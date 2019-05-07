@@ -13,7 +13,7 @@ COVERAGE
 6. Number of station in view of each satellite, depth of coverage (DOC) based on satellite ground track
 7. Satellite passes time statistics for user grid
 8. Satellite pass time gap statistics for user grid
-9. Number of station in view of each satellite, depth of coverage (DOC) based on user grid)
+9. Number of station in view of each satellite, depth of coverage (DOC) based on user grid
 11. Satellite elevation statistics for highest satellite in view for user grid
 12. Output satellite and stations time and position
 
@@ -29,4 +29,3 @@ Statistics can be:
 - Max
 - Std
 - Median
-- Avail (for a limit)

@@ -121,6 +121,8 @@ class User:
         self.TLEFileName = ''  # In case user is a spacecraft
         self.Kepler = KeplerSet()  # In case user is a spacecraft
 
+        self.Metric = []
+
     def DeterminePosVelECF(self):
         self.PosVelECF = misc_fn.LLA2XYZ(self.LLA)  # ECF
 

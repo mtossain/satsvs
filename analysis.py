@@ -2,6 +2,8 @@ import segments
 from constants import M_PI
 from astropy.time import Time
 import pandas as pd
+import numpy as np
+
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
@@ -18,6 +20,7 @@ class Analysis:
         self.f = ''
         self.Type = 0
         self.Name = 'GroundTrack'
+        self.Data = pd.DataFrame()
 
         # Members for specific analysis
         self.ConstellationID = 0
@@ -85,7 +88,7 @@ class Analysis:
         self.AnalysisMemory2DShort = []  # To save space a short int is used (8bit)
 
     # General methods for each of the analysis
-    def RunAnalysisBeforeTimeLoop(self, NumEpoch, TimeStep, SatelliteList, UserList):
+    def RunAnalysisBeforeTimeLoop(self, NumEpoch, TimeStep, SatelliteList, UserList, AnalysisList):
 
         if self.Type == 1:
             # Find the index of the user that is needed
@@ -93,6 +96,10 @@ class Analysis:
                 if UserList[i].LLA[0] == self.LatitudeRequested and UserList[i].LLA[1] == self.LongitudeRequested:
                     self.iFndUser = i
                     break
+
+        if self.Type == 2:
+            for i in range(len(UserList)):
+                UserList[i].Metric = np.zeros(NumEpoch)
 
         if self.Type == 3:
             # Find the index of the user that is needed
@@ -145,13 +152,13 @@ class Analysis:
                                      SatelliteList[i].LLA[2]))
 
         if self.Type == 1:
-            self.f.write('{} {} {} {} {}\n'.format(RunTimeStr, self.iFndUser,UserList[self.iFndUser].LLA[0] / M_PI * 180,
-                                                      UserList[self.iFndUser].LLA[1] / M_PI * 180,UserList[self.iFndUser].NumSatInView))
+            self.f.write('{} {} {} {} {}\n'.format(RunTimeStr, self.iFndUser, UserList[self.iFndUser].LLA[0] / M_PI * 180,
+                                                      UserList[self.iFndUser].LLA[1] / M_PI * 180, UserList[self.iFndUser].NumSatInView))
 
         if self.Type == 2:
             # Sum the satellites in view
             for i in range(len(UserList)):
-                self.AnalysisMemory2D[CntEpoch][i] = int(UserList[i].NumSatInView*100)
+                UserList[i].Metric[CntEpoch] = UserList[i].NumSatInView
 
         if self.Type == 3:
             for j in range(UserList[self.iFndUser].NumSatInView): # Loop over satellites
@@ -191,16 +198,57 @@ class Analysis:
     def RunAnalysisAfterTimeLoop(self):
         self.f.close()
 
-    def Plot(self):
+    def Plot(self, UserList):
         if self.Type == 0:
             data = pd.read_csv('analysis_0.txt', delim_whitespace=True, header=None)
+            fig = plt.figure(figsize=(12,8))
             m = Basemap(projection='cyl',lon_0=0)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
             m.drawcoastlines()
             plt.plot(data.iloc[:, 5], data.iloc[:, 4],'r.')
-            plt.show()
             plt.savefig('analysis_0.png')
+            plt.show()
+
+        if self.Type == 1:
+            df = pd.read_csv('analysis_1.txt', delim_whitespace=True, header=None)
+            df["Date"] = pd.to_datetime(df.iloc[:, 0] + ' ' + df.iloc[:, 1])
+            df['fDOY'] = df['Date'].dt.dayofyear + df['Date'].dt.hour/24+df['Date'].dt.minute/60/24+df['Date'].dt.second/3600/24
+            fig = plt.figure(figsize=(12,8))
+            plt.plot(df['fDOY'], df.iloc[:, 5], 'r-')
+            plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
+            plt.savefig('analysis_1.png')
+            plt.show()
+
+        if self.Type == 2:
+            Metric,Lats,Lons = [],[],[]
+            for i in range(len(UserList)):
+                if self.Statistic == 'Min':
+                    Metric.append(np.min(UserList[i].Metric))
+                if self.Statistic == 'Mean':
+                    Metric.append(np.mean(UserList[i].Metric))
+                if self.Statistic == 'Max':
+                    Metric.append(np.max(UserList[i].Metric))
+                if self.Statistic == 'Std':
+                    Metric.append(np.std(UserList[i].Metric))
+                if self.Statistic == 'Median':
+                    Metric.append(np.median(UserList[i].Metric))
+                Lats.append(UserList[i].LLA[0]/M_PI*180)
+                Lons.append(UserList[i].LLA[1]/M_PI*180)
+            Xnew = np.reshape(np.array(Lons), (19,37))
+            Ynew = np.reshape(np.array(Lats), (19,37))
+            Znew = np.reshape(np.array(Metric), (19,37))
+            fig = plt.figure(figsize=(12,8))
+            m = Basemap(projection='cyl', lon_0=0)
+            im1 = m.pcolormesh(Xnew,Ynew,Znew, shading='flat', cmap=plt.cm.jet, latlon=True)
+            m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
+            m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
+            m.drawcoastlines()
+            cb = m.colorbar(im1, "right", size="2%", pad="2%")
+            cb.set_label(self.Statistic+' Number of satellites in view', fontsize=10)
+            plt.savefig('analysis_2.png')
+            plt.show()
+
 
     def ComputeStatistics(self):
         pass

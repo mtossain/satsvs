@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 from math import floor
 from astropy.time import Time
+import numpy as np
 
 import misc_fn
 from constants import *
@@ -353,7 +354,7 @@ class AppConfig:
                 # Prepare output file
                 if analysis_conf.find('Statistic') is not None:
                     analysis_obj.Statistic = analysis_conf.find('Statistic').text
-                    out = "Analysis_" + analysis_obj.Type + "_" + analysis_obj.Statistic + ".txt"
+                    out = "Analysis_" + str(analysis_obj.Type) + "_" + analysis_obj.Statistic + ".txt"
                 else:
                     out = "Analysis_" + str(analysis_obj.Type) + ".txt"
                 analysis_obj.f = open(out, "w")
@@ -380,7 +381,7 @@ class AppConfig:
 
         #self.NumSat = Ground2SpaceLink.NumSat # don't remember why this...???
 
-        self.NumEpoch = floor(86400 * (self.StopDateTime - self.StartDateTime) / self.TimeStep) + 1
+        self.NumEpoch = floor(86400 * (self.StopDateTime - self.StartDateTime) / self.TimeStep)
 
 
 

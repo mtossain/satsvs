@@ -1,4 +1,5 @@
 import misc_fn
+from astropy.time import Time
 
 import os
 try:
@@ -27,16 +28,10 @@ conf.LoadSimulation('Config.xml')
 CntEpoch = 0  # timestep
 X_sat=[0, 0, 0, 0, 0, 0]  # Temporary state vector
 
-
-#ParamPropagator ParamProp;
-#if (conf.HPOP) {
-#    cout << " *** HPOP: Initialization of the position and the velocity of the satellites *** " << endl;
-#    ParamProp.InitializeParam(conf); // Initialize the propagation parameters such as EOP, time offsets...
-#    Init_PV(conf, ParamProp); // Computation of the initial ECI coordinates
-
 # Run analyses which are needed before time loop
 for CntAnalysis in range(len(conf.AnalysisList)):
-    conf.AnalysisList[CntAnalysis].RunAnalysisBeforeTimeLoop(conf.NumEpoch, conf.TimeStep, conf.SatelliteList, conf.UserList)
+    conf.AnalysisList[CntAnalysis].RunAnalysisBeforeTimeLoop(conf.NumEpoch, conf.TimeStep, conf.SatelliteList,
+                                                             conf.UserList, conf.AnalysisList)
 
 # Loop over simulation time window
 logger.info('Starting Simulation')
@@ -119,10 +114,11 @@ while round(MJDRequested * 86400) < round(conf.StopDateTime * 86400):
 
     # Update time
     CntEpoch += 1
+    print('Simulation time: '+Time(MJDRequested, format='mjd').iso)
     MJDRequested += conf.TimeStep / 86400.0
 
 # Run analyses which are needed after time loop
 for i in range(len(conf.AnalysisList)):
     conf.AnalysisList[i].RunAnalysisAfterTimeLoop()
     logger.info(['Plot Analysis:', i])
-    conf.AnalysisList[i].Plot()
+    conf.AnalysisList[i].Plot(conf.UserList)
