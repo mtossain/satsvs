@@ -56,6 +56,8 @@ class Satellite:
         self.IdxSatelliteInView = []
         self.NumSatelliteInView = 0  # Number of satellites that 'see' this satellite
 
+        self.Metric = []  # For analysis purposes
+
     def DeterminePosVelECI(self, MJDRequested):
         self.PosVelECI = misc_fn.KEP2XYZ(MJDRequested, self.Kepler)
 
@@ -121,7 +123,7 @@ class User:
         self.TLEFileName = ''  # In case user is a spacecraft
         self.Kepler = KeplerSet()  # In case user is a spacecraft
 
-        self.Metric = []
+        self.Metric = [] # For analysis purposes
 
     def DeterminePosVelECF(self):
         self.PosVelECF = misc_fn.LLA2XYZ(self.LLA)  # ECF

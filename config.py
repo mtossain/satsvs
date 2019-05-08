@@ -152,7 +152,7 @@ class AppConfig:
             gs.LLA[1] = float(groundstation.find('Longitude').text) / 180 * pi
             gs.LLA[2] = float(groundstation.find('Height').text)
             gs.ReceiverConstellation = groundstation.find('ReceiverConstellation').text
-            gs.IdxSatInView = self.NumSat*[0]
+            gs.IdxSatInView = self.NumSat*[999999]
 
             MaskValues = groundstation.find('ElevationMask').text.split(',')
             for MaskValue in MaskValues:
@@ -186,7 +186,7 @@ class AppConfig:
                 user.LLA[1] = float(userelement.find('Longitude').text) / 180 * pi
                 user.LLA[2] = float(userelement.find('Height').text)
                 user.ReceiverConstellation = userelement.find('ReceiverConstellation').text
-                user.IdxSatInView = self.NumSat*[0]
+                user.IdxSatInView = self.NumSat*[999999]
                 MaskValues = userelement.find('ElevationMask').text.split(',')
                 user.ElevationMask = list(map(lambda x: float(x) / 180 * M_PI, MaskValues))
                 if userelement.find('ElevationMaskMaximum') is not None:
@@ -234,7 +234,7 @@ class AppConfig:
                             user.ElevationMaskMaximum = len(MaskValues)*[90.0 / 180.0 * M_PI]
 
                         user.DeterminePosVelECF()  # Do it once to initialise
-                        user.IdxSatInView = self.NumSat*[0]
+                        user.IdxSatInView = self.NumSat*[999999]
                         self.UserList.append(user)
                         CntUsers += 1
 
@@ -243,7 +243,7 @@ class AppConfig:
                 user.UserID = 0
                 user.Type = 'Spacecraft'
                 user.ReceiverConstellation = userelement.find('ReceiverConstellation').text
-                user.IdxSatInView = self.NumSat*[0]
+                user.IdxSatInView = self.NumSat*[999999]
                 MaskValues = userelement.find('ElevationMask').text.split(',')
                 user.ElevationMask = list(map(lambda x: float(x) / 180 * M_PI, MaskValues))
                 if userelement.find('ElevationMaskMaximum') is not None:
@@ -330,9 +330,9 @@ class AppConfig:
 
         # Allocate the memory for the lists of links
         for j in range(self.NumSat):
-            self.SatelliteList[j].IdxStationInView = self.NumGroundStation*[0]
+            self.SatelliteList[j].IdxStationInView = self.NumGroundStation*[999999]
         for j in range(self.NumUser):
-            self.UserList[j].IdxSatInView =  self.NumSat*[0]
+            self.UserList[j].IdxSatInView = self.NumSat*[999999]
 
     def LoadPropagation(self, FileName):
         pass
@@ -349,33 +349,27 @@ class AppConfig:
             logger.info(['Loaded simulation, start:',str(self.StartDateTime),'stop:',str(self.StopDateTime),'TimeStep',str(self.TimeStep)])
 
             for analysis_conf in sim.iter('Analysis'):
+
                 analysis_obj = Analysis()
                 analysis_obj.Type = int(analysis_conf.find('Type').text)
-                # Prepare output file
-                if analysis_conf.find('Statistic') is not None:
-                    analysis_obj.Statistic = analysis_conf.find('Statistic').text
-                    out = "Analysis_" + str(analysis_obj.Type) + "_" + analysis_obj.Statistic + ".txt"
-                else:
-                    out = "Analysis_" + str(analysis_obj.Type) + ".txt"
-                analysis_obj.f = open(out, "w")
-
                 if analysis_conf.find('Direction') is not None:
                     analysis_obj.Direction = analysis_conf.find('Direction').text
+                if analysis_conf.find('Statistic') is not None:
+                    analysis_obj.Statistic = analysis_conf.find('Statistic').text
                 if analysis_conf.find('ConstellationID') is not None:
                     analysis_obj.ConstellationID = int(analysis_conf.find('ConstellationID').text)
                 if analysis_conf.find('SatelliteID') is not None:
                     analysis_obj.SatelliteID = int(analysis_conf.find('SatelliteID').text)
                 if analysis_conf.find('LatitudeRequested') is not None:
-                    analysis_obj.LatitudeRequested = float(analysis_conf.find('LatitudeRequested').text)
-                if analysis_conf.find('LongitudeRequested'):
-                    analysis_obj.LongitudeRequested = float(analysis_conf.find('LongitudeRequested').text)
+                    analysis_obj.LatitudeRequested = float(analysis_conf.find('LatitudeRequested').text) / 180.0 * M_PI
+                if analysis_conf.find('LongitudeRequested') is not None:
+                    analysis_obj.LongitudeRequested = float(analysis_conf.find('LongitudeRequested').text) / 180.0 * M_PI
                 if analysis_conf.find('ElevationMask') is not None:
-                    analysis_obj.ElevationMask = float(analysis_conf.find('ElevationMask').text)
+                    analysis_obj.ElevationMask = float(analysis_conf.find('ElevationMask').text) / 180.0 * M_PI
                 if analysis_conf.find('RequiredNumberSatellites') is not None:
                     analysis_obj.RequiredNumberSatellites = int(analysis_conf.find('RequiredNumberSatellites').text)
                 if analysis_conf.find('ConstellationName') is not None:
                     analysis_obj.ConstellationName = analysis_conf.find('ConstellationName').text
-
                 self.AnalysisList.append(analysis_obj)
 
 

@@ -1,8 +1,8 @@
 import math
-from math import sin, cos, tan, atan2, atan, floor, sqrt, fabs
+from math import sin, cos, tan, atan2, atan, floor, sqrt, fabs, asin, acos
 import constants
 from constants import M_PI, GM_Earth
-
+import numpy as np
 
 """**
 * Compute Modified Julian Date from YYYY and Day Of Year pair
@@ -402,3 +402,60 @@ def User2SatGeometryMatrix (UserList, Ground2SpaceLink, User2SatelliteList, iUse
         G[i][3] = 1.0
 
     return G
+
+# Compute satellite visibility contour for a certain ElevationMask of the users,
+# assuming the Earth is a perfect sphere
+#
+# REFERENCE
+# Space Mission Analysis and Design, 3rd edition (Space Technology Library)
+# W. Larson and J. Wertz
+#
+# @param LLA Sub Satellite Point Latitude, Longitude, Altitude rad/m
+# @param ElevationMask User to satellite elevation mask (rad)
+# @param Contour Array with Lat Lon points on the satellite visibility contour lat/lon in (rad)
+def SatGrndVis(LLA, ElevationMask):
+
+    StepSize = 0.3
+
+    Contour = np.zeros((math.ceil(360.0/StepSize), 2))
+
+    LatS = LLA[0]
+    LonS = LLA[1]
+    Re = 6378137.0000
+
+    Lam=0
+    if ElevationMask == 0:
+        Lam = acos(Re / (Re + LLA[2]))
+    else:
+        Lam = M_PI / 2 - ElevationMask - asin(cos(ElevationMask) * Re / (Re + LLA[2]))
+
+
+    # Problem detected at Az=180 for acos, so step size set to 0.3 iso 0.5
+
+    LatT, LonT = 0, 0
+    DeltaLon= 0
+    cnt = 0
+    for i in np.arange(0.0, 360.0, StepSize):
+
+        try:
+            Az = i / 180 * M_PI
+            LatTAcc = acos(cos(Lam) * sin(LatS) + sin(Lam) * cos(LatS) * cos(Az))
+            LatT = M_PI / 2 - LatTAcc
+            DeltaLon = acos((cos(Lam)-(sin(LatS) * sin(LatT))) / (cos(LatS) * cos(LatT)))
+        except:
+            pass
+        if i < 180:
+            LonT = LonS + DeltaLon
+        else:
+            LonT = LonS - DeltaLon
+
+        if LonT > M_PI:
+            LonT = LonT - 2 * M_PI
+        if LonT < -M_PI:
+            LonT = LonT + 2 * M_PI
+
+        Contour[cnt,:] = [LatT, LonT]
+
+        cnt += 1
+
+    return Contour

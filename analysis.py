@@ -3,6 +3,8 @@ from constants import M_PI
 from astropy.time import Time
 import pandas as pd
 import numpy as np
+import datetime
+import misc_fn
 
 import matplotlib
 matplotlib.use("TkAgg")
@@ -17,10 +19,12 @@ class Analysis:
     def __init__(self):
 
         # General analysis parameters
-        self.f = ''
         self.Type = 0
         self.Name = 'GroundTrack'
         self.Data = pd.DataFrame()
+        self.TimeListISO = []
+        self.TimeListMJD = []
+        self.TimeListfDOY = []
 
         # Members for specific analysis
         self.ConstellationID = 0
@@ -32,8 +36,7 @@ class Analysis:
         self.ElevationMask = 0.0
         self.iFndUser = 0
         self.RequiredNumberSatellites = 0
-        self.Statistic = 'Mean'  # Depending on analysis it can be Min, Max, Mean, etc.
-        self.Direction = 'Hor'  # Depending on analysis it can be Hor, Ver or Pos
+        self.Statistic = ''  # Depending on analysis it can be Min, Max, Mean, etc.
 
         # For space to space analysis (Type 20)
         self.TransmitterType = ''  # Type of transmitter (either Satellite or GroundStation)
@@ -50,11 +53,11 @@ class Analysis:
         self.Modulation = ''
         self.CodeRate = 0.0
         self.MiscLosses = 0.0
-        self.AtmObstructionHeight  = 0.0  # the height above earth radius to obstruct the link, in m.
+        self.AtmObstructionHeight = 0.0  # the height above earth radius to obstruct the link, in m.
 
         self.PowerInput = 0.0
         self.RecvLineTemp = 0.0  # receiving antenna lines temp
-        self.RecvLineLoss = 0.0  #receiving antenna lines losses for noise computation
+        self.RecvLineLoss = 0.0  # receiving antenna lines losses for noise computation
         self.Bandwidth = 0.0
 
         # For the rain
@@ -69,18 +72,14 @@ class Analysis:
         self.AnalysisDate = 0.0
 
         # type 22
-        self.max_link_quality  = 0.0  # to track the maximum non zero in the file
-
+        self.max_link_quality = 0.0  # to track the maximum non zero in the file
         self.pTransmitterG = segments.GroundStation()
         self.pTransmitterS = segments.Satellite()
-
         self.pReceiverG = segments.GroundStation()
         self.pReceiverS = segments.Satellite()
-
         self.worstCaseG2S = segments.Ground2SpaceLink()  # stores range between two terminals (sat or ground) from previous time loop
         self.worstCaseS2S = segments.Space2SpaceLink()
         self.worstCaseS2G = segments.Ground2SpaceLink()
-
         self.AnalysisFigureOfMerit = []  # vector containing the statistic for every user
         self.AnalysisMemory2D = []  # To save space a int is used(16bit)
         self.AnalysisMemory2DBool = []  # To save space a bool is used (1bit)
@@ -90,12 +89,14 @@ class Analysis:
     # General methods for each of the analysis
     def RunAnalysisBeforeTimeLoop(self, NumEpoch, TimeStep, SatelliteList, UserList, AnalysisList):
 
+        if self.Type == 0:
+            for i in range(len(SatelliteList)):
+                SatelliteList[i].Metric = np.zeros((NumEpoch,2))
+
         if self.Type == 1:
             # Find the index of the user that is needed
             for i in range(len(UserList)):
-                if UserList[i].LLA[0] == self.LatitudeRequested and UserList[i].LLA[1] == self.LongitudeRequested:
-                    self.iFndUser = i
-                    break
+                UserList[i].Metric = np.zeros(NumEpoch)
 
         if self.Type == 2:
             for i in range(len(UserList)):
@@ -104,9 +105,7 @@ class Analysis:
         if self.Type == 3:
             # Find the index of the user that is needed
             for i in range(len(UserList)):
-                if UserList[i].LLA[0] == self.LatitudeRequested and UserList[i].LLA[1] == self.LongitudeRequested:
-                    self.iFndUser = i
-                    break
+                UserList[i].Metric = np.ones((NumEpoch, len(SatelliteList)))*999999
 
         if self.Type == 4:
             # Find the index of the satellite that is needed
@@ -131,6 +130,10 @@ class Analysis:
     def RunAnalysisInTimeLoop(self, RunTime, CntEpoch, SatelliteList, UserList, User2SatelliteList):
 
         RunTimeStr = Time(RunTime, format='mjd').iso
+        self.TimeListISO.append(RunTimeStr)
+        self.TimeListMJD.append(RunTime)
+        date = datetime.datetime.strptime(RunTimeStr[:-4], '%Y-%m-%d %H:%M:%S')
+        self.TimeListfDOY.append(date.timetuple().tm_yday + date.hour/24+date.minute/60/24+date.second/3600/24)
 
         if self.Type == 0:
             if self.SatelliteID > 0:  # Only for one satellite
@@ -138,33 +141,27 @@ class Analysis:
                     if SatelliteList[i].ConstellationID == self.ConstellationID and \
                             SatelliteList[i].SatelliteID == self.SatelliteID:
                         SatelliteList[i].DeterminePosVelLLA()
-                        self.f.write('{} {} {} {} {} {}\n'.format(RunTimeStr, self.ConstellationID, self.SatelliteID,
-                                     SatelliteList[i].LLA[0] / M_PI * 180,
-                                     SatelliteList[i].LLA[1] / M_PI * 180,
-                                     SatelliteList[i].LLA[2]))
+                        SatelliteList[i].Metric[CntEpoch, 0] = SatelliteList[i].LLA[0] / M_PI * 180
+                        SatelliteList[i].Metric[CntEpoch, 1] = SatelliteList[i].LLA[1] / M_PI * 180
             else:  # Plot the GT for all satellites in the chosen constellation
                 for i in range(len(SatelliteList)):
                     if SatelliteList[i].ConstellationID == self.ConstellationID:
                         SatelliteList[i].DeterminePosVelLLA()
-                        self.f.write('{} {} {} {} {} {}\n'.format(RunTimeStr, self.ConstellationID, self.SatelliteList[i].SatelliteID,
-                                     SatelliteList[i].LLA[0] / M_PI * 180,
-                                     SatelliteList[i].LLA[1] / M_PI * 180,
-                                     SatelliteList[i].LLA[2]))
+                        SatelliteList[i].Metric[CntEpoch, 0] = SatelliteList[i].LLA[0] / M_PI * 180
+                        SatelliteList[i].Metric[CntEpoch, 1] = SatelliteList[i].LLA[1] / M_PI * 180
 
         if self.Type == 1:
-            self.f.write('{} {} {} {} {}\n'.format(RunTimeStr, self.iFndUser, UserList[self.iFndUser].LLA[0] / M_PI * 180,
-                                                      UserList[self.iFndUser].LLA[1] / M_PI * 180, UserList[self.iFndUser].NumSatInView))
+            for i in range(len(UserList)):
+                UserList[i].Metric[CntEpoch] = UserList[i].NumSatInView
 
         if self.Type == 2:
-            # Sum the satellites in view
             for i in range(len(UserList)):
                 UserList[i].Metric[CntEpoch] = UserList[i].NumSatInView
 
         if self.Type == 3:
-            for j in range(UserList[self.iFndUser].NumSatInView): # Loop over satellites
-                if SatelliteList[UserList[self.iFndUser].IdxSatInView[j]].ConstellationID == self.ConstellationID:
-                    self.f.write('{} {} {}\n'.format(RunTimeStr,self.ConstellationID,
-                                 SatelliteList[UserList[self.iFndUser].IdxSatInView[j]].SatelliteID))
+            for i in range(len(UserList[0].IdxSatInView)):
+                if UserList[0].IdxSatInView[i] != 999999:
+                    UserList[0].Metric[CntEpoch, i] = SatelliteList[UserList[0].IdxSatInView[i]].SatelliteID
 
         if self.Type == 5:
             NumSat = User2SatelliteList[0].NumSat
@@ -195,27 +192,27 @@ class Analysis:
                 if CntSat >= self.RequiredNumberSatellites:
                     self.AnalysisMemory2DBool[CntEpoch][i] = True
 
-    def RunAnalysisAfterTimeLoop(self):
-        self.f.close()
+    def RunAnalysisAfterTimeLoop(self, SatelliteList, UserList):
 
-    def Plot(self, UserList):
         if self.Type == 0:
-            data = pd.read_csv('analysis_0.txt', delim_whitespace=True, header=None)
-            fig = plt.figure(figsize=(12,8))
-            m = Basemap(projection='cyl',lon_0=0)
+            if self.SatelliteID > 0:  # Only for one satellite
+                for i in range(len(SatelliteList)):
+                    if SatelliteList[i].ConstellationID == self.ConstellationID and \
+                            SatelliteList[i].SatelliteID == self.SatelliteID:
+                        y,x = SatelliteList[i].Metric[:,0], SatelliteList[i].Metric[:,1]
+            fig = plt.figure(figsize=(12, 8))
+            m = Basemap(projection='cyl', lon_0=0)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
             m.drawcoastlines()
-            plt.plot(data.iloc[:, 5], data.iloc[:, 4],'r.')
+            plt.plot(x, y, 'r.')
             plt.savefig('analysis_0.png')
             plt.show()
 
         if self.Type == 1:
-            df = pd.read_csv('analysis_1.txt', delim_whitespace=True, header=None)
-            df["Date"] = pd.to_datetime(df.iloc[:, 0] + ' ' + df.iloc[:, 1])
-            df['fDOY'] = df['Date'].dt.dayofyear + df['Date'].dt.hour/24+df['Date'].dt.minute/60/24+df['Date'].dt.second/3600/24
-            fig = plt.figure(figsize=(12,8))
-            plt.plot(df['fDOY'], df.iloc[:, 5], 'r-')
+            fig = plt.figure(figsize=(12, 8))
+            for i in range(len(UserList)):
+                plt.plot(self.TimeListfDOY, UserList[i].Metric, 'r-')
             plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
             plt.savefig('analysis_1.png')
             plt.show()
@@ -249,6 +246,28 @@ class Analysis:
             plt.savefig('analysis_2.png')
             plt.show()
 
+        if self.Type == 3:
+            fig = plt.figure(figsize=(12, 8))
+            plt.plot(self.TimeListfDOY, UserList[0].Metric, 'r+')
+            plt.ylim((.5, len(SatelliteList)+1))
+            plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
+            plt.savefig('analysis_1.png')
+            plt.show()
+
+        if self.Type == 4:
+
+
+            SatelliteList[self.iFndSatellite].DeterminePosVelLLA()
+
+            Contour = misc_fn.SatGrndVis(SatelliteList[self.iFndSatellite].LLA, self.ElevationMask)
+            fig = plt.figure(figsize=(12, 8))
+            m = Basemap(projection='cyl', lon_0=0)
+            m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
+            m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
+            m.drawcoastlines()
+            plt.plot(Contour[:,1]/M_PI*180, Contour[:,0]/M_PI*180, 'r.')
+            plt.savefig('analysis_0.png')
+            plt.show()
 
     def ComputeStatistics(self):
         pass

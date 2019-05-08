@@ -119,6 +119,5 @@ while round(MJDRequested * 86400) < round(conf.StopDateTime * 86400):
 
 # Run analyses which are needed after time loop
 for i in range(len(conf.AnalysisList)):
-    conf.AnalysisList[i].RunAnalysisAfterTimeLoop()
     logger.info(['Plot Analysis:', i])
-    conf.AnalysisList[i].Plot(conf.UserList)
+    conf.AnalysisList[i].RunAnalysisAfterTimeLoop(conf.SatelliteList, conf.UserList)

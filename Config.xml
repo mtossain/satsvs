@@ -378,13 +378,9 @@
   </GroundSegment>
   <!--Defines the users that should be simulated-->
   <UserSegment>
-     <Type>Grid</Type>
-    <LatMin>-90</LatMin>
-    <LatMax>90</LatMax>
-    <LonMin>-180</LonMin>
-    <LonMax>180</LonMax>
-    <LatStep>10</LatStep>
-    <LonStep>10</LonStep>
+    <Type>Static</Type>
+    <Latitude>50</Latitude>
+    <Longitude>5</Longitude>
     <Height>0</Height>
     <ReceiverConstellation>111</ReceiverConstellation>
     <ElevationMask>5</ElevationMask>
@@ -395,9 +391,12 @@
     <StopDate>2013-05-09 00:00:00</StopDate>
     <TimeStep>3600</TimeStep>
     <HPOP>False</HPOP>
+
     <Analysis>
-      <Type>2</Type>
-      <Statistic>Max</Statistic>
+      <Type>4</Type>
+      <ConstellationID>3</ConstellationID>
+      <SatelliteID>24307</SatelliteID>
+      <ElevationMask>10</ElevationMask>
     </Analysis>
 
   </SimulationManager>
