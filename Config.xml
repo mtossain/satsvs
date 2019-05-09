@@ -394,9 +394,9 @@
 
     <Analysis>
       <Type>4</Type>
-      <ConstellationID>3</ConstellationID>
-      <SatelliteID>24307</SatelliteID>
-      <ElevationMask>10</ElevationMask>
+      <ConstellationID>1</ConstellationID>
+      <SatelliteID>1</SatelliteID>
+      <ElevationMask>80</ElevationMask>
     </Analysis>
 
   </SimulationManager>

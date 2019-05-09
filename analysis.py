@@ -194,28 +194,24 @@ class Analysis:
 
     def RunAnalysisAfterTimeLoop(self, SatelliteList, UserList):
 
+        fig = plt.figure(figsize=(12, 8))
+
         if self.Type == 0:
             if self.SatelliteID > 0:  # Only for one satellite
                 for i in range(len(SatelliteList)):
                     if SatelliteList[i].ConstellationID == self.ConstellationID and \
                             SatelliteList[i].SatelliteID == self.SatelliteID:
                         y,x = SatelliteList[i].Metric[:,0], SatelliteList[i].Metric[:,1]
-            fig = plt.figure(figsize=(12, 8))
             m = Basemap(projection='cyl', lon_0=0)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
             m.drawcoastlines()
             plt.plot(x, y, 'r.')
-            plt.savefig('analysis_0.png')
-            plt.show()
 
         if self.Type == 1:
-            fig = plt.figure(figsize=(12, 8))
             for i in range(len(UserList)):
                 plt.plot(self.TimeListfDOY, UserList[i].Metric, 'r-')
             plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
-            plt.savefig('analysis_1.png')
-            plt.show()
 
         if self.Type == 2:
             Metric,Lats,Lons = [],[],[]
@@ -232,9 +228,9 @@ class Analysis:
                     Metric.append(np.median(UserList[i].Metric))
                 Lats.append(UserList[i].LLA[0]/M_PI*180)
                 Lons.append(UserList[i].LLA[1]/M_PI*180)
-            Xnew = np.reshape(np.array(Lons), (19,37))
-            Ynew = np.reshape(np.array(Lats), (19,37))
-            Znew = np.reshape(np.array(Metric), (19,37))
+            Xnew = np.reshape(np.array(Lons), (19,37)) # TBD
+            Ynew = np.reshape(np.array(Lats), (19,37)) # TBD
+            Znew = np.reshape(np.array(Metric), (19,37)) # TBD
             fig = plt.figure(figsize=(12,8))
             m = Basemap(projection='cyl', lon_0=0)
             im1 = m.pcolormesh(Xnew,Ynew,Znew, shading='flat', cmap=plt.cm.jet, latlon=True)
@@ -243,24 +239,15 @@ class Analysis:
             m.drawcoastlines()
             cb = m.colorbar(im1, "right", size="2%", pad="2%")
             cb.set_label(self.Statistic+' Number of satellites in view', fontsize=10)
-            plt.savefig('analysis_2.png')
-            plt.show()
 
         if self.Type == 3:
-            fig = plt.figure(figsize=(12, 8))
             plt.plot(self.TimeListfDOY, UserList[0].Metric, 'r+')
             plt.ylim((.5, len(SatelliteList)+1))
             plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
-            plt.savefig('analysis_1.png')
-            plt.show()
 
         if self.Type == 4:
-
-
             SatelliteList[self.iFndSatellite].DeterminePosVelLLA()
-
             Contour = misc_fn.SatGrndVis(SatelliteList[self.iFndSatellite].LLA, self.ElevationMask)
-            fig = plt.figure(figsize=(12, 8))
             m = Basemap(projection='cyl', lon_0=0)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
