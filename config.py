@@ -1,23 +1,12 @@
 import xml.etree.ElementTree as ET
 from math import floor
 from astropy.time import Time
-import numpy as np
 
 import misc_fn
 from constants import *
 from analysis import Analysis
 from segments import Constellation, Satellite, GroundStation, User, Ground2SpaceLink, Space2SpaceLink
-
-import logging
-import logging.handlers as handlers
-
-logger = logging.getLogger('config')
-logger.setLevel(logging.INFO)
-logHandler = handlers.RotatingFileHandler('main.log', maxBytes=5*1024*1024)
-logHandler.setLevel(logging.INFO)
-logHandler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-logger.addHandler(logHandler)
-
+import logging_svs as ls
 
 class AppConfig:
     
@@ -91,7 +80,7 @@ class AppConfig:
             const.NumOfSatellites = int(constellation.find('NumOfSatellites').text)
             const.NumberOfPlanes = int(constellation.find('NumOfPlanes').text)
             const.ConstellationName = constellation.find('ConstellationName').text
-            logger.info(const.__dict__)
+            ls.logger.info(const.__dict__)
             self.ConstellationList.append(const)
             for satellite in constellation.iter('Satellite'):
                 sat = Satellite()
@@ -102,11 +91,11 @@ class AppConfig:
                 sat.Kepler.EpochMJD = float(satellite.find('EpochMJD').text)
                 sat.Kepler.SemiMajorAxis = float(satellite.find('SemiMajorAxis').text)
                 sat.Kepler.Eccentricity = float(satellite.find('Eccentricity').text)
-                sat.Kepler.Inclination = float(satellite.find('Inclination').text) / 180 * M_PI
-                sat.Kepler.RAAN = float(satellite.find('RAAN').text) / 180 * M_PI
-                sat.Kepler.ArgOfPerigee = float(satellite.find('ArgOfPerigee').text) / 180 * M_PI
-                sat.Kepler.MeanAnomaly = float(satellite.find('MeanAnomaly').text) / 180 * M_PI
-                logger.info(sat.__dict__)
+                sat.Kepler.Inclination = float(satellite.find('Inclination').text) / 180 * pi
+                sat.Kepler.RAAN = float(satellite.find('RAAN').text) / 180 * pi
+                sat.Kepler.ArgOfPerigee = float(satellite.find('ArgOfPerigee').text) / 180 * pi
+                sat.Kepler.MeanAnomaly = float(satellite.find('MeanAnomaly').text) / 180 * pi
+                ls.logger.info(sat.__dict__)
                 self.SatelliteList.append(sat)
             for item in constellation.iter('TLEFileName'):
                 with open(item.text) as file:         
@@ -133,7 +122,8 @@ class AppConfig:
                             sat.Kepler.RAAN = float(line[17:24]) / 180 * math.pi
                             sat.Kepler.ArgOfPerigee = float(line[34:41]) / 180 * math.pi
                             sat.Kepler.MeanAnomaly = float(line[43:50]) / 180 * math.pi
-                            logger.info(['Found satellite:', str(sat.SatelliteID),'Kepler Elements', str(sat.Kepler.__dict__)])
+                            ls.logger.info(['Found satellite:', str(sat.SatelliteID),'Kepler Elements', str(sat.Kepler.__dict__)])
+                            self.SatelliteList.append(sat)
                             cnt=-1
                         cnt += 1
         self.NumSat = len(self.SatelliteList)
@@ -156,17 +146,17 @@ class AppConfig:
 
             MaskValues = groundstation.find('ElevationMask').text.split(',')
             for MaskValue in MaskValues:
-                gs.ElevationMask.append(float(MaskValue) / 180 * M_PI)
+                gs.ElevationMask.append(float(MaskValue) / 180 * pi)
             if groundstation.find('ElevationMaskMaximum') is not None: # Optional
                 MaskMaxValues = groundstation.find('ElevationMaskMaximum').text.split(',')
                 for MaskMaxValue in MaskMaxValues:
-                    gs.ElevationMaskMaximum.append(MaskMaxValue / 180 * M_PI)
+                    gs.ElevationMaskMaximum.append(MaskMaxValue / 180 * pi)
             else:  # If no maximum set to 90 degrees
                 for MaskValue in MaskValues:
-                    gs.ElevationMaskMaximum.append(90.0 / 180.0 * M_PI)
+                    gs.ElevationMaskMaximum.append(90.0 / 180.0 * pi)
 
             gs.DeterminePosVelECF()
-            logger.info(gs.__dict__)
+            ls.logger.info(gs.__dict__)
             self.GroundStationList.append(gs)
 
         self.NumGroundStation = len(self.GroundStationList)
@@ -188,12 +178,12 @@ class AppConfig:
                 user.ReceiverConstellation = userelement.find('ReceiverConstellation').text
                 user.IdxSatInView = self.NumSat*[999999]
                 MaskValues = userelement.find('ElevationMask').text.split(',')
-                user.ElevationMask = list(map(lambda x: float(x) / 180 * M_PI, MaskValues))
+                user.ElevationMask = list(map(lambda x: float(x) / 180 * pi, MaskValues))
                 if userelement.find('ElevationMaskMaximum') is not None:
-                    user.ElevationMaskMaximum = list(map(lambda x: float(x) / 180 * M_PI,
-                                                    (userelement.find('ElevationMaskMaximum').text.split(','))))
+                    user.ElevationMaskMaximum = list(map(lambda x: float(x) / 180 * pi,
+                                                         (userelement.find('ElevationMaskMaximum').text.split(','))))
                 else:
-                    user.ElevationMaskMaximum = len(MaskValues) * [90.0 / 180.0 * M_PI]
+                    user.ElevationMaskMaximum = len(MaskValues) * [90.0 / 180.0 * pi]
                 user.DeterminePosVelECF()
                 self.UserList.append(user)
 
@@ -223,34 +213,36 @@ class AppConfig:
                         user.Type = "Grid"
                         user.UserID = CntUsers
                         user.UserName = "Grid"
-                        user.LLA[0] = Latitude / 180 * M_PI
-                        user.LLA[1] = Longitude / 180 * M_PI
+                        user.LLA[0] = Latitude / 180 * pi
+                        user.LLA[1] = Longitude / 180 * pi
                         user.LLA[2] = Height
+                        user.NumLat = NumLat
+                        user.NumLon = NumLon
                         user.ReceiverConstellation = ReceiverConstellation
-                        user.ElevationMask = list(map(lambda x: float(x)/180*M_PI, MaskValues))
+                        user.ElevationMask = list(map(lambda x: float(x) / 180 * pi, MaskValues))
                         if userelement.find('ElevationMaskMaximum') is not None:
-                            user.ElevationMaskMaximum = list(map(lambda x: float(x)/180*M_PI, MaskMaximumumValues))
+                            user.ElevationMaskMaximum = list(map(lambda x: float(x) / 180 * pi, MaskMaximumumValues))
                         else:
-                            user.ElevationMaskMaximum = len(MaskValues)*[90.0 / 180.0 * M_PI]
+                            user.ElevationMaskMaximum = len(MaskValues)*[90.0 / 180.0 * pi]
 
                         user.DeterminePosVelECF()  # Do it once to initialise
                         user.IdxSatInView = self.NumSat*[999999]
                         self.UserList.append(user)
                         CntUsers += 1
 
-            if userelement.find('Type').text == 'Spacecraft': # TBD Only one for the moment... Only defined by TLE for the mpment
+            if userelement.find('Type').text == 'Spacecraft': # TODO Multiple spacecraft users
                 user = User()
                 user.UserID = 0
                 user.Type = 'Spacecraft'
                 user.ReceiverConstellation = userelement.find('ReceiverConstellation').text
                 user.IdxSatInView = self.NumSat*[999999]
                 MaskValues = userelement.find('ElevationMask').text.split(',')
-                user.ElevationMask = list(map(lambda x: float(x) / 180 * M_PI, MaskValues))
+                user.ElevationMask = list(map(lambda x: float(x) / 180 * pi, MaskValues))
                 if userelement.find('ElevationMaskMaximum') is not None:
-                    user.ElevationMaskMaximum = list(map(lambda x: float(x) / 180 * M_PI,
-                                                    (userelement.find('ElevationMaskMaximum').text.split(','))))
+                    user.ElevationMaskMaximum = list(map(lambda x: float(x) / 180 * pi,
+                                                         (userelement.find('ElevationMaskMaximum').text.split(','))))
                 else:
-                    user.ElevationMaskMaximum = len(MaskValues) * [90.0 / 180.0 * M_PI]
+                    user.ElevationMaskMaximum = len(MaskValues) * [90.0 / 180.0 * pi]
 
                 user.TLEFileName = userelement.find('TLEFileName').text
                 with open(user.TLEFileName) as file:
@@ -281,7 +273,7 @@ class AppConfig:
                 user.DeterminePosVelTLE(GMSTRequested, user.Kepler.EpochMJD)
                 user.DeterminePosVelECF()
                 self.UserList.append(user)
-        logger.info(user.__dict__)
+        ls.logger.info(user.__dict__)
         self.NumUser = len(self.UserList)
 
     def SetupGround2Space(self):
@@ -302,7 +294,7 @@ class AppConfig:
                 else:
                     self.GroundStation2SatelliteList[CntGrndLink].LinkInUse = False
                 CntGrndLink += 1
-        logger.info(["Loaded: ", CntGrndLink , " number of Ground Station to Spacecraft links"])
+        ls.logger.info(["Loaded: ", CntGrndLink , " number of Ground Station to Spacecraft links"])
 
         for i in range(self.NumUser):
             for j in range(self.NumSat):
@@ -313,7 +305,7 @@ class AppConfig:
                 else:
                     self.User2SatelliteList[CntUsrLink].LinkInUse = False
                 CntUsrLink += 1
-        logger.info(["Loaded: ", CntUsrLink , " number of User to Spacecraft links"])
+        ls.logger.info(["Loaded: ", CntUsrLink , " number of User to Spacecraft links"])
 
         for i in range(self.NumSat):
             for j in range(self.NumSat):
@@ -325,7 +317,7 @@ class AppConfig:
                 Sp2Sp.IdxSatRecv = self.SatelliteList[j]
                 self.Satellite2SatelliteList.append(Sp2Sp)
                 CntSpaceLink += 1
-        logger.info(["Loaded: ", CntSpaceLink , " number of Spacecraft to Spacecraft links"])
+        ls.logger.info(["Loaded: ", CntSpaceLink , " number of Spacecraft to Spacecraft links"])
 
 
         # Allocate the memory for the lists of links
@@ -346,7 +338,7 @@ class AppConfig:
             self.StopDateTime = Time(sim.find('StopDate').text, scale='utc').mjd
             self.TimeStep = int(sim.find('TimeStep').text)
             self.HPOP = eval(sim.find('HPOP').text)
-            logger.info(['Loaded simulation, start:',str(self.StartDateTime),'stop:',str(self.StopDateTime),'TimeStep',str(self.TimeStep)])
+            ls.logger.info(['Loaded simulation, start:',str(self.StartDateTime),'stop:',str(self.StopDateTime),'TimeStep',str(self.TimeStep)])
 
             for analysis_conf in sim.iter('Analysis'):
 
@@ -361,11 +353,11 @@ class AppConfig:
                 if analysis_conf.find('SatelliteID') is not None:
                     analysis_obj.SatelliteID = int(analysis_conf.find('SatelliteID').text)
                 if analysis_conf.find('LatitudeRequested') is not None:
-                    analysis_obj.LatitudeRequested = float(analysis_conf.find('LatitudeRequested').text) / 180.0 * M_PI
+                    analysis_obj.LatitudeRequested = float(analysis_conf.find('LatitudeRequested').text) / 180.0 * pi
                 if analysis_conf.find('LongitudeRequested') is not None:
-                    analysis_obj.LongitudeRequested = float(analysis_conf.find('LongitudeRequested').text) / 180.0 * M_PI
+                    analysis_obj.LongitudeRequested = float(analysis_conf.find('LongitudeRequested').text) / 180.0 * pi
                 if analysis_conf.find('ElevationMask') is not None:
-                    analysis_obj.ElevationMask = float(analysis_conf.find('ElevationMask').text) / 180.0 * M_PI
+                    analysis_obj.ElevationMask = float(analysis_conf.find('ElevationMask').text) / 180.0 * pi
                 if analysis_conf.find('RequiredNumberSatellites') is not None:
                     analysis_obj.RequiredNumberSatellites = int(analysis_conf.find('RequiredNumberSatellites').text)
                 if analysis_conf.find('ConstellationName') is not None:

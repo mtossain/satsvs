@@ -1,30 +1,30 @@
 import segments
-from constants import M_PI
+from constants import pi
 from astropy.time import Time
-import pandas as pd
-import numpy as np
 import datetime
-import misc_fn
 
 import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib import pyplot as plt
 import os
+import numpy as np
+matplotlib.use("TkAgg")  # TODO solve bug with basemap???
+from matplotlib import pyplot as plt
 os.environ['PROJ_LIB'] = '/users/micheltossaint/Documents/anaconda3/lib/python3.6/site-packages/pyproj/data'
 from mpl_toolkits.basemap import Basemap
-import numpy as np
 
-class Analysis:
+import misc_fn
+import logging_svs as ls
+
+class Analysis: # TODO Make subclasses for the different analysis
+
 
     def __init__(self):
 
         # General analysis parameters
         self.Type = 0
-        self.Name = 'GroundTrack'
-        self.Data = pd.DataFrame()
-        self.TimeListISO = []
-        self.TimeListMJD = []
-        self.TimeListfDOY = []
+        self.Name = ''
+        self.TimeListISO = []  # TODO should be done only once
+        self.TimeListMJD = []  # TODO should be done only once
+        self.TimeListfDOY = []  # TODO should be done only once
 
         # Members for specific analysis
         self.ConstellationID = 0
@@ -122,10 +122,21 @@ class Analysis:
                         SatelliteList[i].SatelliteID == self.SatelliteID:
                     self.iFndSatellite = i
                     break
-                for i in range(len(UserList)):
-                    if UserList[i].LLA[0] == self.LatitudeRequested and UserList[i].LLA[1] == self.LongitudeRequested:
-                        self.iFndUser = i
-                        break
+            for i in range(len(UserList)):
+                UserList[i].Metric = np.zeros((NumEpoch, 2))
+
+        if self.Type == 6:
+            for i in range(len(SatelliteList)):
+                SatelliteList[i].Metric = np.zeros((NumEpoch,3))
+
+        if self.Type == 7:
+            for i in range(len(UserList)):
+                UserList[i].Metric = np.full((NumEpoch, len(SatelliteList)), False, dtype=bool)
+
+        if self.Type == 8:
+            for i in range(len(UserList)):
+                UserList[i].Metric = np.zeros(NumEpoch)
+
 
     def RunAnalysisInTimeLoop(self, RunTime, CntEpoch, SatelliteList, UserList, User2SatelliteList):
 
@@ -137,60 +148,61 @@ class Analysis:
 
         if self.Type == 0:
             if self.SatelliteID > 0:  # Only for one satellite
-                for i in range(len(SatelliteList)):
-                    if SatelliteList[i].ConstellationID == self.ConstellationID and \
-                            SatelliteList[i].SatelliteID == self.SatelliteID:
-                        SatelliteList[i].DeterminePosVelLLA()
-                        SatelliteList[i].Metric[CntEpoch, 0] = SatelliteList[i].LLA[0] / M_PI * 180
-                        SatelliteList[i].Metric[CntEpoch, 1] = SatelliteList[i].LLA[1] / M_PI * 180
+                for idx in range(len(SatelliteList)):
+                    if SatelliteList[idx].ConstellationID == self.ConstellationID and \
+                            SatelliteList[idx].SatelliteID == self.SatelliteID:
+                        SatelliteList[idx].DeterminePosVelLLA()
+                        SatelliteList[idx].Metric[CntEpoch, 0] = SatelliteList[idx].LLA[0] / pi * 180
+                        SatelliteList[idx].Metric[CntEpoch, 1] = SatelliteList[idx].LLA[1] / pi * 180
             else:  # Plot the GT for all satellites in the chosen constellation
-                for i in range(len(SatelliteList)):
-                    if SatelliteList[i].ConstellationID == self.ConstellationID:
-                        SatelliteList[i].DeterminePosVelLLA()
-                        SatelliteList[i].Metric[CntEpoch, 0] = SatelliteList[i].LLA[0] / M_PI * 180
-                        SatelliteList[i].Metric[CntEpoch, 1] = SatelliteList[i].LLA[1] / M_PI * 180
+                for idx in range(len(SatelliteList)):
+                    if SatelliteList[idx].ConstellationID == self.ConstellationID:
+                        SatelliteList[idx].DeterminePosVelLLA()
+                        SatelliteList[idx].Metric[CntEpoch, 0] = SatelliteList[idx].LLA[0] / pi * 180
+                        SatelliteList[idx].Metric[CntEpoch, 1] = SatelliteList[idx].LLA[1] / pi * 180
 
         if self.Type == 1:
-            for i in range(len(UserList)):
-                UserList[i].Metric[CntEpoch] = UserList[i].NumSatInView
+            for idx in range(len(UserList)):
+                UserList[idx].Metric[CntEpoch] = UserList[idx].NumSatInView
 
         if self.Type == 2:
-            for i in range(len(UserList)):
-                UserList[i].Metric[CntEpoch] = UserList[i].NumSatInView
+            for idx in range(len(UserList)):
+                UserList[idx].Metric[CntEpoch] = UserList[idx].NumSatInView
 
         if self.Type == 3:
-            for i in range(len(UserList[0].IdxSatInView)):
-                if UserList[0].IdxSatInView[i] != 999999:
-                    UserList[0].Metric[CntEpoch, i] = SatelliteList[UserList[0].IdxSatInView[i]].SatelliteID
+            for idx in range(len(UserList[0].IdxSatInView)):
+                if UserList[0].IdxSatInView[idx] != 999999:
+                    UserList[0].Metric[CntEpoch, idx] = SatelliteList[UserList[0].IdxSatInView[idx]].SatelliteID
 
         if self.Type == 5:
-            NumSat = User2SatelliteList[0].NumSat
-            if User2SatelliteList[self.iFndUser * NumSat + self.iFndSatellite].Elevation > 0:
-                self.f.write('{} {} {} {}\n'.format(RunTimeStr,self.SatelliteID,
-                    User2SatelliteList[self.iFndUser * NumSat + self.iFndSatellite].Azimuth / M_PI * 180,
-                             User2SatelliteList[self.iFndUser * NumSat + self.iFndSatellite].Elevation / M_PI * 180))
+            num_sat = User2SatelliteList[0].NumSat
+            for idx in range(len(UserList)):
+                if User2SatelliteList[idx * num_sat + self.iFndSatellite].Elevation > 0:
+                    UserList[idx].Metric[CntEpoch, 0] = User2SatelliteList[idx * num_sat + self.iFndSatellite].Azimuth / pi * 180
+                    UserList[idx].Metric[CntEpoch, 1] = User2SatelliteList[idx * num_sat + self.iFndSatellite].Elevation / pi * 180
 
         if self.Type == 6:
-            for i in range(len(SatelliteList)):
-                SatelliteList[i].DeterminePosVelLLA()
-                self.f.write('{} {} {} {}\n'.format(RunTimeStr,SatelliteList[i].LLA[0] / M_PI * 180,
-                             SatelliteList[i].LLA[1] / M_PI * 180,SatelliteList[i].NumStationInView))
+            for idx in range(len(SatelliteList)):
+                SatelliteList[idx].DeterminePosVelLLA()
+                SatelliteList[idx].Metric[CntEpoch, 0] = SatelliteList[idx].LLA[0] / pi * 180
+                SatelliteList[idx].Metric[CntEpoch, 1] = SatelliteList[idx].LLA[1] / pi * 180
+                SatelliteList[idx].Metric[CntEpoch, 2] = SatelliteList[idx].NumStationInView
 
         if self.Type == 7:
-            for i in range(len(UserList)):
-                for j in range(UserList[i].NumSatInView): # Loop over satellites
-                    if SatelliteList[UserList[i].IdxSatInView[j]].ConstellationID == self.ConstellationID:
-                        self.AnalysisMemory3DBool[CntEpoch][i][UserList[i].IdxSatInView[j]] = True
+            for idx in range(len(UserList)):
+                for j in range(UserList[idx].NumSatInView):
+                    if SatelliteList[UserList[idx].IdxSatInView[j]].ConstellationID == self.ConstellationID:
+                        UserList[idx].Metric[CntEpoch, UserList[idx].IdxSatInView[j]] = True
 
-        if self.Type == 8:
-            # Determine whether X or more satellites are in view
-            for i in range(len(UserList)):
-                CntSat = 0
-                for j in range(UserList[i].NumSatInView): # Loop over satellites
-                    if SatelliteList[UserList[i].IdxSatInView[j]].ConstellationID == self.ConstellationID:
-                        CntSat += 1
-                if CntSat >= self.RequiredNumberSatellites:
-                    self.AnalysisMemory2DBool[CntEpoch][i] = True
+        if self.Type == 8: # TODO ERROR !!!! there seems to be a bug in the user to satellite elevation value, it has to be checked
+            for idx in range(len(UserList)):
+                best_satellite_value = -1
+                for idx_sat in range(UserList[idx].NumSatInView):
+                    if SatelliteList[UserList[idx].IdxSatInView[idx_sat]].ConstellationID == self.ConstellationID:
+                        elevation = User2SatelliteList[idx * len(SatelliteList) + UserList[idx].IdxSatInView[idx_sat]].Elevation / pi * 180
+                        if elevation > best_satellite_value:
+                            best_satellite_value = elevation
+                UserList[idx].Metric[CntEpoch] = best_satellite_value
 
     def RunAnalysisAfterTimeLoop(self, SatelliteList, UserList):
 
@@ -209,31 +221,30 @@ class Analysis:
             plt.plot(x, y, 'r.')
 
         if self.Type == 1:
-            for i in range(len(UserList)):
+            for i in range(len(UserList)):  # TODO check multiple users
                 plt.plot(self.TimeListfDOY, UserList[i].Metric, 'r-')
             plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
 
         if self.Type == 2:
-            Metric,Lats,Lons = [],[],[]
+            metric,lats,lons = [],[],[]
             for i in range(len(UserList)):
                 if self.Statistic == 'Min':
-                    Metric.append(np.min(UserList[i].Metric))
+                    metric.append(np.min(UserList[i].Metric))
                 if self.Statistic == 'Mean':
-                    Metric.append(np.mean(UserList[i].Metric))
+                    metric.append(np.mean(UserList[i].Metric))
                 if self.Statistic == 'Max':
-                    Metric.append(np.max(UserList[i].Metric))
+                    metric.append(np.max(UserList[i].Metric))
                 if self.Statistic == 'Std':
-                    Metric.append(np.std(UserList[i].Metric))
+                    metric.append(np.std(UserList[i].Metric))
                 if self.Statistic == 'Median':
-                    Metric.append(np.median(UserList[i].Metric))
-                Lats.append(UserList[i].LLA[0]/M_PI*180)
-                Lons.append(UserList[i].LLA[1]/M_PI*180)
-            Xnew = np.reshape(np.array(Lons), (19,37)) # TBD
-            Ynew = np.reshape(np.array(Lats), (19,37)) # TBD
-            Znew = np.reshape(np.array(Metric), (19,37)) # TBD
-            fig = plt.figure(figsize=(12,8))
+                    metric.append(np.median(UserList[i].Metric))
+                lats.append(UserList[i].LLA[0] / pi * 180)
+                lons.append(UserList[i].LLA[1] / pi * 180)
+            x_new = np.reshape(np.array(lons), (UserList[0].NumLat,UserList[0].NumLon))
+            y_new = np.reshape(np.array(lats), (UserList[0].NumLat,UserList[0].NumLon))
+            z_new = np.reshape(np.array(metric), (UserList[0].NumLat,UserList[0].NumLon))
             m = Basemap(projection='cyl', lon_0=0)
-            im1 = m.pcolormesh(Xnew,Ynew,Znew, shading='flat', cmap=plt.cm.jet, latlon=True)
+            im1 = m.pcolormesh(x_new, y_new, z_new, shading='flat', cmap=plt.cm.jet, latlon=True)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
             m.drawcoastlines()
@@ -252,9 +263,101 @@ class Analysis:
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
             m.drawcoastlines()
-            plt.plot(Contour[:,1]/M_PI*180, Contour[:,0]/M_PI*180, 'r.')
-            plt.savefig('analysis_0.png')
-            plt.show()
+            plt.plot(Contour[:,1] / pi * 180, Contour[:, 0] / pi * 180, 'r.')
 
-    def ComputeStatistics(self):
-        pass
+        if self.Type == 5:  # TODO check multiple users
+            for i in range(len(UserList)):
+                plt.plot(self.TimeListfDOY, UserList[i].Metric[:, 0], 'r+',label='Azimuth')
+                plt.plot(self.TimeListfDOY, UserList[i].Metric[:, 1], 'b+',label='Elevation')
+            plt.xlabel('DOY[-]'); plt.ylabel('Azimuth / Elevation [deg]'); plt.legend(); plt.grid()
+
+        if self.Type == 6:
+            for i in range(len(SatelliteList)):
+                plt.scatter(SatelliteList[i].Metric[:, 1], SatelliteList[i].Metric[:, 0], c=SatelliteList[i].Metric[:, 2])
+            plt.colorbar(shrink=0.6)
+            m = Basemap(projection='cyl', lon_0=0)
+            m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
+            m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
+            m.drawcoastlines()
+
+        if self.Type == 7:
+
+            lats, lons = [], []
+            time_step = int((self.TimeListMJD[1]-self.TimeListMJD[0])*86400)
+            metric = np.zeros(len(UserList))
+
+            for idx_usr in range(len(UserList)):
+                valid_value_list = []  # Define and clear
+                for idx_sat in range(len(SatelliteList)):
+                    for idx_tim in range(1, len(self.TimeListfDOY)):  # Loop over time (ignoring first)
+                        if UserList[idx_usr].Metric[idx_tim - 1][idx_sat] and not \
+                                UserList[idx_usr].Metric[idx_tim][idx_sat]:  # End pass detected
+                                # Compute the length of the pass
+                                length_of_pass = 1
+                                found_beginning_pass = False
+                                while not found_beginning_pass:
+                                    if idx_tim - length_of_pass >= 0:
+                                        if UserList[idx_usr].Metric[idx_tim - length_of_pass][idx_sat]:
+                                            length_of_pass += 1
+                                        else:
+                                            found_beginning_pass = True
+                                    else:
+                                        found_beginning_pass = True
+                                valid_value_list.append(length_of_pass * time_step)  # Add pass length to the list for this user
+
+                if len(valid_value_list) == 0:
+                    metric[idx_usr] = -1.0
+                else:
+                    if self.Statistic == "Min":
+                        metric[idx_usr] = np.min(valid_value_list)
+                    if self.Statistic == "Mean":
+                        metric[idx_usr] = np.mean(valid_value_list)
+                    if self.Statistic == "Max":
+                        metric[idx_usr] = np.max(valid_value_list)
+                    if self.Statistic == "Std":
+                        metric[idx_usr] = np.std(valid_value_list)
+                    if self.Statistic == "Median":
+                        metric[idx_usr] = np.median(valid_value_list)
+                lats.append(UserList[idx_usr].LLA[0] / pi * 180)
+                lons.append(UserList[idx_usr].LLA[1] / pi * 180)
+
+            x_new = np.reshape(np.array(lons), (UserList[0].NumLat, UserList[0].NumLon))
+            y_new = np.reshape(np.array(lats), (UserList[0].NumLat, UserList[0].NumLon))
+            z_new = np.reshape(np.array(metric), (UserList[0].NumLat, UserList[0].NumLon))
+            m = Basemap(projection='cyl', lon_0=0)
+            im1 = m.pcolormesh(x_new, y_new, z_new, shading='flat', cmap=plt.cm.jet, latlon=True)
+            m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
+            m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
+            m.drawcoastlines()
+            cb = m.colorbar(im1, "right", size="2%", pad="2%")
+            cb.set_label(self.Statistic+' Pass Time Interval [s]', fontsize=10)
+
+        if self.Type == 8:
+            metric, lats, lons = [], [], []
+            for i in range(len(UserList)):
+                if self.Statistic == 'Min':
+                    metric.append(np.min(UserList[i].Metric))
+                if self.Statistic == 'Mean':
+                    metric.append(np.mean(UserList[i].Metric))
+                if self.Statistic == 'Max':
+                    metric.append(np.max(UserList[i].Metric))
+                if self.Statistic == 'Std':
+                    metric.append(np.std(UserList[i].Metric))
+                if self.Statistic == 'Median':
+                    metric.append(np.median(UserList[i].Metric))
+                lats.append(UserList[i].LLA[0] / pi * 180)
+                lons.append(UserList[i].LLA[1] / pi * 180)
+            x_new = np.reshape(np.array(lons), (UserList[0].NumLat, UserList[0].NumLon))
+            y_new = np.reshape(np.array(lats), (UserList[0].NumLat, UserList[0].NumLon))
+            z_new = np.reshape(np.array(metric), (UserList[0].NumLat, UserList[0].NumLon))
+            m = Basemap(projection='cyl', lon_0=0)
+            im1 = m.pcolormesh(x_new, y_new, z_new, shading='flat', cmap=plt.cm.jet, latlon=True)
+            m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
+            m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
+            m.drawcoastlines()
+            cb = m.colorbar(im1, "right", size="2%", pad="2%")
+            cb.set_label(self.Statistic+' of Max Elevation satellites in view', fontsize=10)
+
+        plt.savefig('analysis_'+str(self.Type)+'.png')
+        plt.show()
+

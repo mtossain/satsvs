@@ -1,7 +1,7 @@
 
 import misc_fn
 from math import sqrt, floor
-from constants import M_PI
+from constants import pi
 
 
 class KeplerSet:
@@ -42,8 +42,6 @@ class Satellite:
         self.AntennaMaskMaximum = []  # Could be varying over azimuth...
 
         self.Kepler = KeplerSet()
-
-        #self.PropSat Param
 
         self.PosVelECI = [0,0,0,0,0,0]
         self.PosVelECF = [0,0,0,0,0,0]
@@ -116,6 +114,8 @@ class User:
         self.PosVelECI = [0,0,0,0,0,0]
         self.PosVelECF = [0,0,0,0,0,0]
         self.LLA = [0,0,0]
+        self.NumLat = 0
+        self.NumLon = 0
 
         self.IdxSatInView = []  # Indices of satellites which are in view
         self.NumSatInView = 0
@@ -157,6 +157,8 @@ class Ground2SpaceLink:
         self.GroundStation = GroundStation()
         self.Satellite = Satellite()
 
+        self.Metric = []  # For analysis purposes
+
     def ComputeLinkGroundStation(self, station, satellite):
 
         #For reasons of speed this function is coded inline, since this function is done for every time step,
@@ -194,7 +196,7 @@ class Ground2SpaceLink:
             if self.Elevation > station.ElevationMask[0] and self.Elevation < station.ElevationMaskMaximum[0]:
                 InView = True
         else:  # More than one mask
-            AzCakePieceAngle = 2 * M_PI / NumberOfMasks
+            AzCakePieceAngle = 2 * pi / NumberOfMasks
             IdxAzimuth = int(floor(self.Azimuth / AzCakePieceAngle))
             if self.Elevation > station.ElevationMask[IdxAzimuth] and self.Elevation < station.ElevationMaskMaximum[IdxAzimuth]:
                 InView = True
@@ -212,7 +214,7 @@ class Ground2SpaceLink:
             if self.Elevation > user.ElevationMask[0] and self.Elevation < user.ElevationMaskMaximum[0]:
                 InView = True
         else:  # More than one mask
-            AzCakePieceAngle = 2 * M_PI / NumberOfMasks
+            AzCakePieceAngle = 2 * pi / NumberOfMasks
             IdxAzimuth = int(floor(self.Azimuth / AzCakePieceAngle))
             if self.Elevation > user.ElevationMask[IdxAzimuth] and self.Elevation < user.ElevationMaskMaximum[IdxAzimuth]:
                 InView = True
@@ -243,6 +245,7 @@ class Space2SpaceLink:
         self.Space2SpaceECF = [0, 0, 0]
         self.Distance = 0  # m
 
+        self.Metric = []  # For analysis purposes
 
     """def ComputeLink(self):
 
@@ -312,7 +315,7 @@ class Space2SpaceLink:
                 InViewTransm = True
 
         else:  # More than one mask
-            AzCakePieceAngle = 2 * M_PI / NumberOfMasksTransm
+            AzCakePieceAngle = 2 * pi / NumberOfMasksTransm
             IdxAzimuth = int(floor(self.AzimuthTransm / AzCakePieceAngle))
             if self.ElevationTransm >= satelliteTransm.AntennaMask[IdxAzimuth] and \
                     self.ElevationTransm <= satelliteTransm.AntennaMaskMaximum[IdxAzimuth]:
@@ -328,7 +331,7 @@ class Space2SpaceLink:
                 InViewRecv = True
 
         else:  # More than one mask
-            AzCakePieceAngle = 2 * M_PI / NumberOfMasksRecv
+            AzCakePieceAngle = 2 * pi / NumberOfMasksRecv
             IdxAzimuth = int(floor(self.AzimuthRecv / AzCakePieceAngle))
             if self.ElevationRecv >= satelliteRecv.AntennaMask[IdxAzimuth] and \
                     self.ElevationRecv <= satelliteRecv.AntennaMaskMaximum[IdxAzimuth]:

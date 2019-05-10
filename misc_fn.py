@@ -1,17 +1,14 @@
 import math
-from math import sin, cos, tan, atan2, atan, floor, sqrt, fabs, asin, acos
-import constants
-from constants import M_PI, GM_Earth
+from math import sin, cos, tan, atan2, atan, sqrt, fabs, asin, acos
+from constants import pi, GM_Earth, R_Earth
 import numpy as np
 
-"""**
-* Compute Modified Julian Date from YYYY and Day Of Year pair
-* Time functions from SP3 library B.Remondi.
-*
-* @param YYYY Year (year)
-* @param DOY Day of year (days)
-* @return Modified Julian Date
-*"""
+# Compute Modified Julian Date from YYYY and Day Of Year pair
+# Time functions from SP3 library B.Remondi.
+#
+# @param YYYY Year (year)
+# @param DOY Day of year (days)
+# @return Modified Julian Date
 
 
 def YYYYDOY2MJD(YYYY, DOY):
@@ -58,9 +55,9 @@ def MJD2GMST(MJD_Requested):
     THETAN = THETAN + (THETA0 % 86400)
 
     # gmst in radians
-    THETAN = ((THETAN / 43200) * M_PI) % (2 * M_PI)
+    THETAN = ((THETAN / 43200) * pi) % (2 * pi)
     if THETAN < 0:
-        THETAN = THETAN + (2 * M_PI)
+        THETAN = THETAN + (2 * pi)
 
     return THETAN
 
@@ -117,8 +114,8 @@ def XYZ2LLA(XYZ):
     y2 = XYZ[1] * XYZ[1]
     z2 = XYZ[2] * XYZ[2]
     
-    sma = 6378137.0000 # earth radius in meters
-    smb = 6356752.3142 # earth semi minor in meters
+    sma = 6378137.0000  # earth radius in meters
+    smb = 6356752.3142  # earth semi minor in meters
     
     e = sqrt(1.0 - (smb / sma)*(smb / sma))
     b2 = smb*smb
@@ -148,9 +145,9 @@ def XYZ2LLA(XYZ):
     if XYZ[0] >= 0:
         lon = temp
     elif XYZ[0] < 0 and XYZ[1] >= 0:
-        lon = M_PI + temp
+        lon = pi + temp
     else:
-        lon = temp - M_PI
+        lon = temp - pi
     
     return [lat, lon, height]
 
@@ -308,20 +305,20 @@ def CalcAzEl(Xs, Xu):
 
     s = d[2] / sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2])
     if s == 1.0:
-        AzEl[1] = 0.5 * M_PI
+        AzEl[1] = 0.5 * pi
     else:
         AzEl[1] = atan(s / sqrt(1.0 - s * s))
 
     if d[1] == 0.0 and d[0] > 0.0:
-        AzEl[0] = 0.5 * M_PI
+        AzEl[0] = 0.5 * pi
     elif d[1] == 0.0 and d[0] < 0.0:
-        AzEl[0] = 1.5 * M_PI
+        AzEl[0] = 1.5 * pi
     else:
         AzEl[0] = atan(d[0] / d[1])
         if d[1] < 0.0:
-            AzEl[0] += M_PI
+            AzEl[0] += pi
         elif d[1] > 0.0 and d[0] < 0.0:
-            AzEl[0] += 2.0 * M_PI
+            AzEl[0] += 2.0 * pi
 
     return AzEl[0], AzEl[1]
 
@@ -329,7 +326,6 @@ def CalcAzEl(Xs, Xu):
 # Returns false if the line does not intersect the sphere
 # Returns two equal intersection points if the line is tangent to the sphere
 # Returns two different intersection points if the line gos through the sphere
-# Ref: GSSF v2.1
 #
 # @param X1 Point 1 on the line
 # @param X2 Point 2 on the line
@@ -356,7 +352,7 @@ def GetLineSphereIntersection(X1, X2, SphereRadius, SphereCenterX) :
 
     inSqrt = (b * b - 4.0 * a * c)
 
-    #No intersection
+    # No intersection
     if inSqrt < 0:
         Intersect = False
 
@@ -421,13 +417,13 @@ def SatGrndVis(LLA, ElevationMask):
 
     LatS = LLA[0]
     LonS = LLA[1]
-    Re = 6378137.0000
+    Re = R_Earth
 
     Lam=0
     if ElevationMask == 0:
         Lam = acos(Re / (Re + LLA[2]))
     else:
-        Lam = M_PI / 2 - ElevationMask - asin(cos(ElevationMask) * Re / (Re + LLA[2]))
+        Lam = pi / 2 - ElevationMask - asin(cos(ElevationMask) * Re / (Re + LLA[2]))
 
 
     # Problem detected at Az=180 for acos, so step size set to 0.3 iso 0.5
@@ -438,9 +434,9 @@ def SatGrndVis(LLA, ElevationMask):
     for i in np.arange(0.0, 360.0, StepSize):
 
         try:
-            Az = i / 180 * M_PI
+            Az = i / 180 * pi
             LatTAcc = acos(cos(Lam) * sin(LatS) + sin(Lam) * cos(LatS) * cos(Az))
-            LatT = M_PI / 2 - LatTAcc
+            LatT = pi / 2 - LatTAcc
             DeltaLon = acos((cos(Lam)-(sin(LatS) * sin(LatT))) / (cos(LatS) * cos(LatT)))
         except:
             pass
@@ -449,10 +445,10 @@ def SatGrndVis(LLA, ElevationMask):
         else:
             LonT = LonS - DeltaLon
 
-        if LonT > M_PI:
-            LonT = LonT - 2 * M_PI
-        if LonT < -M_PI:
-            LonT = LonT + 2 * M_PI
+        if LonT > pi:
+            LonT = LonT - 2 * pi
+        if LonT < -pi:
+            LonT = LonT + 2 * pi
 
         Contour[cnt,:] = [LatT, LonT]
 

@@ -339,13 +339,13 @@
         <MeanAnomaly>348</MeanAnomaly>
       </Satellite>
     </Constellation>
-       <Constellation>
-      <NumOfPlanes>3</NumOfPlanes>
-      <NumOfSatellites>30</NumOfSatellites>
-      <ConstellationID>1</ConstellationID>
-      <ConstellationName>OrbComm</ConstellationName>
-      <TLEFileName>tle.txt</TLEFileName>
-       </Constellation>
+<!--       <Constellation>-->
+<!--      <NumOfPlanes>3</NumOfPlanes>-->
+<!--      <NumOfSatellites>30</NumOfSatellites>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--      <ConstellationName>OrbComm</ConstellationName>-->
+<!--      <TLEFileName>tle.txt</TLEFileName>-->
+<!--       </Constellation>-->
   </SpaceSegment>
   <!--Defines the ground stations that should be simulated-->
   <GroundSegment>
@@ -368,8 +368,8 @@
         <ConstellationID>1</ConstellationID>
         <GroundStationID>2</GroundStationID>
         <GroundStationName>FUC</GroundStationName>
-        <Latitude>41.995</Latitude>
-        <Longitude>13.547</Longitude>
+        <Latitude>-41.995</Latitude>
+        <Longitude>-130.547</Longitude>
         <Height>0</Height>
         <ReceiverConstellation>1</ReceiverConstellation>
         <ElevationMask>5</ElevationMask>
@@ -378,12 +378,24 @@
   </GroundSegment>
   <!--Defines the users that should be simulated-->
   <UserSegment>
-    <Type>Static</Type>
-    <Latitude>50</Latitude>
-    <Longitude>5</Longitude>
+    <Type>Grid</Type>
+    <LatMin>-90</LatMin>
+    <LatMax>90</LatMax>
+    <LonMin>-180</LonMin>
+    <LonMax>180</LonMax>
+    <LatStep>10</LatStep>
+    <LonStep>10</LonStep>
     <Height>0</Height>
     <ReceiverConstellation>111</ReceiverConstellation>
     <ElevationMask>5</ElevationMask>
+
+<!--    <Type>Static</Type>-->
+<!--    <Latitude>50</Latitude>-->
+<!--    <Longitude>5</Longitude>-->
+<!--    <Height>0</Height>-->
+<!--    <ReceiverConstellation>111</ReceiverConstellation>-->
+<!--    <ElevationMask>5</ElevationMask>-->
+
 </UserSegment>
   <!--Defines the simulation parameters-->
   <SimulationManager>
@@ -391,12 +403,58 @@
     <StopDate>2013-05-09 00:00:00</StopDate>
     <TimeStep>3600</TimeStep>
     <HPOP>False</HPOP>
+<!--      <Analysis>-->
+<!--          <Type>0</Type>-->
+<!--          <ConstellationID>1</ConstellationID>-->
+<!--          <SatelliteID>1</SatelliteID>-->
+<!--        </Analysis>-->
+<!--    -->
+<!--        <Analysis>-->
+<!--          <Type>1</Type>-->
+<!--          <LatitudeRequested>50</LatitudeRequested>-->
+<!--          <LongitudeRequested>10</LongitudeRequested>-->
+<!--        </Analysis>-->
+<!--    -->
+<!--        <Analysis>-->
+<!--          <Type>2</Type>-->
+<!--          <Statistic>Min</Statistic>-->
+<!--        </Analysis>-->
+
+<!--    <Analysis>-->
+<!--      <Type>3</Type>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--      <LatitudeRequested>50</LatitudeRequested>-->
+<!--      <LongitudeRequested>10</LongitudeRequested>-->
+<!--    </Analysis>-->
+
+<!--    <Analysis>-->
+<!--      <Type>4</Type>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--      <SatelliteID>1</SatelliteID>-->
+<!--      <ElevationMask>20</ElevationMask>-->
+<!--    </Analysis>-->
+
+<!--    <Analysis>-->
+<!--      <Type>5</Type>-->
+<!--      <ConstellationID>3</ConstellationID>-->
+<!--      <SatelliteID>24307</SatelliteID>-->
+<!--      <LatitudeRequested>50</LatitudeRequested>-->
+<!--      <LongitudeRequested>10</LongitudeRequested>-->
+<!--    </Analysis>-->
+
+<!--        <Analysis>-->
+<!--          <Type>6</Type>-->
+<!--        </Analysis>-->
+<!--    <Analysis>-->
+<!--      <Type>7</Type>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--      <Statistic>Mean</Statistic>-->
+<!--    </Analysis>-->
 
     <Analysis>
-      <Type>4</Type>
+      <Type>8</Type>
       <ConstellationID>1</ConstellationID>
-      <SatelliteID>1</SatelliteID>
-      <ElevationMask>80</ElevationMask>
+      <Statistic>Mean</Statistic>
     </Analysis>
 
   </SimulationManager>

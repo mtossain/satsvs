@@ -1,7 +1,6 @@
 import math
 
 pi = math.pi
-M_PI = math.pi
 Rad = (pi / (180.0)) / 3600  # Radians per arcseconds of degrees
 Rad2 = pi / (180.0)  # Radians per degree
 
@@ -20,8 +19,8 @@ c_light = 299792458.0  # Speed of light  [m/s]IAU 1976 (Seidelmann 1992)
 
 k_boltzmann = -228.6  # dBJ/K
 
-R_Sun = 6.9599e8  # Radius Sun [m]Seidelmann 1992
-R_Earth = 6378136.3  # Radius Earth [m]EGM2008 & EGM96
+R_Sun = 6.9599e8  # Radius Sun [m] Seidelmann 1992
+R_Earth = 6378136.3  # Radius Earth [m] EGM2008 & EGM96
 R_Moon = 1738.200e3
 
 omega_Earth = 7.29211514670698e-5  # [rad/s]Aoki 1982, NIMA 1997  Earth rotation
