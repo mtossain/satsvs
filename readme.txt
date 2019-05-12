@@ -37,4 +37,4 @@ Statistics on plots can be:
 - Std
 - Median
 
-![alt text](https://raw.githubusercontent.com/mtossain/satsvs/output/analysis_0.png)
+![alt text](https://github.com/mtossain/satsvs/blob/master/output/analysis_0.png)
