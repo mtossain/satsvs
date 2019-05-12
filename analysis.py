@@ -1,7 +1,3 @@
-import segments
-from constants import pi
-from astropy.time import Time
-import datetime
 
 import matplotlib
 import os
@@ -10,21 +6,26 @@ matplotlib.use("TkAgg")  # TODO solve bug with basemap???
 from matplotlib import pyplot as plt
 os.environ['PROJ_LIB'] = '/users/micheltossaint/Documents/anaconda3/lib/python3.6/site-packages/pyproj/data'
 from mpl_toolkits.basemap import Basemap
+import pandas as pd
 
 import misc_fn
-import logging_svs as ls
+import segments
+from constants import pi
 
 class Analysis: # TODO Make subclasses for the different analysis
 
+    TimeListISO = []
+    TimeListMJD = []
+    TimeListfDOY = []
 
     def __init__(self):
 
         # General analysis parameters
         self.Type = 0
         self.Name = ''
-        self.TimeListISO = []  # TODO should be done only once
-        self.TimeListMJD = []  # TODO should be done only once
-        self.TimeListfDOY = []  # TODO should be done only once
+        self.TimeListISO = []
+        self.TimeListMJD = []
+        self.TimeListfDOY = []
 
         # Members for specific analysis
         self.ConstellationID = 0
@@ -137,14 +138,13 @@ class Analysis: # TODO Make subclasses for the different analysis
             for i in range(len(UserList)):
                 UserList[i].Metric = np.zeros(NumEpoch)
 
+        if self.Type == 9:
+            try:
+                os.remove('output/orbits.txt')
+            except:
+                pass
 
     def RunAnalysisInTimeLoop(self, RunTime, CntEpoch, SatelliteList, UserList, User2SatelliteList):
-
-        RunTimeStr = Time(RunTime, format='mjd').iso
-        self.TimeListISO.append(RunTimeStr)
-        self.TimeListMJD.append(RunTime)
-        date = datetime.datetime.strptime(RunTimeStr[:-4], '%Y-%m-%d %H:%M:%S')
-        self.TimeListfDOY.append(date.timetuple().tm_yday + date.hour/24+date.minute/60/24+date.second/3600/24)
 
         if self.Type == 0:
             if self.SatelliteID > 0:  # Only for one satellite
@@ -195,14 +195,25 @@ class Analysis: # TODO Make subclasses for the different analysis
                         UserList[idx].Metric[CntEpoch, UserList[idx].IdxSatInView[j]] = True
 
         if self.Type == 8: # TODO ERROR !!!! there seems to be a bug in the user to satellite elevation value, it has to be checked
-            for idx in range(len(UserList)):
+            for idx_user in range(len(UserList)):
                 best_satellite_value = -1
-                for idx_sat in range(UserList[idx].NumSatInView):
-                    if SatelliteList[UserList[idx].IdxSatInView[idx_sat]].ConstellationID == self.ConstellationID:
-                        elevation = User2SatelliteList[idx * len(SatelliteList) + UserList[idx].IdxSatInView[idx_sat]].Elevation / pi * 180
+                for idx_sat in range(UserList[idx_user].NumSatInView):
+                    if SatelliteList[UserList[idx_user].IdxSatInView[idx_sat]].ConstellationID == self.ConstellationID:
+                        elevation = User2SatelliteList[idx_user * len(SatelliteList) + UserList[idx_user].IdxSatInView[idx_sat]].Elevation / pi * 180
                         if elevation > best_satellite_value:
                             best_satellite_value = elevation
-                UserList[idx].Metric[CntEpoch] = best_satellite_value
+                UserList[idx_user].Metric[CntEpoch] = best_satellite_value
+
+        if self.Type == 9:
+            for idx_sat in range(len(SatelliteList)):
+                if SatelliteList[idx_sat].ConstellationID == self.ConstellationID:
+                    with open('output/orbits.txt', 'a') as f:
+                        f.write("%13.6f,%d,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n" % (RunTime,
+                                SatelliteList[idx_sat].SatelliteID, SatelliteList[idx_sat].PosVelECI[0],
+                                SatelliteList[idx_sat].PosVelECI[1], SatelliteList[idx_sat].PosVelECI[2],
+                                SatelliteList[idx_sat].PosVelECI[3], SatelliteList[idx_sat].PosVelECI[4],
+                                SatelliteList[idx_sat].PosVelECI[5]))
+
 
     def RunAnalysisAfterTimeLoop(self, SatelliteList, UserList):
 
@@ -358,6 +369,13 @@ class Analysis: # TODO Make subclasses for the different analysis
             cb = m.colorbar(im1, "right", size="2%", pad="2%")
             cb.set_label(self.Statistic+' of Max Elevation satellites in view', fontsize=10)
 
-        plt.savefig('analysis_'+str(self.Type)+'.png')
+        if self.Type == 9:
+            data = pd.read_csv('output/orbits.txt', sep=',', header=None,
+                               names=['RunTime', 'ID', 'x', 'y', 'z', 'x_vel', 'y_vel', 'z_vel'])
+            data2 = data[data.ID == 1]
+            plt.plot(Analysis.TimeListfDOY, data2.x_vel, 'r-')
+            plt.xlabel('DOY[-]'); plt.ylabel('X value velocity ECI [m/s]'); plt.grid()
+
+        plt.savefig('output/analysis_'+str(self.Type)+'.png')
         plt.show()
 

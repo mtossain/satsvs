@@ -11,7 +11,7 @@
 # TODO refactor names of variables and classes
 import os
 try:
-    os.remove('main.log')
+    os.remove('output/main.log')
 except:
     pass
 
@@ -20,16 +20,18 @@ import misc_fn
 from astropy.time import Time
 import logging_svs as ls
 ls.logger.info('Read configuration file')
+from analysis import Analysis
+import datetime
 
 
 def main():
 
     # Loading configuration
     conf = config.AppConfig()
-    conf.LoadSpaceSegment('Config.xml')
-    conf.LoadGroundSegment('Config.xml')
-    conf.LoadUserSegment('Config.xml')
-    conf.LoadSimulation('Config.xml')
+    conf.LoadSpaceSegment('input/Config.xml')
+    conf.LoadGroundSegment('input/Config.xml')
+    conf.LoadUserSegment('input/Config.xml')
+    conf.LoadSimulation('input/Config.xml')
     conf.SetupGround2Space()
 
     # Run analyses which are needed before time loop
@@ -38,22 +40,27 @@ def main():
                                                                  conf.UserList, conf.AnalysisList)
     # Loop over simulation time window
     mjd_requested = conf.StartDateTime
-    cnt_epoch = 0  # timestep
+    cnt_epoch = 0  # count the time_steps
     while round(mjd_requested * 86400) < round(conf.StopDateTime * 86400):
 
-        ls.logger.info(['Sim Time:', Time(mjd_requested, format='mjd').iso])
-        GMSTRequested = misc_fn.MJD2GMST(mjd_requested)  # Determine GMST
+        run_time_str = Time(mjd_requested, format='mjd').iso
+        gmst_requested = misc_fn.MJD2GMST(mjd_requested)  # Determine GMST
+        Analysis.TimeListISO.append(run_time_str)
+        Analysis.TimeListMJD.append(mjd_requested)
+        date = datetime.datetime.strptime(run_time_str[:-4], '%Y-%m-%d %H:%M:%S')
+        Analysis.TimeListfDOY.append(date.timetuple().tm_yday + date.hour/24+date.minute/60/24+date.second/3600/24)
+        ls.logger.info(['Sim Time:', run_time_str])
 
         for i in range(conf.NumSat):
             conf.SatelliteList[i].DeterminePosVelECI(mjd_requested)
-            conf.SatelliteList[i].DeterminePosVelECF(GMSTRequested)
+            conf.SatelliteList[i].DeterminePosVelECF(gmst_requested)
             conf.SatelliteList[i].NumStationInView = 0  # Reset before loop
 
         # Compute ground station positions/velocities in ECI, compute connection to satellite,
         # and remember which ones are in view
         for CntGroundStation in range(conf.NumGroundStation):
             conf.GroundStationList[CntGroundStation].NumSatInView = 0  # Reset before loop
-            conf.GroundStationList[CntGroundStation].DeterminePosVelECI(GMSTRequested)
+            conf.GroundStationList[CntGroundStation].DeterminePosVelECI(gmst_requested)
             for CntSatellite in range(conf.NumSat):
                 if conf.GroundStation2SatelliteList[CntGroundStation * conf.NumSat + CntSatellite].LinkInUse:  # From Receiver Constellation of Ground Station
                     conf.GroundStation2SatelliteList[CntGroundStation * conf.NumSat + CntSatellite].\
@@ -70,9 +77,9 @@ def main():
         for CntUser in range(conf.NumUser):
             conf.UserList[CntUser].NumSatInView = 0  # Reset before loop
             if conf.UserList[CntUser].Type == "Static" or conf.UserList[CntUser].Type == "Grid":
-                conf.UserList[CntUser].DeterminePosVelECI(GMSTRequested)  # Compute position/velocity in ECI
+                conf.UserList[CntUser].DeterminePosVelECI(gmst_requested)  # Compute position/velocity in ECI
             if conf.UserList[CntUser].Type == "Spacecraft":
-                conf.UserList[CntUser].DeterminePosVelTLE(GMSTRequested, mjd_requested)  # Spacecraft position from TLE
+                conf.UserList[CntUser].DeterminePosVelTLE(gmst_requested, mjd_requested)  # Spacecraft position from TLE
             for CntSatellite in range(conf.NumSat):
                 if conf.User2SatelliteList[CntUser * conf.NumSat + CntSatellite].LinkInUse:  # From Receiver Constellation of User
                     conf.User2SatelliteList[CntUser * conf.NumSat + CntSatellite].\

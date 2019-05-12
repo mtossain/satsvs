@@ -17,8 +17,7 @@ COVERAGE
     6. Number of station in view of each satellite, depth of coverage (DOC) based on satellite ground track
     7. Satellite passes time statistics for user grid
     8. Satellite elevation statistics for highest satellite in view for user grid
-
-9. Output satellite and stations time and position in ECI (for later use)
+    9. Output satellite and stations time and position in ECI (for later use)
 
 COMMUNICATION
 20. Single ISL link assessment for satellite-satellite or ground-satellite receiver power, bitrate and C/N0
@@ -29,7 +28,7 @@ NAVIGATION
 0. DOP values for users
 
 EARTH OBSERVATION
-TBD
+0. Swath coverage for satellite(s)
 
 Statistics on plots can be:
 - Min
@@ -38,4 +37,4 @@ Statistics on plots can be:
 - Std
 - Median
 
-![alt text](https://raw.githubusercontent.com/mtossain/satsvs/analysis_0.png)
+![alt text](https://raw.githubusercontent.com/mtossain/satsvs/output/analysis_0.png)
