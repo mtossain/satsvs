@@ -37,5 +37,6 @@ Statistics on plots can be:
 - Std
 - Median
 
-![Optional Text](../master/output/analysis_0.png)
+<img src="/output/analysis_0.png" alt="My cool logo"/>
+
 
