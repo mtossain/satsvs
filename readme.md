@@ -49,7 +49,7 @@ All units in the configuration file are in SI units, angles are in degrees.
 
 ### Space segment
 The following xml is used to setup the space segment:
-'''
+```
 <?xml version="1.0" encoding="utf-8"?>
 <!--Simulation Scenario-->
 <Scenario>
@@ -74,9 +74,9 @@ The following xml is used to setup the space segment:
         </Constellation>
     </SpaceSegment>
 
-'''
+```
 Orbit parameters are either Keplerian or can be defined as a list of satellites in a TLE file (in input directory):
-'''
+```
 <Constellation>
     <NumOfPlanes>3</NumOfPlanes>
     <NumOfSatellites>30</NumOfSatellites>
@@ -84,11 +84,11 @@ Orbit parameters are either Keplerian or can be defined as a list of satellites 
     <ConstellationName>OrbComm</ConstellationName>
     <TLEFileName>input/tle.txt</TLEFileName>
 </Constellation>
-'''
+```
 
 ### Ground segment
 The following xml is used to setup the ground segment:
-'''
+```
   <GroundSegment>
     <Network>
       <NumStation>2</NumStation>
@@ -106,14 +106,14 @@ The following xml is used to setup the ground segment:
       </GroundStation>
     </Network>
   </GroundSegment>
-'''
+```
 Ground stations belong to a constellation <ConstellationID> and can be told to receive from multiple constellations 
 <ReceiverConstellation> through a list of True/False separated by commas. The elevation mask is defined as a list of
 values seperated by commas, dividing the azimuth circle in equal parts.
 
 ### User segment
 The following xml is used to setup the user segment:
-'''
+```
 <UserSegment>
     <Type>Grid</Type>
     <LatMin>-90</LatMin>
@@ -126,9 +126,9 @@ The following xml is used to setup the user segment:
     <ReceiverConstellation>111</ReceiverConstellation>
     <ElevationMask>5</ElevationMask>
 </UserSegment>
-'''
+```
 The user segment can be setup as a grid or single locations:
-'''
+```
 <UserSegment>
     <Type>Static</Type>
     <Latitude>50</Latitude>
@@ -137,23 +137,23 @@ The user segment can be setup as a grid or single locations:
     <ReceiverConstellation>111</ReceiverConstellation>
     <ElevationMask>5</ElevationMask>
 </UserSegment>
-'''
+```
 or as a spacecraft user through a TLE file:
-'''
+```
 <UserSegment>
     <Type>Spacecraft</Type>
     <TLEFileName>C:\Documents and Settings\Michel Tossaint\My Documents\Navigation Data\TLE\TLE_MetopA_2006_12_26.txt</TLEFileName>
     <ElevationMask>20</ElevationMask>
     <ReceiverConstellation>1000</ReceiverConstellation>
 </UserSegment>
-'''
+```
 Users can be told to receive from multiple constellations <ReceiverConstellation> through a list of True/False 
 separated by commas. The elevation mask is defined as a list of values (one or more) seperated by commas, 
 dividing the azimuth circle in equal parts.
 
 ### Simulation parameters
 The following xml is used to setup the simulation parameters:
-'''
+```
 <SimulationManager>
     <StartDate>2013-05-08 00:00:00</StartDate>
     <StopDate>2013-05-09 00:00:00</StopDate>
@@ -163,13 +163,14 @@ The following xml is used to setup the simulation parameters:
           <ConstellationID>1</ConstellationID>
     </Analysis>
 </SimulationManager>
-'''
+```
 The time parameters are in UTC time and TimeStep in seconds. The analysis are described below:
 
 ## Analysis parameters
 
 ### cov_ground_track
 <img src="/output/cov_ground_track.png" alt="cov_ground_track"/>
+
 The following parameters are needed:
 - Type: cov_ground_track
 - ConstellationID: which constellation to use
@@ -179,6 +180,7 @@ If this parameter is omitted all the satellites of the constellation are plotted
 
 ### cov_ground_track
 <img src="/output/cov_satellite_pvt.png" alt="cov_satellite_pvt"/>
+
 The following parameters are needed:
 - Type: cov_satellite_pvt
 - ConstellationID: which constellation to use
