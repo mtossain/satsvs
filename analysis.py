@@ -89,25 +89,25 @@ class Analysis: # TODO Make subclasses for the different analysis
     # General methods for each of the analysis
     def RunAnalysisBeforeTimeLoop(self, NumEpoch, TimeStep, SatelliteList, UserList, AnalysisList):
 
-        if self.Type == 0:
+        if self.Type == 'cov_ground_track':
             for i in range(len(SatelliteList)):
                 SatelliteList[i].Metric = np.zeros((NumEpoch,2))
 
-        if self.Type == 1:
+        if self.Type == 'cov_satellite_visible':
             # Find the index of the user that is needed
             for i in range(len(UserList)):
                 UserList[i].Metric = np.zeros(NumEpoch)
 
-        if self.Type == 2:
+        if self.Type == 'cov_satellite_visible_grid':
             for i in range(len(UserList)):
                 UserList[i].Metric = np.zeros(NumEpoch)
 
-        if self.Type == 3:
+        if self.Type == 'cov_satellite_visible_id':
             # Find the index of the user that is needed
             for i in range(len(UserList)):
                 UserList[i].Metric = np.ones((NumEpoch, len(SatelliteList)))*999999
 
-        if self.Type == 4:
+        if self.Type == 'cov_satellite_contour':
             # Find the index of the satellite that is needed
             for i in range(len(SatelliteList)):
                 if SatelliteList[i].ConstellationID == self.ConstellationID and \
@@ -115,7 +115,7 @@ class Analysis: # TODO Make subclasses for the different analysis
                     self.iFndSatellite = i
                     break
 
-        if self.Type == 5:
+        if self.Type == 'cov_satellite_sky_angles':
             # Find the index of the satellite that is needed
             for i in range(len(SatelliteList)):
                 if SatelliteList[i].ConstellationID == self.ConstellationID and \
@@ -125,15 +125,15 @@ class Analysis: # TODO Make subclasses for the different analysis
             for i in range(len(UserList)):
                 UserList[i].Metric = np.zeros((NumEpoch, 2))
 
-        if self.Type == 6:
+        if self.Type == 'cov_depth_of_coverage':
             for i in range(len(SatelliteList)):
                 SatelliteList[i].Metric = np.zeros((NumEpoch,3))
 
-        if self.Type == 7:
+        if self.Type == 'cov_pass_time':
             for i in range(len(UserList)):
                 UserList[i].Metric = np.full((NumEpoch, len(SatelliteList)), False, dtype=bool)
 
-        if self.Type == 8:
+        if self.Type == 'cov_satellite_highest':
             for i in range(len(UserList)):
                 UserList[i].Metric = np.zeros(NumEpoch)
 
@@ -145,7 +145,7 @@ class Analysis: # TODO Make subclasses for the different analysis
 
     def RunAnalysisInTimeLoop(self, RunTime, CntEpoch, SatelliteList, UserList, User2SatelliteList):
 
-        if self.Type == 0:
+        if self.Type == 'cov_ground_track':
             if self.SatelliteID > 0:  # Only for one satellite
                 for idx in range(len(SatelliteList)):
                     if SatelliteList[idx].ConstellationID == self.ConstellationID and \
@@ -160,40 +160,40 @@ class Analysis: # TODO Make subclasses for the different analysis
                         SatelliteList[idx].Metric[CntEpoch, 0] = SatelliteList[idx].LLA[0] / pi * 180
                         SatelliteList[idx].Metric[CntEpoch, 1] = SatelliteList[idx].LLA[1] / pi * 180
 
-        if self.Type == 1:
+        if self.Type == 'cov_satellite_visible':
             for idx in range(len(UserList)):
                 UserList[idx].Metric[CntEpoch] = UserList[idx].NumSatInView
 
-        if self.Type == 2:
+        if self.Type == 'cov_satellite_visible_grid':
             for idx in range(len(UserList)):
                 UserList[idx].Metric[CntEpoch] = UserList[idx].NumSatInView
 
-        if self.Type == 3:
+        if self.Type == 'cov_satellite_visible_id':
             for idx in range(len(UserList[0].IdxSatInView)):
                 if UserList[0].IdxSatInView[idx] != 999999:
                     UserList[0].Metric[CntEpoch, idx] = SatelliteList[UserList[0].IdxSatInView[idx]].SatelliteID
 
-        if self.Type == 5:
+        if self.Type == 'cov_satellite_sky_angles':
             num_sat = User2SatelliteList[0].NumSat
             for idx in range(len(UserList)):
                 if User2SatelliteList[idx * num_sat + self.iFndSatellite].Elevation > 0:
                     UserList[idx].Metric[CntEpoch, 0] = User2SatelliteList[idx * num_sat + self.iFndSatellite].Azimuth / pi * 180
                     UserList[idx].Metric[CntEpoch, 1] = User2SatelliteList[idx * num_sat + self.iFndSatellite].Elevation / pi * 180
 
-        if self.Type == 6:
+        if self.Type == 'cov_depth_of_coverage':
             for idx in range(len(SatelliteList)):
                 SatelliteList[idx].DeterminePosVelLLA()
                 SatelliteList[idx].Metric[CntEpoch, 0] = SatelliteList[idx].LLA[0] / pi * 180
                 SatelliteList[idx].Metric[CntEpoch, 1] = SatelliteList[idx].LLA[1] / pi * 180
                 SatelliteList[idx].Metric[CntEpoch, 2] = SatelliteList[idx].NumStationInView
 
-        if self.Type == 7:
+        if self.Type == 'cov_pass_time':
             for idx in range(len(UserList)):
                 for j in range(UserList[idx].NumSatInView):
                     if SatelliteList[UserList[idx].IdxSatInView[j]].ConstellationID == self.ConstellationID:
                         UserList[idx].Metric[CntEpoch, UserList[idx].IdxSatInView[j]] = True
 
-        if self.Type == 8: # TODO ERROR !!!! there seems to be a bug in the user to satellite elevation value, it has to be checked
+        if self.Type == 'cov_satellite_highest': # TODO ERROR !!!! there seems to be a bug in the user to satellite elevation value, it has to be checked
             for idx_user in range(len(UserList)):
                 best_satellite_value = -1
                 for idx_sat in range(UserList[idx_user].NumSatInView):
@@ -216,29 +216,34 @@ class Analysis: # TODO Make subclasses for the different analysis
 
     def RunAnalysisAfterTimeLoop(self, SatelliteList, UserList):
 
-        fig = plt.figure(figsize=(12, 8))
-        #plt.tight_layout()
+        fig = plt.figure(figsize=(10, 6))
         plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
 
-        if self.Type == 0:
-            if self.SatelliteID > 0:  # Only for one satellite
-                for i in range(len(SatelliteList)):
-                    if SatelliteList[i].ConstellationID == self.ConstellationID and \
-                            SatelliteList[i].SatelliteID == self.SatelliteID:
-                        y,x = SatelliteList[i].Metric[:,0], SatelliteList[i].Metric[:,1]
+        if self.Type == 'cov_ground_track':
             m = Basemap(projection='cyl', lon_0=0)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
             m.drawcoastlines()
-            plt.plot(x, y, 'r.')
+            if self.SatelliteID > 0:  # Only for one satellite
+                for i in range(len(SatelliteList)):
+                    if SatelliteList[i].ConstellationID == self.ConstellationID and \
+                            SatelliteList[i].SatelliteID == self.SatelliteID:
+                        y, x = SatelliteList[i].Metric[:, 0], SatelliteList[i].Metric[:, 1]
+                        plt.plot(x, y, 'r.')
+            else:
+                for i in range(len(SatelliteList)):
+                    y, x = SatelliteList[i].Metric[:, 0], SatelliteList[i].Metric[:, 1]
+                    plt.plot(x, y, '+', label=str(SatelliteList[i].SatelliteID))
+                plt.legend(fontsize=8)
+            plt.tight_layout()
 
-        if self.Type == 1:
+        if self.Type == 'cov_satellite_visible':
             for i in range(len(UserList)):  # TODO check multiple users
-                plt.plot(self.TimeListfDOY, UserList[i].Metric, 'r-')
+                plt.plot(Analysis.TimeListfDOY, UserList[i].Metric, 'r-')
             plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
 
-        if self.Type == 2:
-            metric,lats,lons = [],[],[]
+        if self.Type == 'cov_satellite_visible_grid':
+            metric, lats, lons = [], [], []
             for i in range(len(UserList)):
                 if self.Statistic == 'Min':
                     metric.append(np.min(UserList[i].Metric))
@@ -263,27 +268,27 @@ class Analysis: # TODO Make subclasses for the different analysis
             cb = m.colorbar(im1, "right", size="2%", pad="2%")
             cb.set_label(self.Statistic+' Number of satellites in view', fontsize=10)
 
-        if self.Type == 3:
-            plt.plot(self.TimeListfDOY, UserList[0].Metric, 'r+')
+        if self.Type == 'cov_satellite_visible_id':
+            plt.plot(Analysis.TimeListfDOY, UserList[0].Metric, 'r+')
             plt.ylim((.5, len(SatelliteList)+1))
             plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
 
-        if self.Type == 4:
+        if self.Type == 'cov_satellite_contour':
             SatelliteList[self.iFndSatellite].DeterminePosVelLLA()
-            Contour = misc_fn.SatGrndVis(SatelliteList[self.iFndSatellite].LLA, self.ElevationMask)
+            countour = misc_fn.SatGrndVis(SatelliteList[self.iFndSatellite].LLA, self.ElevationMask)
             m = Basemap(projection='cyl', lon_0=0)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
             m.drawcoastlines()
-            plt.plot(Contour[:,1] / pi * 180, Contour[:, 0] / pi * 180, 'r.')
+            plt.plot(contour[:,1] / pi * 180, countour[:, 0] / pi * 180, 'r.')
 
-        if self.Type == 5:  # TODO check multiple users
+        if self.Type == 'cov_satellite_sky_angles':  # TODO check multiple users
             for i in range(len(UserList)):
-                plt.plot(self.TimeListfDOY, UserList[i].Metric[:, 0], 'r+',label='Azimuth')
-                plt.plot(self.TimeListfDOY, UserList[i].Metric[:, 1], 'b+',label='Elevation')
+                plt.plot(Analysis.TimeListfDOY, UserList[i].Metric[:, 0], 'r+', label='Azimuth')
+                plt.plot(Analysis.TimeListfDOY, UserList[i].Metric[:, 1], 'b+', label='Elevation')
             plt.xlabel('DOY[-]'); plt.ylabel('Azimuth / Elevation [deg]'); plt.legend(); plt.grid()
 
-        if self.Type == 6:
+        if self.Type == 'cov_depth_of_coverage':
             for i in range(len(SatelliteList)):
                 plt.scatter(SatelliteList[i].Metric[:, 1], SatelliteList[i].Metric[:, 0], c=SatelliteList[i].Metric[:, 2])
             plt.colorbar(shrink=0.6)
@@ -292,7 +297,7 @@ class Analysis: # TODO Make subclasses for the different analysis
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
             m.drawcoastlines()
 
-        if self.Type == 7:
+        if self.Type == 'cov_pass_time':
 
             lats, lons = [], []
             time_step = int((self.TimeListMJD[1]-self.TimeListMJD[0])*86400)
@@ -301,7 +306,7 @@ class Analysis: # TODO Make subclasses for the different analysis
             for idx_usr in range(len(UserList)):
                 valid_value_list = []  # Define and clear
                 for idx_sat in range(len(SatelliteList)):
-                    for idx_tim in range(1, len(self.TimeListfDOY)):  # Loop over time (ignoring first)
+                    for idx_tim in range(1, len(Analysis.TimeListfDOY)):  # Loop over time (ignoring first)
                         if UserList[idx_usr].Metric[idx_tim - 1][idx_sat] and not \
                                 UserList[idx_usr].Metric[idx_tim][idx_sat]:  # End pass detected
                                 # Compute the length of the pass
@@ -344,7 +349,7 @@ class Analysis: # TODO Make subclasses for the different analysis
             cb = m.colorbar(im1, "right", size="2%", pad="2%")
             cb.set_label(self.Statistic+' Pass Time Interval [s]', fontsize=10)
 
-        if self.Type == 8:
+        if self.Type == 'cov_satellite_highest':
             metric, lats, lons = [], [], []
             for i in range(len(UserList)):
                 if self.Statistic == 'Min':

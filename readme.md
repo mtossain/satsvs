@@ -44,7 +44,8 @@ This file contains several main parts:
 - The space segment in several constellations
 - The ground segment with ground stations servicing the satellites
 - The user segment receiving the satellite information at single locations or user grids
-- The simulation parameters like start,stop,step time and analysis to be performed
+- The simulation parameters like start,stop,step time and analysis to be performed.
+
 All units in the configuration file are in SI units, angles are in degrees.
 
 ### Space segment
@@ -188,11 +189,25 @@ are needed:
 ```
 Optional are:
 ```
-<SatelliteID>1</SatelliteID>-->
+<SatelliteID>1</SatelliteID>
 ``` 
 If this parameter is omitted all the satellites of the constellation are output. Additionally an __/output/orbits.txt__ 
 file is saved to disk.
 <img src="/output/cov_satellite_pvt.png" alt="cov_satellite_pvt"/>
+
+### cov_satellite_visible
+Plots the number of available satellites at a specific location. The following parameters are needed:
+```
+<Type>cov_satellite_visible</Type>
+<LatitudeRequested>50</LatitudeRequested>
+<LongitudeRequested>10</LongitudeRequested>
+```
+<img src="/output/cov_satellite_visible.png" alt="cov_satellite_visible"/>
+
+
+
+
+
 
 Statistics on plots can be: minimum, mean, maximum, std and median.
 

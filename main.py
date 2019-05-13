@@ -4,8 +4,7 @@
 # TODO different propagators including SGP4 and HPOP
 # TODO satellite orbit run from previous run, so to save time
 # TODO S2G and S2S only when needed with flag...
-# TODO analysis 5-10
-# TODO analysis 20
+# TODO analysis 20 series
 # TODO analysis navigation
 # TODO analysis earth observation
 # TODO refactor names of variables and classes
