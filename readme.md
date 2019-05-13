@@ -182,10 +182,14 @@ If this parameter is omitted all the satellites of the constellation are plotted
 ### cov_satellite_pvt
 Plots the satellite position and velocity and outputs it to the 'output/orbits.txt' file. The following parameters 
 are needed:
-- Type: cov_satellite_pvt
-- ConstellationID: which constellation to use
+```
+<Type>cov_satellite_pvt</Type>
+<ConstellationID>1</ConstellationID>
+```
 Optional are:
-- SatelliteID: which satellite to use (ID or NORAD number if a TLE file is used). 
+```
+<SatelliteID>1</SatelliteID>-->
+``` 
 If this parameter is omitted all the satellites of the constellation are output. Additionally an __/output/orbits.txt__ 
 file is saved to disk.
 <img src="/output/cov_satellite_pvt.png" alt="cov_satellite_pvt"/>
