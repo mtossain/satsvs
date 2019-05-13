@@ -10,6 +10,7 @@
 # TODO refactor names of variables and classes
 # TODO simplify config.xml (cleanup unused headings)
 # TODO receiverconstellation by list True/False with commas
+# TODO analysis visible satellite for users static, grid and satellite
 import os
 try:
     os.remove('output/main.log')

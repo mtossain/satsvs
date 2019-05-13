@@ -168,8 +168,8 @@ class Analysis: # TODO Make subclasses for the different analysis
             for idx in range(len(UserList)):
                 UserList[idx].Metric[CntEpoch] = UserList[idx].NumSatInView
 
-        if self.Type == 'cov_satellite_visible_id':
-            for idx in range(len(UserList[0].IdxSatInView)):
+        if self.Type == 'cov_satellite_visible_id': # TODO for a certain constellation
+            for idx in range(len(UserList[0].IdxSatInView)):  # TODO for a spacecraft or static user
                 if UserList[0].IdxSatInView[idx] != 999999:
                     UserList[0].Metric[CntEpoch, idx] = SatelliteList[UserList[0].IdxSatInView[idx]].SatelliteID
 
@@ -243,6 +243,7 @@ class Analysis: # TODO Make subclasses for the different analysis
             plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
 
         if self.Type == 'cov_satellite_visible_grid':
+            plt.subplots_adjust(left=.1, right=.9, top=0.99, bottom=0.01)
             metric, lats, lons = [], [], []
             for i in range(len(UserList)):
                 if self.Statistic == 'Min':
@@ -271,24 +272,24 @@ class Analysis: # TODO Make subclasses for the different analysis
         if self.Type == 'cov_satellite_visible_id':
             plt.plot(Analysis.TimeListfDOY, UserList[0].Metric, 'r+')
             plt.ylim((.5, len(SatelliteList)+1))
-            plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view'); plt.grid()
+            plt.xlabel('DOY[-]'); plt.ylabel('IDs of satellites in view [-]'); plt.grid()
 
         if self.Type == 'cov_satellite_contour':
             SatelliteList[self.iFndSatellite].DeterminePosVelLLA()
-            countour = misc_fn.SatGrndVis(SatelliteList[self.iFndSatellite].LLA, self.ElevationMask)
+            contour = misc_fn.SatGrndVis(SatelliteList[self.iFndSatellite].LLA, self.ElevationMask)
             m = Basemap(projection='cyl', lon_0=0)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
             m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
             m.drawcoastlines()
-            plt.plot(contour[:,1] / pi * 180, countour[:, 0] / pi * 180, 'r.')
+            plt.plot(contour[:, 1] / pi * 180, contour[:, 0] / pi * 180, 'r.')
 
-        if self.Type == 'cov_satellite_sky_angles':  # TODO check multiple users
+        if self.Type == 'cov_satellite_sky_angles':  # TODO cov_satellite_sky_angles check static, grid and spacecraft users
             for i in range(len(UserList)):
                 plt.plot(Analysis.TimeListfDOY, UserList[i].Metric[:, 0], 'r+', label='Azimuth')
                 plt.plot(Analysis.TimeListfDOY, UserList[i].Metric[:, 1], 'b+', label='Elevation')
             plt.xlabel('DOY[-]'); plt.ylabel('Azimuth / Elevation [deg]'); plt.legend(); plt.grid()
 
-        if self.Type == 'cov_depth_of_coverage':
+        if self.Type == 'cov_depth_of_coverage': # TODO select satellite/constellation
             for i in range(len(SatelliteList)):
                 plt.scatter(SatelliteList[i].Metric[:, 1], SatelliteList[i].Metric[:, 0], c=SatelliteList[i].Metric[:, 2])
             plt.colorbar(shrink=0.6)
@@ -298,11 +299,10 @@ class Analysis: # TODO Make subclasses for the different analysis
             m.drawcoastlines()
 
         if self.Type == 'cov_pass_time':
-
+            plt.subplots_adjust(left=.1, right=.9, top=0.99, bottom=0.01)
             lats, lons = [], []
-            time_step = int((self.TimeListMJD[1]-self.TimeListMJD[0])*86400)
+            time_step = int((Analysis.TimeListMJD[1]-Analysis.TimeListMJD[0])*86400)
             metric = np.zeros(len(UserList))
-
             for idx_usr in range(len(UserList)):
                 valid_value_list = []  # Define and clear
                 for idx_sat in range(len(SatelliteList)):
@@ -350,6 +350,7 @@ class Analysis: # TODO Make subclasses for the different analysis
             cb.set_label(self.Statistic+' Pass Time Interval [s]', fontsize=10)
 
         if self.Type == 'cov_satellite_highest':
+            plt.subplots_adjust(left=.1, right=.9, top=0.99, bottom=0.01)
             metric, lats, lons = [], [], []
             for i in range(len(UserList)):
                 if self.Statistic == 'Min':

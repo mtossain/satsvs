@@ -374,23 +374,23 @@
 	</GroundSegment>
   <!--Defines the users that should be simulated-->
 	<UserSegment>
-<!--		<Type>Grid</Type>-->
-<!--		<LatMin>-90</LatMin>-->
-<!--		<LatMax>90</LatMax>-->
-<!--		<LonMin>-180</LonMin>-->
-<!--		<LonMax>180</LonMax>-->
-<!--		<LatStep>10</LatStep>-->
-<!--		<LonStep>10</LonStep>-->
-<!--		<Height>0</Height>-->
-<!--		<ReceiverConstellation>111</ReceiverConstellation>-->
-<!--		<ElevationMask>5</ElevationMask>-->
+		<Type>Grid</Type>
+		<LatMin>-90</LatMin>
+		<LatMax>90</LatMax>
+		<LonMin>-180</LonMin>
+		<LonMax>180</LonMax>
+		<LatStep>10</LatStep>
+		<LonStep>10</LonStep>
+		<Height>0</Height>
+		<ReceiverConstellation>111</ReceiverConstellation>
+		<ElevationMask>5</ElevationMask>
 
-    <Type>Static</Type>
-    <Latitude>50</Latitude>
-    <Longitude>5</Longitude>
-    <Height>0</Height>
-    <ReceiverConstellation>111</ReceiverConstellation>
-    <ElevationMask>5</ElevationMask>
+<!--	    <Type>Static</Type>-->
+<!--	    <Latitude>50</Latitude>-->
+<!--	    <Longitude>5</Longitude>-->
+<!--	    <Height>0</Height>-->
+<!--	    <ReceiverConstellation>111</ReceiverConstellation>-->
+<!--	    <ElevationMask>5</ElevationMask>-->
 
 	</UserSegment>
 	<!--Defines the simulation parameters-->
@@ -404,11 +404,11 @@
 <!--			<SatelliteID>1</SatelliteID>-->
 <!--		</Analysis>-->
 
-        <Analysis>
-			<Type>cov_satellite_visible</Type>
-			<LatitudeRequested>50</LatitudeRequested>
-			<LongitudeRequested>10</LongitudeRequested>
-        </Analysis>
+<!--        <Analysis>-->
+<!--			<Type>cov_satellite_visible</Type>-->
+<!--			<LatitudeRequested>50</LatitudeRequested>-->
+<!--			<LongitudeRequested>10</LongitudeRequested>-->
+<!--        </Analysis>-->
 
 <!--        <Analysis>-->
 <!--          <Type>cov_satellite_visible_grid</Type>-->
@@ -431,21 +431,21 @@
 
 <!--    <Analysis>-->
 <!--      <Type>cov_satellite_sky_angles</Type>-->
-<!--      <ConstellationID>3</ConstellationID>-->
-<!--      <SatelliteID>24307</SatelliteID>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--      <SatelliteID>1</SatelliteID>-->
 <!--      <LatitudeRequested>50</LatitudeRequested>-->
 <!--      <LongitudeRequested>10</LongitudeRequested>-->
 <!--    </Analysis>-->
 
-<!--        <Analysis>-->
-<!--          <Type>cov_depth_of_coverage</Type>-->
-<!--        </Analysis>-->
-<!--    <Analysis>-->
+<!--		<Analysis>-->
+<!--			<Type>cov_depth_of_coverage</Type>-->
+<!--		</Analysis>-->
 
-<!--      <Type>cov_pass_time</Type>-->
-<!--      <ConstellationID>1</ConstellationID>-->
-<!--      <Statistic>Mean</Statistic>-->
-<!--    </Analysis>-->
+<!--		<Analysis>-->
+<!--			<Type>cov_pass_time</Type>-->
+<!--			<ConstellationID>1</ConstellationID>-->
+<!--			<Statistic>Mean</Statistic>-->
+<!--		</Analysis>-->
 
 <!--    <Analysis>-->
 <!--      <Type>cov_satellite_highest</Type>-->
@@ -453,10 +453,10 @@
 <!--      <Statistic>Mean</Statistic>-->
 <!--    </Analysis>-->
 
-<!--    <Analysis>-->
-<!--      <Type>cov_satellite_pvt</Type>-->
-<!--      <ConstellationID>1</ConstellationID>-->
-<!--    </Analysis>-->
+    <Analysis>
+      <Type>cov_satellite_pvt</Type>
+      <ConstellationID>1</ConstellationID>
+    </Analysis>
 
 	</SimulationManager>
 </Scenario>

@@ -171,12 +171,14 @@ The time parameters are in UTC time and TimeStep in seconds. The analysis are de
 
 ### cov_ground_track
 Plots the ground track of one or more satellites over simulation time. The following parameters are needed:
-- Type: cov_ground_track
-- ConstellationID: which constellation to use
-
-Optional are:
-- SatelliteID: which satellite to use (ID or NORAD number if a TLE file is used). 
-
+```
+<Type>cov_ground_track</Type>
+<ConstellationID>1</ConstellationID>
+```
+Optional is SatelliteID: which satellite to use (ID or NORAD number if a TLE file is used): 
+```
+<SatelliteID>1</SatelliteID>
+```
 If this parameter is omitted all the satellites of the constellation are plotted.
 <img src="/output/cov_ground_track.png" alt="cov_ground_track"/>
 
@@ -204,12 +206,95 @@ Plots the number of available satellites at a specific location. The following p
 ```
 <img src="/output/cov_satellite_visible.png" alt="cov_satellite_visible"/>
 
+### cov_satellite_visible_grid
+Plots the number of available satellites at a user grid. Statistics on plots can be: minimum, mean, maximum, std and
+median.The following parameters are needed:
+```
+<Analysis>
+      <Type>cov_satellite_visible_grid</Type>
+      <Statistic>Min</Statistic>
+</Analysis>
+
+```
+<img src="/output/cov_satellite_visible_grid.png" alt="cov_satellite_visible_grid"/>
+
+### cov_satellite_visible_id
+Plots the satellite IDs in view over time. The following parameters are needed:
+```
+<Analysis>
+    <Type>cov_satellite_visible_id</Type>
+    <ConstellationID>1</ConstellationID>
+    <LatitudeRequested>50</LatitudeRequested>
+    <LongitudeRequested>10</LongitudeRequested>
+</Analysis>
+```
+<img src="/output/cov_satellite_visible_id.png" alt="cov_satellite_visible_id"/>
+
+### cov_satellite_contour
+Plots the satellite IDs in view over time. The following parameters are needed:
+```
+<Analysis>
+    <Type>cov_satellite_contour</Type>
+    <ConstellationID>1</ConstellationID>
+    <SatelliteID>1</SatelliteID>
+    <ElevationMask>20</ElevationMask>
+</Analysis>
+```
+The elevation mask is for the user who has to receive the satellite. The satellite is selected by constellation ID and
+satellite ID.
+<img src="/output/cov_satellite_contour.png" alt="cov_satellite_contour"/>
+
+### cov_satellite_sky_angles
+Plots the satellite IDs in view over time. The following parameters are needed:
+```
+<Analysis>
+    <Type>cov_satellite_sky_angles</Type>
+    <ConstellationID>3</ConstellationID>
+    <SatelliteID>24307</SatelliteID>
+    <LatitudeRequested>50</LatitudeRequested>
+    <LongitudeRequested>10</LongitudeRequested>
+</Analysis>
+```
+The elevation mask is for the user who has to receive the satellite. The satellite is selected by constellation ID and
+satellite ID.
+<img src="/output/cov_satellite_sky_angles.png" alt="cov_satellite_sky_angles"/>
+
+### cov_depth_of_coverage
+Plots the number of ground stations in view over the orbit of the satellites. The following parameters are needed:
+```
+<Analysis>
+  <Type>cov_depth_of_coverage</Type>
+</Analysis>
+```
+The elevation mask is taken by the ground station setup.
+<img src="/output/cov_depth_of_coverage.png" alt="cov_depth_of_coverage"/>
+
+### cov_pass_time
+Plots the satellite pass time statistics for a user grid. The following parameters are needed:
+```
+<Analysis>
+    <Type>cov_pass_time</Type>
+    <ConstellationID>1</ConstellationID>
+    <Statistic>Mean</Statistic>
+</Analysis>
+```
+<img src="/output/cov_pass_time.png" alt="cov_pass_time"/>
+
+### cov_satellite_highest
+Plots elevation for the highest satellite in view over a user grid. The following parameters are needed:
+```
+<Analysis>
+    <Type>cov_satellite_highest</Type>
+    <ConstellationID>1</ConstellationID>
+    <Statistic>Mean</Statistic>
+</Analysis>
+```
+<img src="/output/cov_satellite_highest.png" alt="cov_satellite_highest"/>
 
 
 
 
 
-Statistics on plots can be: minimum, mean, maximum, std and median.
 
 
 
