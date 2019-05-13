@@ -402,7 +402,6 @@
     <StartDate>2013-05-08 00:00:00</StartDate>
     <StopDate>2013-05-09 00:00:00</StopDate>
     <TimeStep>3600</TimeStep>
-    <HPOP>False</HPOP>
 <!--      <Analysis>-->
 <!--          <Type>0</Type>-->
 <!--          <ConstellationID>1</ConstellationID>-->

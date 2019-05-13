@@ -36,7 +36,6 @@ class AppConfig:
 
         # Boolean regarding HPOP ( if false no perturbations are taken into account)
         self.HPOP = True
-        # Propagation parameters
         self.mass = 0
         self.solar_Area = 0
          # Forces
@@ -337,7 +336,6 @@ class AppConfig:
             self.StartDateTime = Time(sim.find('StartDate').text,scale='utc').mjd
             self.StopDateTime = Time(sim.find('StopDate').text, scale='utc').mjd
             self.TimeStep = int(sim.find('TimeStep').text)
-            self.HPOP = eval(sim.find('HPOP').text)
             ls.logger.info(['Loaded simulation, start:',str(self.StartDateTime),'stop:',str(self.StopDateTime),'TimeStep',str(self.TimeStep)])
 
             for analysis_conf in sim.iter('Analysis'):

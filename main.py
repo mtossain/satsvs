@@ -9,6 +9,8 @@
 # TODO analysis navigation
 # TODO analysis earth observation
 # TODO refactor names of variables and classes
+# TODO simplify config.xml (cleanup unused headings)
+# TODO receiverconstellation by list True/False with commas
 import os
 try:
     os.remove('output/main.log')
