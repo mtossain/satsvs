@@ -218,6 +218,8 @@ class Analysis: # TODO Make subclasses for the different analysis
     def RunAnalysisAfterTimeLoop(self, SatelliteList, UserList):
 
         fig = plt.figure(figsize=(12, 8))
+        #plt.tight_layout()
+        plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
 
         if self.Type == 0:
             if self.SatelliteID > 0:  # Only for one satellite

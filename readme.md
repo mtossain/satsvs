@@ -169,14 +169,15 @@ The time parameters are in UTC time and TimeStep in seconds. The analysis are de
 ## Analysis parameters
 
 ### cov_ground_track
-<img src="/output/cov_ground_track.png" alt="cov_ground_track"/>
-
 The following parameters are needed:
 - Type: cov_ground_track
 - ConstellationID: which constellation to use
+
 Optional are:
 - SatelliteID: which satellite to use (ID or NORAD number if a TLE file is used). 
+
 If this parameter is omitted all the satellites of the constellation are plotted.
+<img src="/output/cov_ground_track.png" alt="cov_ground_track"/>
 
 ### cov_ground_track
 <img src="/output/cov_satellite_pvt.png" alt="cov_satellite_pvt"/>
