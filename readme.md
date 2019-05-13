@@ -169,7 +169,7 @@ The time parameters are in UTC time and TimeStep in seconds. The analysis are de
 ## Analysis parameters
 
 ### cov_ground_track
-The following parameters are needed:
+Plots the ground track of one or more satellites over simulation time. The following parameters are needed:
 - Type: cov_ground_track
 - ConstellationID: which constellation to use
 
@@ -179,17 +179,16 @@ Optional are:
 If this parameter is omitted all the satellites of the constellation are plotted.
 <img src="/output/cov_ground_track.png" alt="cov_ground_track"/>
 
-### cov_ground_track
-<img src="/output/cov_satellite_pvt.png" alt="cov_satellite_pvt"/>
-
-The following parameters are needed:
+### cov_satellite_pvt
+Plots the satellite position and velocity and outputs it to the 'output/orbits.txt' file. The following parameters 
+are needed:
 - Type: cov_satellite_pvt
 - ConstellationID: which constellation to use
 Optional are:
 - SatelliteID: which satellite to use (ID or NORAD number if a TLE file is used). 
 If this parameter is omitted all the satellites of the constellation are output. Additionally an __/output/orbits.txt__ 
 file is saved to disk.
-
+<img src="/output/cov_satellite_pvt.png" alt="cov_satellite_pvt"/>
 
 Statistics on plots can be: minimum, mean, maximum, std and median.
 

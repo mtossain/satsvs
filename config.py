@@ -341,7 +341,7 @@ class AppConfig:
             for analysis_conf in sim.iter('Analysis'):
 
                 analysis_obj = Analysis()
-                analysis_obj.Type = int(analysis_conf.find('Type').text)
+                analysis_obj.Type = analysis_conf.find('Type').text
                 if analysis_conf.find('Direction') is not None:
                     analysis_obj.Direction = analysis_conf.find('Direction').text
                 if analysis_conf.find('Statistic') is not None:

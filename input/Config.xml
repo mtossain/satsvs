@@ -457,7 +457,7 @@
 <!--    </Analysis>-->
 
     <Analysis>
-      <Type>9</Type>
+      <Type>cov_satellite_pvt</Type>
       <ConstellationID>1</ConstellationID>
     </Analysis>
 

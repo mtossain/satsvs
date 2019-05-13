@@ -21,8 +21,7 @@ class Analysis: # TODO Make subclasses for the different analysis
     def __init__(self):
 
         # General analysis parameters
-        self.Type = 0
-        self.Name = ''
+        self.Type = ''
         self.TimeListISO = []
         self.TimeListMJD = []
         self.TimeListfDOY = []
@@ -138,7 +137,7 @@ class Analysis: # TODO Make subclasses for the different analysis
             for i in range(len(UserList)):
                 UserList[i].Metric = np.zeros(NumEpoch)
 
-        if self.Type == 9:
+        if self.Type == 'cov_satellite_pvt':
             try:
                 os.remove('output/orbits.txt')
             except:
@@ -204,7 +203,7 @@ class Analysis: # TODO Make subclasses for the different analysis
                             best_satellite_value = elevation
                 UserList[idx_user].Metric[CntEpoch] = best_satellite_value
 
-        if self.Type == 9:
+        if self.Type == 'cov_satellite_pvt':
             for idx_sat in range(len(SatelliteList)):
                 if SatelliteList[idx_sat].ConstellationID == self.ConstellationID:
                     with open('output/orbits.txt', 'a') as f:
@@ -371,13 +370,13 @@ class Analysis: # TODO Make subclasses for the different analysis
             cb = m.colorbar(im1, "right", size="2%", pad="2%")
             cb.set_label(self.Statistic+' of Max Elevation satellites in view', fontsize=10)
 
-        if self.Type == 9:
+        if self.Type == 'cov_satellite_pvt':
             data = pd.read_csv('output/orbits.txt', sep=',', header=None,
                                names=['RunTime', 'ID', 'x', 'y', 'z', 'x_vel', 'y_vel', 'z_vel'])
             data2 = data[data.ID == 1]
             plt.plot(Analysis.TimeListfDOY, data2.x_vel, 'r-')
             plt.xlabel('DOY[-]'); plt.ylabel('X value velocity ECI [m/s]'); plt.grid()
 
-        plt.savefig('output/analysis_'+str(self.Type)+'.png')
+        plt.savefig('output/'+self.Type+'.png')
         plt.show()
 
