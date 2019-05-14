@@ -206,7 +206,7 @@ Plots the number of available satellites for the user(s). The following paramete
 
 ### cov_satellite_visible_grid
 Plots the number of available satellites at a user grid. Statistics on plots can be: minimum, mean, maximum, std and
-median.The following parameters are needed:
+median. The following parameters are needed:
 ```
 <Analysis>
       <Type>cov_satellite_visible_grid</Type>
@@ -227,7 +227,7 @@ Plots the satellite IDs in view over time for the first user. The following para
 <img src="/docs/cov_satellite_visible_id.png" alt="cov_satellite_visible_id"/>
 
 ### cov_satellite_contour
-Plots the satellite IDs in view over time. The following parameters are needed:
+Plots the satellite ground contour on the world map. The following parameters are needed:
 ```
 <Analysis>
     <Type>cov_satellite_contour</Type>
@@ -241,7 +241,7 @@ satellite ID.
 <img src="/docs/cov_satellite_contour.png" alt="cov_satellite_contour"/>
 
 ### cov_satellite_sky_angles
-Plots the satellite IDs in view over time for the first user. The following parameters are needed:
+Plots the satellite azimuth and elevation over time for the first user. The following parameters are needed:
 ```
 <Analysis>
     <Type>cov_satellite_sky_angles</Type>
@@ -249,12 +249,12 @@ Plots the satellite IDs in view over time for the first user. The following para
     <SatelliteID>24307</SatelliteID>
 </Analysis>
 ```
-The elevation mask is for the user who has to receive the satellite. The satellite is selected by constellation ID and
-satellite ID.
+The satellite is selected by constellation ID and satellite ID.
 <img src="/docs/cov_satellite_sky_angles.png" alt="cov_satellite_sky_angles"/>
 
 ### cov_depth_of_coverage
-Plots the number of ground stations in view over the orbit of the satellites. The following parameters are needed:
+Plots the number of ground stations in view from the satellite over the orbit of the satellites. 
+The following parameters are needed:
 ```
 <Analysis>
   <Type>cov_depth_of_coverage</Type>
@@ -264,7 +264,7 @@ The elevation mask is taken by the ground station setup.
 <img src="/docs/cov_depth_of_coverage.png" alt="cov_depth_of_coverage"/>
 
 ### cov_pass_time
-Plots the satellite pass time statistics for a user grid. The following parameters are needed:
+Plots the satellite constellation pass time statistics for a user grid. The following parameters are needed:
 ```
 <Analysis>
     <Type>cov_pass_time</Type>

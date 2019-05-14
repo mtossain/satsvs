@@ -697,8 +697,6 @@
 
         <Analysis>
 			<Type>cov_satellite_visible</Type>
-			<LatitudeRequested>50</LatitudeRequested>
-			<LongitudeRequested>10</LongitudeRequested>
         </Analysis>
 
 <!--        <Analysis>-->
