@@ -198,11 +198,9 @@ file is saved to disk.
 <img src="/docs/cov_satellite_pvt.png" alt="cov_satellite_pvt"/>
 
 ### cov_satellite_visible
-Plots the number of available satellites at a specific location. The following parameters are needed:
+Plots the number of available satellites for the user(s). The following parameters are needed:
 ```
 <Type>cov_satellite_visible</Type>
-<LatitudeRequested>50</LatitudeRequested>
-<LongitudeRequested>10</LongitudeRequested>
 ```
 <img src="/docs/cov_satellite_visible.png" alt="cov_satellite_visible"/>
 
