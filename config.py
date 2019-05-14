@@ -5,7 +5,7 @@ from astropy.time import Time
 import misc_fn
 from constants import *
 from analysis import Analysis
-from segments import Constellation, Satellite, GroundStation, User, Ground2SpaceLink, Space2SpaceLink
+from segments import Constellation, Satellite, GroundStation, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
 import logging_svs as ls
 
 class AppConfig:
@@ -34,39 +34,6 @@ class AppConfig:
         self.NumSpace2Space = 0
         self.NumGround2Space = 0
 
-        # Boolean regarding HPOP ( if false no perturbations are taken into account)
-        self.HPOP = True
-        self.mass = 0
-        self.solar_Area = 0
-         # Forces
-        self.EarthGravity = True
-        self.PlanetsPerturbations = True
-        self.SRP = True
-        self.SolidTides = True
-        self.OceanTides = True
-        self.Relativity = True
-        self.Albedo = True
-        self.Empirical = True
-
-         # EGM
-        self.Degree = 0
-        self.Order = 0
-        self.Model = ''
-         # Planets Perturbations
-        self. Sun = True
-        self.Moon = True
-        self.Mercury = True
-        self.Venus = True
-        self. Mars = True
-        self.Jupiter = True
-        self.Saturn = True
-        self.Uranus = True
-        self.Neptune = True
-
-        # Numerical Integration
-        self.TimeStepPropagation = 0.0
-        self.Method = ''
-
     def LoadSpaceSegment(self, FileName):
 
         # Get the list of constellations
@@ -74,7 +41,6 @@ class AppConfig:
         root = tree.getroot()
         for constellation in root.iter('Constellation'):
             const = Constellation()
-            const.NumberOfPlanes = int(constellation.find('NumOfPlanes').text)
             const.ConstellationID = int(constellation.find('ConstellationID').text)
             const.NumOfSatellites = int(constellation.find('NumOfSatellites').text)
             const.NumberOfPlanes = int(constellation.find('NumOfPlanes').text)
@@ -229,7 +195,7 @@ class AppConfig:
                         self.UserList.append(user)
                         CntUsers += 1
 
-            if userelement.find('Type').text == 'Spacecraft': # TODO Multiple spacecraft users
+            if userelement.find('Type').text == 'Spacecraft':  # TODO Multiple spacecraft users
                 user = User()
                 user.UserID = 0
                 user.Type = 'Spacecraft'
@@ -277,47 +243,46 @@ class AppConfig:
 
     def SetupGround2Space(self):
 
-        Gr2Sp = Ground2SpaceLink()
-        Sp2Sp = Space2SpaceLink()
+        cnt_space_link = 0
+        cnt_grnd_link = 0
+        cnt_usr_link = 0
 
-        CntSpaceLink = 0
-        CntGrndLink = 0
-        CntUsrLink = 0
-
-        Ground2SpaceLink.NumSat = self.NumSat;
-        for i in range (self.NumGroundStation):
+        Ground2SpaceLink.NumSat = self.NumSat
+        for i in range(self.NumGroundStation):
             for j in range(self.NumSat):
+                Gr2Sp = Ground2SpaceLink()  # important to have new instance every time, python does by reference!!!
                 self.GroundStation2SatelliteList.append(Gr2Sp)
-                if self.GroundStationList[i].ReceiverConstellation[self.SatelliteList[j].ConstellationID - 1:self.SatelliteList[j].ConstellationID] == "1":
-                    self.GroundStation2SatelliteList[CntGrndLink].LinkInUse = True
+                if self.GroundStationList[i].ReceiverConstellation[self.SatelliteList[j].ConstellationID - 1] == '1':
+                    self.GroundStation2SatelliteList[cnt_grnd_link].LinkInUse = True
                 else:
-                    self.GroundStation2SatelliteList[CntGrndLink].LinkInUse = False
-                CntGrndLink += 1
-        ls.logger.info(["Loaded: ", CntGrndLink , " number of Ground Station to Spacecraft links"])
+                    self.GroundStation2SatelliteList[cnt_grnd_link].LinkInUse = False
+                cnt_grnd_link += 1
+        ls.logger.info(["Loaded: ", cnt_grnd_link, " number of Ground Station to Spacecraft links"])
 
+        User2SpaceLink.NumSat = self.NumSat
         for i in range(self.NumUser):
             for j in range(self.NumSat):
-                self.User2SatelliteList.append(Gr2Sp)
-                if self.UserList[i].ReceiverConstellation[(self.SatelliteList[j].ConstellationID - 1): \
-                        self.SatelliteList[j].ConstellationID] == "1":
-                    self.User2SatelliteList[CntUsrLink].LinkInUse = True
+                Usr2Sp = User2SpaceLink()
+                self.User2SatelliteList.append(Usr2Sp)  # important to have new instance every time, by reference!!!
+                if self.UserList[i].ReceiverConstellation[self.SatelliteList[j].ConstellationID - 1] == '1':
+                    self.User2SatelliteList[cnt_usr_link].LinkInUse = True
                 else:
-                    self.User2SatelliteList[CntUsrLink].LinkInUse = False
-                CntUsrLink += 1
-        ls.logger.info(["Loaded: ", CntUsrLink , " number of User to Spacecraft links"])
+                    self.User2SatelliteList[cnt_usr_link].LinkInUse = False
+                cnt_usr_link += 1
+        ls.logger.info(["Loaded: ", cnt_usr_link, " number of User to Spacecraft links"])
 
         for i in range(self.NumSat):
             for j in range(self.NumSat):
-                # if(i != j){ // avoid link to itself
-                Sp2Sp.LinkInUse = True  #TBD Receiver Constellation
-                Sp2Sp.IdxSat1 = i
-                Sp2Sp.IdxSat2 = j
-                Sp2Sp.IdxSatTransm = self.SatelliteList[i]
-                Sp2Sp.IdxSatRecv = self.SatelliteList[j]
-                self.Satellite2SatelliteList.append(Sp2Sp)
-                CntSpaceLink += 1
-        ls.logger.info(["Loaded: ", CntSpaceLink , " number of Spacecraft to Spacecraft links"])
-
+                if i != j:  # avoid link to itself
+                    Sp2Sp = Space2SpaceLink()  # important to have new instance every time, by reference!!!
+                    Sp2Sp.LinkInUse = True  # TODO Receiver Constellation for Sp2Sp
+                    Sp2Sp.IdxSat1 = i
+                    Sp2Sp.IdxSat2 = j
+                    Sp2Sp.IdxSatTransm = self.SatelliteList[i]
+                    Sp2Sp.IdxSatRecv = self.SatelliteList[j]
+                    self.Satellite2SatelliteList.append(Sp2Sp)
+                    cnt_space_link += 1
+        ls.logger.info(["Loaded: ", cnt_space_link, " number of Spacecraft to Spacecraft links"])
 
         # Allocate the memory for the lists of links
         for j in range(self.NumSat):
@@ -336,7 +301,8 @@ class AppConfig:
             self.StartDateTime = Time(sim.find('StartDate').text,scale='utc').mjd
             self.StopDateTime = Time(sim.find('StopDate').text, scale='utc').mjd
             self.TimeStep = int(sim.find('TimeStep').text)
-            ls.logger.info(['Loaded simulation, start:',str(self.StartDateTime),'stop:',str(self.StopDateTime),'TimeStep',str(self.TimeStep)])
+            ls.logger.info(['Loaded simulation, start:', str(self.StartDateTime), 'stop:', str(self.StopDateTime),
+                            'TimeStep', str(self.TimeStep)])
 
             for analysis_conf in sim.iter('Analysis'):
 
@@ -361,9 +327,6 @@ class AppConfig:
                 if analysis_conf.find('ConstellationName') is not None:
                     analysis_obj.ConstellationName = analysis_conf.find('ConstellationName').text
                 self.AnalysisList.append(analysis_obj)
-
-
-        #self.NumSat = Ground2SpaceLink.NumSat # don't remember why this...???
 
         self.NumEpoch = floor(86400 * (self.StopDateTime - self.StartDateTime) / self.TimeStep)
 

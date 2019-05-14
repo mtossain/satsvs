@@ -1,4 +1,3 @@
-# TODO compare against C# reference implementation
 # TODO make available different block
 # TODO write user manual in GIT Readme
 # TODO different propagators including SGP4 and HPOP
@@ -68,14 +67,15 @@ def main():
                     conf.GroundStation2SatelliteList[CntGroundStation * conf.NumSat + CntSatellite].\
                         ComputeLinkGroundStation(conf.GroundStationList[CntGroundStation], conf.SatelliteList[CntSatellite])
                     if conf.GroundStation2SatelliteList[CntGroundStation * conf.NumSat + CntSatellite].\
-                            CheckMasking(conf.GroundStationList[CntGroundStation]):  # Above elevation mask
+                            CheckMaskingStation(conf.GroundStationList[CntGroundStation]):  # Above elevation mask
                         conf.GroundStationList[CntGroundStation].IdxSatInView[conf.GroundStationList[CntGroundStation].NumSatInView] = CntSatellite
                         conf.GroundStationList[CntGroundStation].NumSatInView += 1
                         # Compute which stations are in view from this satellite (DOC)
                         conf.SatelliteList[CntSatellite].IdxStationInView[conf.SatelliteList[CntSatellite].NumStationInView] = CntGroundStation
                         conf.SatelliteList[CntSatellite].NumStationInView += 1
 
-        # Compute user positions/velocities in ECI, compute connection to satellite, and remember which ones are in view
+        # Compute user positions/velocities in ECI, compute connection to satellite,
+        # and remember which ones are in view
         for CntUser in range(conf.NumUser):
             conf.UserList[CntUser].NumSatInView = 0  # Reset before loop
             if conf.UserList[CntUser].Type == "Static" or conf.UserList[CntUser].Type == "Grid":
@@ -83,24 +83,24 @@ def main():
             if conf.UserList[CntUser].Type == "Spacecraft":
                 conf.UserList[CntUser].DeterminePosVelTLE(gmst_requested, mjd_requested)  # Spacecraft position from TLE
             for CntSatellite in range(conf.NumSat):
-                if conf.User2SatelliteList[CntUser * conf.NumSat + CntSatellite].LinkInUse:  # From Receiver Constellation of User
-                    conf.User2SatelliteList[CntUser * conf.NumSat + CntSatellite].\
-                        ComputeLinkUser(conf.UserList[CntUser], conf.SatelliteList[CntSatellite])
-                    if conf.User2SatelliteList[CntUser * conf.NumSat + CntSatellite].CheckMasking(conf.UserList[CntUser]):  # Above elevation mask
+                idx_usr2sat = CntUser * conf.NumSat + CntSatellite
+                if conf.User2SatelliteList[idx_usr2sat].LinkInUse:  # From Receiver Constellation of User
+                    conf.User2SatelliteList[idx_usr2sat].ComputeLinkUser(conf.UserList[CntUser], conf.SatelliteList[CntSatellite])
+                    if conf.User2SatelliteList[idx_usr2sat].CheckMaskingUser(conf.UserList[CntUser]):  # Above elevation mask
                         conf.UserList[CntUser].IdxSatInView[conf.UserList[CntUser].NumSatInView] = CntSatellite
                         conf.UserList[CntUser].NumSatInView += 1
 
-        # Compute satellite to satellite links
-        CntSatellite = 0
-        for CntSatellite1 in range(conf.NumSat):
-            conf.SatelliteList[CntSatellite1].NumSatelliteInView = 0
-            for CntSatellite2 in range(conf.NumSat):
-                if conf.Satellite2SatelliteList[CntSatellite].LinkInUse:  # From Receiver Constellation of Spacecraft TBD
-                    # computing links. If Satellite1 == Satellite2, ComputeLink return 0
-                    #conf.Satellite2SatelliteList[CntSatellite].ComputeLink(conf.SatelliteList[CntSatellite1],conf.SatelliteList[CntSatellite2]) # TODO Check space to space link
-                    conf.SatelliteList[CntSatellite1].IdxSatelliteInView = CntSatellite2
-                    conf.SatelliteList[CntSatellite1].NumSatelliteInView += 1
-                CntSatellite += 1
+        # # Compute satellite to satellite links # TODO Check space to space link
+        # CntSatellite = 0
+        # for CntSatellite1 in range(conf.NumSat):
+        #     conf.SatelliteList[CntSatellite1].NumSatelliteInView = 0
+        #     for CntSatellite2 in range(conf.NumSat):
+        #         if conf.Satellite2SatelliteList[CntSatellite].LinkInUse:  # From Receiver Constellation of Spacecraft TBD
+        #             # computing links. If Satellite1 == Satellite2, ComputeLink return 0
+        #             #conf.Satellite2SatelliteList[CntSatellite].ComputeLink(conf.SatelliteList[CntSatellite1],conf.SatelliteList[CntSatellite2])
+        #             conf.SatelliteList[CntSatellite1].IdxSatelliteInView = CntSatellite2
+        #             conf.SatelliteList[CntSatellite1].NumSatelliteInView += 1
+        #         CntSatellite += 1
 
         # Run analyses which are needed in time loop
         for i in range(len(conf.AnalysisList)):

@@ -14,7 +14,7 @@ from constants import pi
 
 class Analysis: # TODO Make subclasses for the different analysis
 
-    TimeListISO = []
+    TimeListISO = []  # Class variables
     TimeListMJD = []
     TimeListfDOY = []
 
@@ -22,9 +22,6 @@ class Analysis: # TODO Make subclasses for the different analysis
 
         # General analysis parameters
         self.Type = ''
-        self.TimeListISO = []
-        self.TimeListMJD = []
-        self.TimeListfDOY = []
 
         # Members for specific analysis
         self.ConstellationID = 0
@@ -150,39 +147,41 @@ class Analysis: # TODO Make subclasses for the different analysis
                 for idx in range(len(SatelliteList)):
                     if SatelliteList[idx].ConstellationID == self.ConstellationID and \
                             SatelliteList[idx].SatelliteID == self.SatelliteID:
-                        SatelliteList[idx].DeterminePosVelLLA()
+                        SatelliteList[idx].DetermineLLA()
                         SatelliteList[idx].Metric[CntEpoch, 0] = SatelliteList[idx].LLA[0] / pi * 180
                         SatelliteList[idx].Metric[CntEpoch, 1] = SatelliteList[idx].LLA[1] / pi * 180
             else:  # Plot the GT for all satellites in the chosen constellation
                 for idx in range(len(SatelliteList)):
                     if SatelliteList[idx].ConstellationID == self.ConstellationID:
-                        SatelliteList[idx].DeterminePosVelLLA()
+                        SatelliteList[idx].DetermineLLA()
                         SatelliteList[idx].Metric[CntEpoch, 0] = SatelliteList[idx].LLA[0] / pi * 180
                         SatelliteList[idx].Metric[CntEpoch, 1] = SatelliteList[idx].LLA[1] / pi * 180
 
         if self.Type == 'cov_satellite_visible':
-            for idx in range(len(UserList)):
-                UserList[idx].Metric[CntEpoch] = UserList[idx].NumSatInView
+            for idx_user in range(len(UserList)):
+                UserList[idx_user].Metric[CntEpoch] = UserList[idx_user].NumSatInView
 
         if self.Type == 'cov_satellite_visible_grid':
-            for idx in range(len(UserList)):
-                UserList[idx].Metric[CntEpoch] = UserList[idx].NumSatInView
+            for idx_user in range(len(UserList)):
+                UserList[idx_user].Metric[CntEpoch] = UserList[idx_user].NumSatInView
 
-        if self.Type == 'cov_satellite_visible_id': # TODO for a certain constellation
-            for idx in range(len(UserList[0].IdxSatInView)):  # TODO for a spacecraft or static user
-                if UserList[0].IdxSatInView[idx] != 999999:
-                    UserList[0].Metric[CntEpoch, idx] = SatelliteList[UserList[0].IdxSatInView[idx]].SatelliteID
+        if self.Type == 'cov_satellite_visible_id':  # TODO for a certain constellation
+            for idx_sat in range(UserList[0].NumSatInView):
+                if UserList[0].IdxSatInView[idx_sat] < 999999:
+                    UserList[0].Metric[CntEpoch, idx_sat] = SatelliteList[UserList[0].IdxSatInView[idx_sat]].SatelliteID
 
-        if self.Type == 'cov_satellite_sky_angles':
-            num_sat = User2SatelliteList[0].NumSat
-            for idx in range(len(UserList)):
-                if User2SatelliteList[idx * num_sat + self.iFndSatellite].Elevation > 0:
-                    UserList[idx].Metric[CntEpoch, 0] = User2SatelliteList[idx * num_sat + self.iFndSatellite].Azimuth / pi * 180
-                    UserList[idx].Metric[CntEpoch, 1] = User2SatelliteList[idx * num_sat + self.iFndSatellite].Elevation / pi * 180
+        if self.Type == 'cov_satellite_sky_angles':  # TODO for spacecraft user test
+            num_sat = len(SatelliteList)
+            for idx_user in range(len(UserList)):
+                if User2SatelliteList[idx_user * num_sat + self.iFndSatellite].Elevation > 0:
+                    UserList[idx_user].Metric[CntEpoch, 0] = \
+                        User2SatelliteList[idx_user * num_sat + self.iFndSatellite].Azimuth / pi * 180
+                    UserList[idx_user].Metric[CntEpoch, 1] = \
+                        User2SatelliteList[idx_user * num_sat + self.iFndSatellite].Elevation / pi * 180
 
         if self.Type == 'cov_depth_of_coverage':
             for idx in range(len(SatelliteList)):
-                SatelliteList[idx].DeterminePosVelLLA()
+                SatelliteList[idx].DetermineLLA()
                 SatelliteList[idx].Metric[CntEpoch, 0] = SatelliteList[idx].LLA[0] / pi * 180
                 SatelliteList[idx].Metric[CntEpoch, 1] = SatelliteList[idx].LLA[1] / pi * 180
                 SatelliteList[idx].Metric[CntEpoch, 2] = SatelliteList[idx].NumStationInView
@@ -193,12 +192,13 @@ class Analysis: # TODO Make subclasses for the different analysis
                     if SatelliteList[UserList[idx].IdxSatInView[j]].ConstellationID == self.ConstellationID:
                         UserList[idx].Metric[CntEpoch, UserList[idx].IdxSatInView[j]] = True
 
-        if self.Type == 'cov_satellite_highest': # TODO ERROR !!!! there seems to be a bug in the user to satellite elevation value, it has to be checked
+        if self.Type == 'cov_satellite_highest':
             for idx_user in range(len(UserList)):
                 best_satellite_value = -1
                 for idx_sat in range(UserList[idx_user].NumSatInView):
                     if SatelliteList[UserList[idx_user].IdxSatInView[idx_sat]].ConstellationID == self.ConstellationID:
-                        elevation = User2SatelliteList[idx_user * len(SatelliteList) + UserList[idx_user].IdxSatInView[idx_sat]].Elevation / pi * 180
+                        elevation = User2SatelliteList[idx_user * len(SatelliteList) + UserList[idx_user].IdxSatInView[idx_sat]].\
+                                        Elevation / pi * 180
                         if elevation > best_satellite_value:
                             best_satellite_value = elevation
                 UserList[idx_user].Metric[CntEpoch] = best_satellite_value
@@ -275,7 +275,7 @@ class Analysis: # TODO Make subclasses for the different analysis
             plt.xlabel('DOY[-]'); plt.ylabel('IDs of satellites in view [-]'); plt.grid()
 
         if self.Type == 'cov_satellite_contour':
-            SatelliteList[self.iFndSatellite].DeterminePosVelLLA()
+            SatelliteList[self.iFndSatellite].DetermineLLA()
             contour = misc_fn.SatGrndVis(SatelliteList[self.iFndSatellite].LLA, self.ElevationMask)
             m = Basemap(projection='cyl', lon_0=0)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
@@ -283,14 +283,14 @@ class Analysis: # TODO Make subclasses for the different analysis
             m.drawcoastlines()
             plt.plot(contour[:, 1] / pi * 180, contour[:, 0] / pi * 180, 'r.')
 
-        if self.Type == 'cov_satellite_sky_angles':  # TODO cov_satellite_sky_angles check static, grid and spacecraft users
-            for i in range(len(UserList)):
-                plt.plot(Analysis.TimeListfDOY, UserList[i].Metric[:, 0], 'r+', label='Azimuth')
-                plt.plot(Analysis.TimeListfDOY, UserList[i].Metric[:, 1], 'b+', label='Elevation')
+        if self.Type == 'cov_satellite_sky_angles':  # TODO cov_satellite_sky_angles check spacecraft user
+            for idx_user in range(len(UserList)):
+                plt.plot(Analysis.TimeListfDOY, UserList[idx_user].Metric[:, 0], 'r+', label='Azimuth')
+                plt.plot(Analysis.TimeListfDOY, UserList[idx_user].Metric[:, 1], 'b+', label='Elevation')
             plt.xlabel('DOY[-]'); plt.ylabel('Azimuth / Elevation [deg]'); plt.legend(); plt.grid()
 
-        if self.Type == 'cov_depth_of_coverage': # TODO select satellite/constellation
-            for i in range(len(SatelliteList)):
+        if self.Type == 'cov_depth_of_coverage':  # TODO select satellite/constellation
+            for i in range(len(SatelliteList)):  # TODO plot ground stations
                 plt.scatter(SatelliteList[i].Metric[:, 1], SatelliteList[i].Metric[:, 0], c=SatelliteList[i].Metric[:, 2])
             plt.colorbar(shrink=0.6)
             m = Basemap(projection='cyl', lon_0=0)
@@ -380,8 +380,10 @@ class Analysis: # TODO Make subclasses for the different analysis
             data = pd.read_csv('output/orbits.txt', sep=',', header=None,
                                names=['RunTime', 'ID', 'x', 'y', 'z', 'x_vel', 'y_vel', 'z_vel'])
             data2 = data[data.ID == 1]
-            plt.plot(Analysis.TimeListfDOY, data2.x_vel, 'r-')
-            plt.xlabel('DOY[-]'); plt.ylabel('X value velocity ECI [m/s]'); plt.grid()
+            plt.plot(Analysis.TimeListfDOY, data2.x_vel, 'r-', label='x_vel')
+            plt.plot(Analysis.TimeListfDOY, data2.y_vel, 'g-', label='y_vel')
+            plt.plot(Analysis.TimeListfDOY, data2.z_vel, 'b-', label='z_vel')
+            plt.xlabel('DOY[-]'); plt.ylabel('Velocity ECI [m/s]'); plt.legend(); plt.grid()
 
         plt.savefig('output/'+self.Type+'.png')
         plt.show()

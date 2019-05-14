@@ -2,6 +2,8 @@ import math
 from math import sin, cos, tan, atan2, atan, sqrt, fabs, asin, acos
 from constants import pi, GM_Earth, R_Earth
 import numpy as np
+# TODO refactor names and variables
+
 
 # Compute Modified Julian Date from YYYY and Day Of Year pair
 # Time functions from SP3 library B.Remondi.
@@ -9,8 +11,6 @@ import numpy as np
 # @param YYYY Year (year)
 # @param DOY Day of year (days)
 # @return Modified Julian Date
-
-
 def YYYYDOY2MJD(YYYY, DOY):
 
     mjd_jan1_1901 = 15385
@@ -27,7 +27,7 @@ def YYYYDOY2MJD(YYYY, DOY):
     second = full_seconds - hour * 3600 - minute * 60
 
     years_into_election = (YYYY - 1) % 4
-    elections = (YYYY - 1901) / 4
+    elections = int((YYYY - 1901) / 4)
 
     pfmjd = (hour * 3600 + minute * 60 + second) * days_per_second
     pmjd = mjd_jan1_1901 + elections * 1461 + years_into_election * 365 + yday - 1
@@ -73,7 +73,7 @@ def MJD2GMST(MJD_Requested):
 
 def LLA2XYZ(LLA):
 
-    XYZ = [0,0,0]
+    XYZ = 3*[0.0]
     
     a = 6378137.0000
     b = 6356752.3142
@@ -166,7 +166,7 @@ def XYZ2LLA(XYZ):
 
 def KEP2XYZ(MJD_Requested, Kepler):
 
-    Out = [0,0,0,0,0,0]
+    Out = 6*[0.0]
 
     # Set constants
     mu = GM_Earth
@@ -232,7 +232,7 @@ def KEP2XYZ(MJD_Requested, Kepler):
 
 def NewtonRaphson (MeanAnomaly, Eccentricity):
     k = 0
-    E = 50*[0]
+    E = 50*[0.0]
 
     E[1] = MeanAnomaly
     E[0] = MeanAnomaly * 2
@@ -251,35 +251,34 @@ def NewtonRaphson (MeanAnomaly, Eccentricity):
 
 def SpinVector(Angle, Vector):
 
-    Out = [0,0,0,0,0,0]
+    out = 6*[0.0]
     
     # Compute angles to save time
     cosst = cos(Angle)
     sinst = sin(Angle)
     
-    Out[0] = cosst * Vector[0] - sinst * Vector[1]
-    Out[1] = sinst * Vector[0] + cosst * Vector[1]
-    Out[2] = Vector[2]
+    out[0] = cosst * Vector[0] - sinst * Vector[1]
+    out[1] = sinst * Vector[0] + cosst * Vector[1]
+    out[2] = Vector[2]
     
-    Out[3] = cosst * Vector[3] - sinst * Vector[4]
-    Out[4] = sinst * Vector[3] + cosst * Vector[4]
-    Out[5] = Vector[5]
+    out[3] = cosst * Vector[3] - sinst * Vector[4]
+    out[4] = sinst * Vector[3] + cosst * Vector[4]
+    out[5] = Vector[5]
     
-    return Out
+    return out
+
 
 # Compute Azimuth and Elevation from User to Satellite assuming the Earth is a perfect sphere
 #
 # @param Xs Satellite position in ECEF (m/double)
 # @param Xu User position in ECEF (m/double)
 # @param AzEl Azimuth [0] and Elevation [1] (radians/double)
-
-
 def CalcAzEl(Xs, Xu):
 
-    AzEl=[0,0]
+    AzEl = 2*[0.0]
 
-    e = [[0,0,0],[0,0,0],[0,0,0]]
-    d = [0,0,0]
+    e3by3 = [[0,0,0],[0,0,0],[0,0,0]]
+    d = 3*[0.0]
 
     x = Xu[0]
     y = Xu[1]
@@ -287,21 +286,21 @@ def CalcAzEl(Xs, Xu):
     p = sqrt(x * x + y * y)
 
     R = sqrt(x * x + y * y + z * z)
-    e[0][0] = -(y / p)
-    e[0][1] = x / p
-    e[0][2] = 0.0
-    e[1][0] = -(x * z / (p * R))
-    e[1][1] = -(y * z / (p * R))
-    e[1][2] = p / R
-    e[2][0] = x / R
-    e[2][1] = y / R
-    e[2][2] = z / R
+    e3by3[0][0] = -(y / p)
+    e3by3[0][1] = x / p
+    e3by3[0][2] = 0.0
+    e3by3[1][0] = -(x * z / (p * R))
+    e3by3[1][1] = -(y * z / (p * R))
+    e3by3[1][2] = p / R
+    e3by3[2][0] = x / R
+    e3by3[2][1] = y / R
+    e3by3[2][2] = z / R
 
     # matrix multiply vector from user */
     for k in range(3):
         d[k] = 0.0
-        for i in range (3):
-            d[k] += (Xs[i] - Xu[i]) * e[k][i]
+        for i in range(3):
+            d[k] += (Xs[i] - Xu[i]) * e3by3[k][i]
 
     s = d[2] / sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2])
     if s == 1.0:
@@ -322,6 +321,7 @@ def CalcAzEl(Xs, Xu):
 
     return AzEl[0], AzEl[1]
 
+
 # Computes two intersection points for a line and a sphere
 # Returns false if the line does not intersect the sphere
 # Returns two equal intersection points if the line is tangent to the sphere
@@ -334,16 +334,15 @@ def CalcAzEl(Xs, Xu):
 # @param iX1 Intersection point one
 # @param iX2 Intersection point two
 # @return Returns false if the line does not intersect the sphere
-
 def GetLineSphereIntersection(X1, X2, SphereRadius, SphereCenterX) :
 
-    iX1 = [0,0,0]
-    iX2 = [0,0,0]
+    iX1 = 3*[0.0]
+    iX2 = 3*[0.0]
 
     a = (X2[0] - X1[0])*(X2[0] - X1[0]) + (X2[1] - X1[1])*(X2[1] - X1[1]) + (X2[2] - X1[2])*(X2[2] - X1[2])
 
-    b = 2.0 * ((X2[0] - X1[0])*(X1[0] - SphereCenterX[0]) +(X2[1] - X1[1])*(X1[1] - SphereCenterX[1]) + \
-                      (X2[2] - X1[2])*(X1[2] - SphereCenterX[2]))
+    b = 2.0 * ((X2[0] - X1[0])*(X1[0] - SphereCenterX[0]) +(X2[1] - X1[1])*(X1[1] - SphereCenterX[1]) +
+               (X2[2] - X1[2])*(X1[2] - SphereCenterX[2]))
 
     c = SphereCenterX[0] * SphereCenterX[0] + SphereCenterX[1] * SphereCenterX[1] + \
         SphereCenterX[2] * SphereCenterX[2] + X1[0] * X1[0] + X1[1] * X1[1] + X1[2] * X1[2] - \
@@ -369,7 +368,7 @@ def GetLineSphereIntersection(X1, X2, SphereRadius, SphereCenterX) :
     iX2[1] = X1[1] + u2 * (X2[1] - X1[1])
     iX2[2] = X1[2] + u2 * (X2[2] - X1[2])
 
-    return Intersect,iX1,iX2
+    return Intersect, iX1, iX2
 
 
 # Returns the geometry matrix from user to satellite (in local ENU frame rather than
@@ -385,11 +384,11 @@ def GetLineSphereIntersection(X1, X2, SphereRadius, SphereCenterX) :
 
 def User2SatGeometryMatrix (UserList, Ground2SpaceLink, User2SatelliteList, iUser):
 
-    G = UserList[iUser].NumSatInView*[[0,0,0,0]]
+    G = UserList[iUser].NumSatInView*[[0.0, 0.0, 0.0, 0.0]]
 
-    NumSat = Ground2SpaceLink.NumSat; # ??? is this true??? should it not be user2space link?
+    NumSat = Ground2SpaceLink.NumSat  # ??? is this true??? should it not be user2space link?
 
-    for i in range(UserList[iUser].NumSatInView):  #Loop satellites in view
+    for i in range(UserList[iUser].NumSatInView):  # Loop satellites in view
         el = User2SatelliteList[iUser * NumSat + UserList[iUser].IdxSatInView[i]].Elevation
         az = User2SatelliteList[iUser * NumSat + UserList[iUser].IdxSatInView[i]].Azimuth
         G[i][0] = -cos(el) * sin(az)
@@ -450,7 +449,7 @@ def SatGrndVis(LLA, ElevationMask):
         if LonT < -pi:
             LonT = LonT + 2 * pi
 
-        Contour[cnt,:] = [LatT, LonT]
+        Contour[cnt, :] = [LatT, LonT]
 
         cnt += 1
 

@@ -1,31 +1,31 @@
+import numpy as np
+from math import floor
 
-import misc_fn
-from math import sqrt, floor
 from constants import pi
+import misc_fn
 
 
 class KeplerSet:
 
     def __init__(self):
-        self.EpochMJD = 0
-        self.SemiMajorAxis = 0
-        self.Eccentricity = 0
-        self.Inclination = 0
-        self.RAAN = 0
-        self.ArgOfPerigee = 0
-        self.MeanAnomaly = 0
+        self.EpochMJD = 0.0
+        self.SemiMajorAxis = 0.0
+        self.Eccentricity = 0.0
+        self.Inclination = 0.0
+        self.RAAN = 0.0
+        self.ArgOfPerigee = 0.0
+        self.MeanAnomaly = 0.0
 
 
 class Constellation:
 
     def __init__(self):
-        self.ConstellationID = 0
+        self.ConstellationID = 0.0
         self.ConstellationName = ''
-        self.ConstellationType = 0
-        self.NumberOfPlanes = 0
-        self.Size = 0
+        self.ConstellationType = 0.0
+        self.NumberOfPlanes = 0.0
+        self.Size = 0.0
         self.TLEFileName = ''  # Could not be used in normal definition
-        self.SP3FileName= ''
 
 
 class Satellite:
@@ -43,9 +43,9 @@ class Satellite:
 
         self.Kepler = KeplerSet()
 
-        self.PosVelECI = [0,0,0,0,0,0]
-        self.PosVelECF = [0,0,0,0,0,0]
-        self.LLA = [0,0,0]  # For ground track
+        self.PosVelECI = 6*[0.0]
+        self.PosVelECF = 6*[0.0]
+        self.LLA = 3*[0.0]  # For ground track
 
         self.IdxStationInView = []  # Indices of station which are in view
         self.NumStationInView = 0  # Number of stations that 'see' this satellite
@@ -60,12 +60,10 @@ class Satellite:
         self.PosVelECI = misc_fn.KEP2XYZ(MJDRequested, self.Kepler)
 
     def DeterminePosVelECF(self, GMSTRequested):  # ECF
-        self.PosVelECF = misc_fn.SpinVector(-GMSTRequested, self.PosVelECI) # assume ECI and GMST computed elsewhere
+        self.PosVelECF = misc_fn.SpinVector(-GMSTRequested, self.PosVelECI)  # assume ECI and GMST computed elsewhere
 
-    def DeterminePosVelLLA(self):
+    def DetermineLLA(self):
         self.LLA = misc_fn.XYZ2LLA(self.PosVelECF)
-
-    # operator==(Satellite const& rhs)  //Operator overloading
 
 
 class GroundStation:
@@ -78,26 +76,19 @@ class GroundStation:
         self.ElevationMask = []  # Could be varying over azimuth...
         self.ElevationMaskMaximum = []  # Could be varying over azimuth...
 
-        self.PosVelECI = [0,0,0,0,0,0]
-        self.PosVelECF = [0,0,0,0,0,0]
-        self.LLA = [0,0,0]
+        self.PosVelECI = 6*[0.0]
+        self.PosVelECF = 6*[0.0]
+        self.LLA = 3*[0.0]
         self.IdxSatInView = []  # Indices of satellites which are in view
         self.NumSatInView = 0
 
+    def DeterminePosVelECF(self):
+        xyz = misc_fn.LLA2XYZ(self.LLA)  # ECF
+        self.PosVelECF[0:3] = xyz
+
     def DeterminePosVelECI(self, GMSTRequested):
         self.PosVelECI = misc_fn.SpinVector(GMSTRequested, self.PosVelECF)
-        # To be done:
-        # Velocity of ground stations, currently set to zero....
-
-    def DeterminePosVelECF(self):
-
-        XYZ = misc_fn.LLA2XYZ(self.LLA)  # ECF
-        self.PosVelECF[0] = XYZ[0]
-        self.PosVelECF[1] = XYZ[1]
-        self.PosVelECF[2] = XYZ[2]
-        self.PosVelECF[3] = 0
-        self.PosVelECF[4] = 0
-        self.PosVelECF[5] = 0
+        # TODO Velocity of ground stations, currently set to zero....
 
 
 class User:
@@ -111,9 +102,9 @@ class User:
         self.ElevationMask = []  # Could be varying over azimuth...
         self.ElevationMaskMaximum = []  # Could be varying over azimuth...
 
-        self.PosVelECI = [0,0,0,0,0,0]
-        self.PosVelECF = [0,0,0,0,0,0]
-        self.LLA = [0,0,0]
+        self.PosVelECI = 6*[0.0]
+        self.PosVelECF = 6*[0.0]
+        self.LLA = 3*[0.0]
         self.NumLat = 0
         self.NumLon = 0
 
@@ -123,15 +114,16 @@ class User:
         self.TLEFileName = ''  # In case user is a spacecraft
         self.Kepler = KeplerSet()  # In case user is a spacecraft
 
-        self.Metric = [] # For analysis purposes
+        self.Metric = []  # For analysis purposes
 
     def DeterminePosVelECF(self):
-        self.PosVelECF = misc_fn.LLA2XYZ(self.LLA)  # ECF
+        xyz = misc_fn.LLA2XYZ(self.LLA)
+        self.PosVelECF[0:3] = xyz  # ECF
 
     def DeterminePosVelECI(self, GMSTRequested):
         # Compute ECI coordinates from ECF set and GMST
         # Requires the ECF to be computed first
-        self.PosVelECI = misc_fn.SpinVector(GMSTRequested, self.PosVelECI)  # ECI
+        self.PosVelECI = misc_fn.SpinVector(GMSTRequested, self.PosVelECF)  # ECI
 
     def DeterminePosVelTLE(self, GMSTRequested, MJDRequested):  # For spacecraft user
         # Compute ECF and ECI coordinates from MJD and TLE set
@@ -146,13 +138,13 @@ class Ground2SpaceLink:
         self.NumSat = 0  # for indexing static variable
         self.LinkInUse = True  # Defines whether ground asset is using this satellite (from ReceiverConstellation)
 
-        self.Azimuth = 0  # Radians
-        self.Elevation = 0  # Radians
-        self.Azimuth2 = 0  # Receiver as seen from satellite
-        self.Elevation2 = 0  # Receiver as seen from satellite (equivalent to off-nadir from satellite)
+        self.Azimuth = 0.0  # Radians
+        self.Elevation = 0.0  # Radians
+        self.Azimuth2 = 0.0  # Receiver as seen from satellite
+        self.Elevation2 = 0.0  # Receiver as seen from satellite (equivalent to off-nadir from satellite)
 
-        self.Ground2SpaceECF = [0,0,0]  # m
-        self.Distance = 0  # m
+        self.Ground2SpaceECF = [0.0,0.0,0.0]  # m
+        self.Distance = 0.0  # m
 
         self.GroundStation = GroundStation()
         self.Satellite = Satellite()
@@ -161,14 +153,13 @@ class Ground2SpaceLink:
 
     def ComputeLinkGroundStation(self, station, satellite):
 
-        #For reasons of speed this function is coded inline, since this function is done for every time step,
-        #for every combination of user and satellite. Also the computation of azimuth is not done standard,
-        #since it takes more time and not needed by all analysis
+        # For reasons of speed this function is coded inline, since this function is done for every time step,
+        # for every combination of user and satellite. Also the computation of azimuth is not done standard,
+        # since it takes more time and not needed by all analysis
 
-        for i in range(3):
-            self.Ground2SpaceECF[i] = satellite.PosVelECF[i] - station.PosVelECF[i]
-        self.Distance = sqrt(self.Ground2SpaceECF[0] * self.Ground2SpaceECF[0] + self.Ground2SpaceECF[1] * \
-                             self.Ground2SpaceECF[1] + self.Ground2SpaceECF[2] * self.Ground2SpaceECF[2])
+        self.Ground2SpaceECF = [satellite.PosVelECF[i] - station.PosVelECF[i] for i in range(3)]
+
+        self.Distance = np.linalg.norm(self.Ground2SpaceECF)
 
         self.Azimuth, self.Elevation = misc_fn.CalcAzEl(satellite.PosVelECF, station.PosVelECF)  # From Station to Satellite
         self.Azimuth2, self.Elevation2 = misc_fn.CalcAzEl(station.PosVelECF, satellite.PosVelECF)  # From Satellite to Station
@@ -177,52 +168,69 @@ class Ground2SpaceLink:
         self.Satellite = satellite
 
 
+    def CheckMaskingStation(self, station):
+        # Check whether satellite is above masking angle defined for station/user
+        # Optionally also a maximum mask angle is defined
+
+        in_view = False
+        number_of_masks = len(station.ElevationMask)
+
+        if number_of_masks == 1:
+            if station.ElevationMask[0] < self.Elevation < station.ElevationMaskMaximum[0]:
+                in_view = True
+        else:  # More than one mask
+            az_cake_piece_angle = 2 * pi / number_of_masks
+            idx_az = int(floor(self.Azimuth / az_cake_piece_angle))
+            if station.ElevationMask[idx_az] < self.Elevation < station.ElevationMaskMaximum[idx_az]:
+                in_view = True
+
+        return in_view
+
+
+class User2SpaceLink:
+
+    def __init__(self):
+
+        self.NumSat = 0  # for indexing static variable
+        self.LinkInUse = True  # Defines whether ground asset is using this satellite (from ReceiverConstellation)
+
+        self.Azimuth = 0.0  # Radians
+        self.Elevation = 0.0  # Radians
+        self.Azimuth2 = 0.0  # Receiver as seen from satellite
+        self.Elevation2 = 0.0  # Receiver as seen from satellite (equivalent to off-nadir from satellite)
+
+        self.User2SpaceECF = [0.0,0.0,0.0]  # m
+        self.Distance = 0.0  # m
+
+        self.Metric = []  # For analysis purposes
+
     def ComputeLinkUser(self, user, satellite):
 
-        for i in range(3):
-            self.Ground2SpaceECF[i] = satellite.PosVelECF[i] - user.PosVelECF[i]
-        self.Distance = sqrt(self.Ground2SpaceECF[0] * self.Ground2SpaceECF[0] + self.Ground2SpaceECF[1] * \
-                        self.Ground2SpaceECF[1] + self.Ground2SpaceECF[2] * self.Ground2SpaceECF[2])
+        self.User2SpaceECF = [satellite.PosVelECF[i] - user.PosVelECF[i] for i in range(3)]
+
+        self.Distance = np.linalg.norm(self.User2SpaceECF)
 
         self.Azimuth, self.Elevation = misc_fn.CalcAzEl(satellite.PosVelECF, user.PosVelECF)
 
-    def CheckMasking(self, station):
+        # TODO self.User should be defined?
+
+    def CheckMaskingUser(self, user):
         # Check whether satellite is above masking angle defined for station/user
-        # Optionally also a maximium mask angle is defined
+        # Optionally also a maximum mask angle is defined
 
-        NumberOfMasks = len(station.ElevationMask)
+        in_view = False
+        number_of_masks = len(user.ElevationMask)
 
-        if NumberOfMasks == 1:
-            if self.Elevation > station.ElevationMask[0] and self.Elevation < station.ElevationMaskMaximum[0]:
-                InView = True
+        if number_of_masks == 1:
+            if user.ElevationMask[0] < self.Elevation < user.ElevationMaskMaximum[0]:
+                in_view = True
         else:  # More than one mask
-            AzCakePieceAngle = 2 * pi / NumberOfMasks
-            IdxAzimuth = int(floor(self.Azimuth / AzCakePieceAngle))
-            if self.Elevation > station.ElevationMask[IdxAzimuth] and self.Elevation < station.ElevationMaskMaximum[IdxAzimuth]:
-                InView = True
+            az_cake_piece_angle = 2 * pi / number_of_masks
+            idx_az = int(floor(self.Azimuth / az_cake_piece_angle))
+            if user.ElevationMask[idx_az] < self.Elevation < user.ElevationMaskMaximum[idx_az]:
+                in_view = True
 
-        return InView
-
-    def CheckMasking(self, user):
-        # Check whether satellite is above masking angle defined for station/user
-        # Optionally also a maximium mask angle is defined
-
-        InView = False
-        NumberOfMasks = len(user.ElevationMask)
-
-        if NumberOfMasks == 1:
-            if self.Elevation > user.ElevationMask[0] and self.Elevation < user.ElevationMaskMaximum[0]:
-                InView = True
-        else:  # More than one mask
-            AzCakePieceAngle = 2 * pi / NumberOfMasks
-            IdxAzimuth = int(floor(self.Azimuth / AzCakePieceAngle))
-            if self.Elevation > user.ElevationMask[IdxAzimuth] and self.Elevation < user.ElevationMaskMaximum[IdxAzimuth]:
-                InView = True
-
-        return InView
-
-    #Ground2SpaceLink(const Ground2SpaceLink &p) # Copy constructor
-    #Ground2SpaceLink()
+        return in_view
 
 
 class Space2SpaceLink:
@@ -242,103 +250,67 @@ class Space2SpaceLink:
         self.AzimuthRecv = 0.0  # Radians
         self.ElevationRecv = 0.0  # Radians
 
-        self.Space2SpaceECF = [0, 0, 0]
+        self.Space2SpaceECF = 3*[0]
         self.Distance = 0  # m
 
         self.Metric = []  # For analysis purposes
 
-    """def ComputeLink(self):
-
-        if self.IdxSatTransm == self.IdxSatRecv: # avoid calculating a link between two identical sats
-            return 0
-
-        # For reasons of speed this function is coded inline, since this function is done for every time step,
-        # for every combination of user and satellite. Also the computation of azimuth is not done standard,
-        # since it takes more time and not needed by all analysis
-
-        for i in range(3):
-            self.Space2SpaceECF[i] = self.IdxSatRecv->PosVelECF[i] - self.IdxSatTransm->PosVelECF[i]
-        self.Distance = sqrt(self.Space2SpaceECF[0] * self.Space2SpaceECF[0] + self.Space2SpaceECF[1] * \
-                             self.Space2SpaceECF[1] + self.Space2SpaceECF[2] * self.Space2SpaceECF[2])
-
-        self.AzimuthTransm, self.ElevationTransm = misc_fn.CalcAzEl(self.IdxSatTransm->PosVelECF, self.IdxSatRecv->PosVelECF)
-
-        self.AzimuthRecv, self.ElevationRecv = misc_fn.CalcAzEl(self.IdxSatRecv->PosVelECF, self.IdxSatTransm->PosVelECF)
-
-        return 1
-    """
-
-
     def ComputeLink(self, satellite1, satellite2):
 
-        if satellite1 == satellite2:  # avoid calculating a link between two identical satellites
-            return 0
-
         # For reasons of speed this function is coded inline, since this function is done for every time step,
         # for every combination of user and satellite. Also the computation of azimuth is not done standard,
         # since it takes more time and not needed by all analysis
 
-        for i in range(3):
-            self.Space2SpaceECF[i] = satellite2.PosVelECF[i] - satellite1.PosVelECF[i]
-        self.Distance = sqrt(self.Space2SpaceECF[0] * self.Space2SpaceECF[0] + self.Space2SpaceECF[1] *
-                        self.Space2SpaceECF[1] + self.Space2SpaceECF[2] * self.Space2SpaceECF[2])
+        self.Space2SpaceECF = [satellite2.PosVelECF[i] - satellite1.PosVelECF[i] for i in range(3)]
+
+        self.Distance = np.linalg.norm(self.Space2SpaceECF)
 
         self.AzimuthTransm, self.ElevationTransm = misc_fn.CalcAzEl(satellite1.PosVelECF, satellite2.PosVelECF)
-
-        self.AzimuthRecv, self.ElevationRecv  = misc_fn.CalcAzEl(satellite2.PosVelECF, satellite1.PosVelECF)
+        self.AzimuthRecv, self.ElevationRecv = misc_fn.CalcAzEl(satellite2.PosVelECF, satellite1.PosVelECF)
 
         return 1
-
 
     def CheckMasking(self, satelliteTransm, satelliteRecv):
 
         # Check whether satellite is above masking angle defined for station/user
-        # Optionally also a maximium mask angle is defined
+        # Optionally also a maximum mask angle is defined
 
-        InViewTransm = False
-        InViewRecv = False
+        in_view_tx = False
+        in_view_rx = False
 
-        NumberOfMasksTransm = len(satelliteTransm.AntennaMask) # If only one value
-        NumberOfMasksRecv = len(satelliteRecv.AntennaMask) # If only one value
+        num_of_masks_tx = len(satelliteTransm.AntennaMask)  # If only one value
+        num_of_masks_rx = len(satelliteRecv.AntennaMask)  # If only one value
 
-        # if satelliteTransm and satelliteRecv are identical
+        # if satellite_tx and satellite_rx are identical
         if self.Distance == 0.0:
             return False
 
-        if NumberOfMasksTransm == 0:  # omnidirectional antenna
-            InViewTransm = True
+        if num_of_masks_tx == 0:  # omnidirectional antenna
+            in_view_tx = True
 
-        if NumberOfMasksTransm == 1:
+        if num_of_masks_tx == 1:
             # checking for mask of satellite 1
-            if self.ElevationTransm >= satelliteTransm.AntennaMask[0] and \
-                    self.ElevationTransm <= satelliteTransm.AntennaMaskMaximum[0]:
-                InViewTransm = True
+            if satelliteTransm.AntennaMask[0] < self.ElevationTransm < satelliteTransm.AntennaMaskMaximum[0]:
+                in_view_tx = True
 
         else:  # More than one mask
-            AzCakePieceAngle = 2 * pi / NumberOfMasksTransm
-            IdxAzimuth = int(floor(self.AzimuthTransm / AzCakePieceAngle))
-            if self.ElevationTransm >= satelliteTransm.AntennaMask[IdxAzimuth] and \
-                    self.ElevationTransm <= satelliteTransm.AntennaMaskMaximum[IdxAzimuth]:
-                InViewTransm = True
+            az_cake_piece_angle = 2 * pi / num_of_masks_tx
+            idx_az = int(floor(self.AzimuthTransm / az_cake_piece_angle))
+            if satelliteTransm.AntennaMask[idx_az] < self.ElevationTransm < satelliteTransm.AntennaMaskMaximum[idx_az]:
+                in_view_tx = True
 
-        if NumberOfMasksRecv == 0: # omnidirectional antenna
-            InViewRecv = True
+        if num_of_masks_rx == 0: # omnidirectional antenna
+            in_view_rx = True
 
-        if NumberOfMasksRecv == 1:
+        if num_of_masks_rx == 1:
             # checking for mask of satellite 2
-            if self.ElevationRecv >= satelliteRecv.AntennaMask[0] and \
-                    self.ElevationRecv <= satelliteRecv.AntennaMaskMaximum[0]:
-                InViewRecv = True
+            if satelliteRecv.AntennaMask[0] < self.ElevationRecv < satelliteRecv.AntennaMaskMaximum[0]:
+                in_view_rx = True
 
         else:  # More than one mask
-            AzCakePieceAngle = 2 * pi / NumberOfMasksRecv
-            IdxAzimuth = int(floor(self.AzimuthRecv / AzCakePieceAngle))
-            if self.ElevationRecv >= satelliteRecv.AntennaMask[IdxAzimuth] and \
-                    self.ElevationRecv <= satelliteRecv.AntennaMaskMaximum[IdxAzimuth]:
-                InViewRecv = True
+            az_cake_piece_angle = 2 * pi / num_of_masks_rx
+            idx_az = int(floor(self.AzimuthRecv / az_cake_piece_angle))
+            if satelliteRecv.AntennaMask[idx_az] < self.ElevationRecv < satelliteRecv.AntennaMaskMaximum[idx_az]:
+                in_view_rx = True
 
-        return InViewTransm, InViewRecv
-
-    #Space2SpaceLink(const Space2SpaceLink& p)
-    #Space2SpaceLink()
-
+        return in_view_tx, in_view_rx
