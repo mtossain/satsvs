@@ -183,7 +183,7 @@ If this parameter is omitted all the satellites of the constellation are plotted
 <img src="/docs/cov_ground_track.png" alt="cov_ground_track"/>
 
 ### cov_satellite_pvt
-Plots the first satellite velocity and outputs the position and velocity to the 'output/orbits.txt' file. 
+Plots the first satellite position and velocity and outputs the position and velocity to the 'output/orbits.txt' file. 
 The following parameters are needed:
 ```
 <Type>cov_satellite_pvt</Type>

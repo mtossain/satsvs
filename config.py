@@ -5,28 +5,33 @@ from astropy.time import Time
 import misc_fn
 from constants import *
 from analysis import Analysis
-from segments import Constellation, Satellite, GroundStation, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
+from segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
 import logging_svs as ls
 
 class AppConfig:
     
     def __init__(self):
 
-        self.ConstellationList = []
-        self.SatelliteList = []
-        self.GroundStationList = []
-        self.UserList = []
-        self.AnalysisList = []
-        self.GroundStation2SatelliteList = []
-        self.User2SatelliteList = []
-        self.Satellite2SatelliteList = []
-        self.RadiationPropList = []
+        self.constellations = []
+        self.satellites = []
+        self.stations = []
+        self.users = []
+        self.gr2sp = []
+        self.usr2sp = []
+        self.sp2sp = []
 
-        self.StartDateTime = 0  # MJD
-        self.StopDateTime = 0  # MJD
+        self.analysis = None
+
+        self.StartDateTime = 0  # MJD start time simulation
+        self.StopDateTime = 0  # MJD stop time simulation
         self.TimeStep = 0  # s
         self.NumTimeSteps = 0
         self.NumEpoch = 0
+        self.cnt_epoch = 0
+        self.time_gmst = 0  # Loop time
+        self.time_mjd = 0  # Loop time
+        self.time_str = ''  # Loop time
+
         self.NumConstellation = 0
         self.NumSat = 0
         self.NumGroundStation = 0
@@ -34,7 +39,9 @@ class AppConfig:
         self.NumSpace2Space = 0
         self.NumGround2Space = 0
 
-    def LoadSpaceSegment(self, FileName):
+
+
+    def load_satellites(self, FileName):
 
         # Get the list of constellations
         tree = ET.parse(FileName)
@@ -46,7 +53,7 @@ class AppConfig:
             const.NumberOfPlanes = int(constellation.find('NumOfPlanes').text)
             const.ConstellationName = constellation.find('ConstellationName').text
             ls.logger.info(const.__dict__)
-            self.ConstellationList.append(const)
+            self.constellations.append(const)
             for satellite in constellation.iter('Satellite'):
                 sat = Satellite()
                 sat.SatelliteID = int(satellite.find('SatelliteID').text)
@@ -61,7 +68,7 @@ class AppConfig:
                 sat.Kepler.ArgOfPerigee = float(satellite.find('ArgOfPerigee').text) / 180 * pi
                 sat.Kepler.MeanAnomaly = float(satellite.find('MeanAnomaly').text) / 180 * pi
                 ls.logger.info(sat.__dict__)
-                self.SatelliteList.append(sat)
+                self.satellites.append(sat)
             for item in constellation.iter('TLEFileName'):
                 with open(item.text) as file:         
                     cnt = 0
@@ -88,18 +95,18 @@ class AppConfig:
                             sat.Kepler.ArgOfPerigee = float(line[34:41]) / 180 * math.pi
                             sat.Kepler.MeanAnomaly = float(line[43:50]) / 180 * math.pi
                             ls.logger.info(['Found satellite:', str(sat.SatelliteID),'Kepler Elements', str(sat.Kepler.__dict__)])
-                            self.SatelliteList.append(sat)
+                            self.satellites.append(sat)
                             cnt=-1
                         cnt += 1
-        self.NumSat = len(self.SatelliteList)
-        self.NumConstellation = len(self.ConstellationList)
+        self.NumSat = len(self.satellites)
+        self.NumConstellation = len(self.constellations)
 
-    def LoadGroundSegment(self, FileName):
+    def load_stations(self, FileName):
         # Get the list of constellations
         tree = ET.parse(FileName)
         root = tree.getroot()
         for groundstation in root.iter('GroundStation'):
-            gs = GroundStation()
+            gs = Station()
             gs.ConstellationID = int(groundstation.find('ConstellationID').text)
             gs.GroundStationID = int(groundstation.find('GroundStationID').text)
             gs.GroundStationName = groundstation.find('GroundStationName').text
@@ -122,12 +129,12 @@ class AppConfig:
 
             gs.DeterminePosVelECF()
             ls.logger.info(gs.__dict__)
-            self.GroundStationList.append(gs)
+            self.stations.append(gs)
 
-        self.NumGroundStation = len(self.GroundStationList)
+        self.NumGroundStation = len(self.stations)
 
 
-    def LoadUserSegment(self, FileName):
+    def load_users(self, FileName):
         # Get the list of constellations
         tree = ET.parse(FileName)
         root = tree.getroot()
@@ -150,7 +157,7 @@ class AppConfig:
                 else:
                     user.ElevationMaskMaximum = len(MaskValues) * [90.0 / 180.0 * pi]
                 user.DeterminePosVelECF()
-                self.UserList.append(user)
+                self.users.append(user)
 
             if userelement.find('Type').text == 'Grid':
                 LatMin = float(userelement.find('LatMin').text)
@@ -192,7 +199,7 @@ class AppConfig:
 
                         user.DeterminePosVelECF()  # Do it once to initialise
                         user.IdxSatInView = self.NumSat*[999999]
-                        self.UserList.append(user)
+                        self.users.append(user)
                         CntUsers += 1
 
             if userelement.find('Type').text == 'Spacecraft':  # TODO Multiple spacecraft users
@@ -231,17 +238,17 @@ class AppConfig:
                             user.Kepler.RAAN = float(line[17:24]) / 180 * math.pi
                             user.Kepler.ArgOfPerigee = float(line[34:41]) / 180 * math.pi
                             user.Kepler.MeanAnomaly = float(line[43:50]) / 180 * math.pi
-                            logger.info(['Found user satellite:', str(user.UserID), 'Kepler Elements', str(user.Kepler.__dict__)])
+                            ls.logger.info(['Found user satellite:', str(user.UserID), 'Kepler Elements', str(user.Kepler.__dict__)])
                             cnt = -1
                         cnt += 1
                 GMSTRequested = misc_fn.MJD2GMST(user.Kepler.EpochMJD)
                 user.DeterminePosVelTLE(GMSTRequested, user.Kepler.EpochMJD)
                 user.DeterminePosVelECF()
-                self.UserList.append(user)
+                self.users.append(user)
         ls.logger.info(user.__dict__)
-        self.NumUser = len(self.UserList)
+        self.NumUser = len(self.users)
 
-    def SetupGround2Space(self):
+    def setup_links(self):
 
         cnt_space_link = 0
         cnt_grnd_link = 0
@@ -251,11 +258,11 @@ class AppConfig:
         for i in range(self.NumGroundStation):
             for j in range(self.NumSat):
                 Gr2Sp = Ground2SpaceLink()  # important to have new instance every time, python does by reference!!!
-                self.GroundStation2SatelliteList.append(Gr2Sp)
-                if self.GroundStationList[i].ReceiverConstellation[self.SatelliteList[j].ConstellationID - 1] == '1':
-                    self.GroundStation2SatelliteList[cnt_grnd_link].LinkInUse = True
+                self.gr2sp.append(Gr2Sp)
+                if self.stations[i].ReceiverConstellation[self.satellites[j].ConstellationID - 1] == '1':
+                    self.gr2sp[cnt_grnd_link].LinkInUse = True
                 else:
-                    self.GroundStation2SatelliteList[cnt_grnd_link].LinkInUse = False
+                    self.gr2sp[cnt_grnd_link].LinkInUse = False
                 cnt_grnd_link += 1
         ls.logger.info(["Loaded: ", cnt_grnd_link, " number of Ground Station to Spacecraft links"])
 
@@ -263,11 +270,11 @@ class AppConfig:
         for i in range(self.NumUser):
             for j in range(self.NumSat):
                 Usr2Sp = User2SpaceLink()
-                self.User2SatelliteList.append(Usr2Sp)  # important to have new instance every time, by reference!!!
-                if self.UserList[i].ReceiverConstellation[self.SatelliteList[j].ConstellationID - 1] == '1':
-                    self.User2SatelliteList[cnt_usr_link].LinkInUse = True
+                self.usr2sp.append(Usr2Sp)  # important to have new instance every time, by reference!!!
+                if self.users[i].ReceiverConstellation[self.satellites[j].ConstellationID - 1] == '1':
+                    self.usr2sp[cnt_usr_link].LinkInUse = True
                 else:
-                    self.User2SatelliteList[cnt_usr_link].LinkInUse = False
+                    self.usr2sp[cnt_usr_link].LinkInUse = False
                 cnt_usr_link += 1
         ls.logger.info(["Loaded: ", cnt_usr_link, " number of User to Spacecraft links"])
 
@@ -278,55 +285,55 @@ class AppConfig:
                     Sp2Sp.LinkInUse = True  # TODO Receiver Constellation for Sp2Sp
                     Sp2Sp.IdxSat1 = i
                     Sp2Sp.IdxSat2 = j
-                    Sp2Sp.IdxSatTransm = self.SatelliteList[i]
-                    Sp2Sp.IdxSatRecv = self.SatelliteList[j]
-                    self.Satellite2SatelliteList.append(Sp2Sp)
+                    Sp2Sp.IdxSatTransm = self.satellites[i]
+                    Sp2Sp.IdxSatRecv = self.satellites[j]
+                    self.sp2sp.append(Sp2Sp)
                     cnt_space_link += 1
         ls.logger.info(["Loaded: ", cnt_space_link, " number of Spacecraft to Spacecraft links"])
 
         # Allocate the memory for the lists of links
         for j in range(self.NumSat):
-            self.SatelliteList[j].IdxStationInView = self.NumGroundStation*[999999]
+            self.satellites[j].IdxStationInView = self.NumGroundStation * [999999]
         for j in range(self.NumUser):
-            self.UserList[j].IdxSatInView = self.NumSat*[999999]
+            self.users[j].IdxSatInView = self.NumSat*[999999]
 
     def LoadPropagation(self, FileName):
         pass
 
-    def LoadSimulation(self, FileName):
+    def load_simulation(self, FileName):
         # Get the list of constellations
         tree = ET.parse(FileName)
         root = tree.getroot()
         for sim in root.iter('SimulationManager'):
             self.StartDateTime = Time(sim.find('StartDate').text,scale='utc').mjd
+            self.time_mjd = self.StartDateTime  # initiate the time loop
             self.StopDateTime = Time(sim.find('StopDate').text, scale='utc').mjd
             self.TimeStep = int(sim.find('TimeStep').text)
             ls.logger.info(['Loaded simulation, start:', str(self.StartDateTime), 'stop:', str(self.StopDateTime),
                             'TimeStep', str(self.TimeStep)])
 
-            for analysis_conf in sim.iter('Analysis'):
-
+            for analysis in root.iter('Analysis'):
                 analysis_obj = Analysis()
-                analysis_obj.Type = analysis_conf.find('Type').text
-                if analysis_conf.find('Direction') is not None:
-                    analysis_obj.Direction = analysis_conf.find('Direction').text
-                if analysis_conf.find('Statistic') is not None:
-                    analysis_obj.Statistic = analysis_conf.find('Statistic').text
-                if analysis_conf.find('ConstellationID') is not None:
-                    analysis_obj.ConstellationID = int(analysis_conf.find('ConstellationID').text)
-                if analysis_conf.find('SatelliteID') is not None:
-                    analysis_obj.SatelliteID = int(analysis_conf.find('SatelliteID').text)
-                if analysis_conf.find('LatitudeRequested') is not None:
-                    analysis_obj.LatitudeRequested = float(analysis_conf.find('LatitudeRequested').text) / 180.0 * pi
-                if analysis_conf.find('LongitudeRequested') is not None:
-                    analysis_obj.LongitudeRequested = float(analysis_conf.find('LongitudeRequested').text) / 180.0 * pi
-                if analysis_conf.find('ElevationMask') is not None:
-                    analysis_obj.ElevationMask = float(analysis_conf.find('ElevationMask').text) / 180.0 * pi
-                if analysis_conf.find('RequiredNumberSatellites') is not None:
-                    analysis_obj.RequiredNumberSatellites = int(analysis_conf.find('RequiredNumberSatellites').text)
-                if analysis_conf.find('ConstellationName') is not None:
-                    analysis_obj.ConstellationName = analysis_conf.find('ConstellationName').text
-                self.AnalysisList.append(analysis_obj)
+                analysis_obj.Type = analysis.find('Type').text
+                if analysis.find('Direction') is not None:
+                    analysis_obj.Direction = analysis.find('Direction').text
+                if analysis.find('Statistic') is not None:
+                    analysis_obj.Statistic = analysis.find('Statistic').text
+                if analysis.find('ConstellationID') is not None:
+                    analysis_obj.ConstellationID = int(analysis.find('ConstellationID').text)
+                if analysis.find('SatelliteID') is not None:
+                    analysis_obj.SatelliteID = int(analysis.find('SatelliteID').text)
+                if analysis.find('LatitudeRequested') is not None:
+                    analysis_obj.LatitudeRequested = float(analysis.find('LatitudeRequested').text) / 180.0 * pi
+                if analysis.find('LongitudeRequested') is not None:
+                    analysis_obj.LongitudeRequested = float(analysis.find('LongitudeRequested').text) / 180.0 * pi
+                if analysis.find('ElevationMask') is not None:
+                    analysis_obj.ElevationMask = float(analysis.find('ElevationMask').text) / 180.0 * pi
+                if analysis.find('RequiredNumberSatellites') is not None:
+                    analysis_obj.RequiredNumberSatellites = int(analysis.find('RequiredNumberSatellites').text)
+                if analysis.find('ConstellationName') is not None:
+                    analysis_obj.ConstellationName = analysis.find('ConstellationName').text
+                self.analysis = analysis_obj
 
         self.NumEpoch = floor(86400 * (self.StopDateTime - self.StartDateTime) / self.TimeStep)
 

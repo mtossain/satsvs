@@ -274,13 +274,13 @@
         <MeanAnomaly>135.346</MeanAnomaly>
       </Satellite>
     </Constellation>
-	     <Constellation>
-	<ConstellationID>2</ConstellationID>
-	<NumOfSatellites>2</NumOfSatellites>
-    <NumOfPlanes>2</NumOfPlanes>
-	<ConstellationName>EGNOS</ConstellationName>
-	<TLEFileName>input/egnos_20100330.txt</TLEFileName>
-    </Constellation>
+<!--	     <Constellation>-->
+<!--	<ConstellationID>2</ConstellationID>-->
+<!--	<NumOfSatellites>2</NumOfSatellites>-->
+<!--    <NumOfPlanes>2</NumOfPlanes>-->
+<!--	<ConstellationName>EGNOS</ConstellationName>-->
+<!--	<TLEFileName>input/egnos_20100330.txt</TLEFileName>-->
+<!--    </Constellation>-->
 
 	</SpaceSegment>
 	<!--Defines the ground stations that should be simulated-->
@@ -687,17 +687,17 @@
 	<SimulationManager>
     <StartDate>2010-05-08 00:00:00</StartDate>
     <StopDate>2010-05-08 12:00:00</StopDate>
-    <TimeStep>90</TimeStep>
+    <TimeStep>900</TimeStep>
 
-		<Analysis>
-			<Type>cov_ground_track</Type>
-			<ConstellationID>1</ConstellationID>
-			<SatelliteID>1</SatelliteID>
-		</Analysis>
+<!--		<Analysis>-->
+<!--			<Type>cov_ground_track</Type>-->
+<!--			<ConstellationID>1</ConstellationID>-->
+<!--			<SatelliteID>1</SatelliteID>-->
+<!--		</Analysis>-->
 
-        <Analysis>
-			<Type>cov_satellite_visible</Type>
-        </Analysis>
+<!--        <Analysis>-->
+<!--			<Type>cov_satellite_visible</Type>-->
+<!--        </Analysis>-->
 
 <!--        <Analysis>-->
 <!--          <Type>cov_satellite_visible_grid</Type>-->
@@ -738,10 +738,10 @@
 <!--      <Statistic>Mean</Statistic>-->
 <!--    </Analysis>-->
 
-<!--    <Analysis>-->
-<!--      <Type>cov_satellite_pvt</Type>-->
-<!--      <ConstellationID>1</ConstellationID>-->
-<!--    </Analysis>-->
+    <Analysis>
+      <Type>cov_satellite_pvt</Type>
+      <ConstellationID>1</ConstellationID>
+    </Analysis>
 
 	</SimulationManager>
 </Scenario>

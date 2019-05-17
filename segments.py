@@ -66,7 +66,7 @@ class Satellite:
         self.LLA = misc_fn.XYZ2LLA(self.PosVelECF)
 
 
-class GroundStation:
+class Station:
 
     def __init__(self):
         self.ConstellationID = 0
@@ -146,7 +146,7 @@ class Ground2SpaceLink:
         self.Ground2SpaceECF = [0.0,0.0,0.0]  # m
         self.Distance = 0.0  # m
 
-        self.GroundStation = GroundStation()
+        self.GroundStation = Station()
         self.Satellite = Satellite()
 
         self.Metric = []  # For analysis purposes
