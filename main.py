@@ -22,11 +22,11 @@ import logging_svs as ls
 
 
 def load_configuration():
-    sm = config.AppConfig()
-    sm.load_satellites('input/Config.xml')
-    sm.load_stations('input/Config.xml')
-    sm.load_users('input/Config.xml')
-    sm.load_simulation('input/Config.xml')
+    sm = config.AppConfig('input/Config.xml' )
+    sm.load_satellites()
+    sm.load_stations()
+    sm.load_users()
+    sm.load_simulation()
     sm.setup_links()
     return sm  # Configuration is used as state machine
 

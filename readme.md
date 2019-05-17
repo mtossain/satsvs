@@ -168,14 +168,20 @@ The following xml is used to setup the simulation parameters:
 The time parameters are in UTC time and TimeStep in seconds. The analysis are described below:
 
 ## Analysis parameters
+In order to run an analysis block it has to be uncommented and the parameters adapted. To add a new analysis to the code the following has to be performed:
+- Add a new analysis class at the end of analysis.py
+- Use as a template one of the other analysis classes above or the base analysis class definition
+- Add the class instantiation at the end of config.py
+
+The specific parameters for the existing analysis are given here below:
 
 ### cov_ground_track
-Plots the ground track of one or more satellites over simulation time. The following parameters are needed:
+Plots the ground track of one or more satellites over simulation time. The following parameters are needed, to plot the ground track of satellites in a constellation:
 ```
 <Type>cov_ground_track</Type>
 <ConstellationID>1</ConstellationID>
 ```
-Optional is SatelliteID: which satellite to use (ID or NORAD number if a TLE file is used): 
+Optional is SatelliteID for selection of one satellite. For a TLE file it is the NORAD number. 
 ```
 <SatelliteID>1</SatelliteID>
 ```

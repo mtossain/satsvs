@@ -689,11 +689,11 @@
     <StopDate>2010-05-08 12:00:00</StopDate>
     <TimeStep>900</TimeStep>
 
-<!--		<Analysis>-->
-<!--			<Type>cov_ground_track</Type>-->
-<!--			<ConstellationID>1</ConstellationID>-->
-<!--			<SatelliteID>1</SatelliteID>-->
-<!--		</Analysis>-->
+		<Analysis>
+			<Type>cov_ground_track</Type>
+			<ConstellationID>1</ConstellationID>
+			<SatelliteID>1</SatelliteID>
+		</Analysis>
 
 <!--        <Analysis>-->
 <!--			<Type>cov_satellite_visible</Type>-->
@@ -738,10 +738,10 @@
 <!--      <Statistic>Mean</Statistic>-->
 <!--    </Analysis>-->
 
-    <Analysis>
-      <Type>cov_satellite_pvt</Type>
-      <ConstellationID>1</ConstellationID>
-    </Analysis>
+<!--    <Analysis>-->
+<!--      <Type>cov_satellite_pvt</Type>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--    </Analysis>-->
 
 	</SimulationManager>
 </Scenario>

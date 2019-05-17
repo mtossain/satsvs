@@ -4,13 +4,14 @@ from astropy.time import Time
 
 import misc_fn
 from constants import *
-from analysis import Analysis
+from analysis import *
 from segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
 import logging_svs as ls
 
+
 class AppConfig:
     
-    def __init__(self):
+    def __init__(self, file_name = None):
 
         self.constellations = []
         self.satellites = []
@@ -21,6 +22,7 @@ class AppConfig:
         self.sp2sp = []
 
         self.analysis = None
+        self.file_name = file_name
 
         self.StartDateTime = 0  # MJD start time simulation
         self.StopDateTime = 0  # MJD stop time simulation
@@ -39,12 +41,10 @@ class AppConfig:
         self.NumSpace2Space = 0
         self.NumGround2Space = 0
 
-
-
-    def load_satellites(self, FileName):
+    def load_satellites(self):
 
         # Get the list of constellations
-        tree = ET.parse(FileName)
+        tree = ET.parse(self.file_name)
         root = tree.getroot()
         for constellation in root.iter('Constellation'):
             const = Constellation()
@@ -101,9 +101,9 @@ class AppConfig:
         self.NumSat = len(self.satellites)
         self.NumConstellation = len(self.constellations)
 
-    def load_stations(self, FileName):
+    def load_stations(self):
         # Get the list of constellations
-        tree = ET.parse(FileName)
+        tree = ET.parse(self.file_name)
         root = tree.getroot()
         for groundstation in root.iter('GroundStation'):
             gs = Station()
@@ -134,9 +134,9 @@ class AppConfig:
         self.NumGroundStation = len(self.stations)
 
 
-    def load_users(self, FileName):
+    def load_users(self):
         # Get the list of constellations
-        tree = ET.parse(FileName)
+        tree = ET.parse(self.file_name)
         root = tree.getroot()
         for userelement in root.iter('UserSegment'):
 
@@ -297,12 +297,12 @@ class AppConfig:
         for j in range(self.NumUser):
             self.users[j].IdxSatInView = self.NumSat*[999999]
 
-    def LoadPropagation(self, FileName):
+    def LoadPropagation(self):
         pass
 
-    def load_simulation(self, FileName):
-        # Get the list of constellations
-        tree = ET.parse(FileName)
+    def load_simulation(self):
+        # Load the simulation parameters
+        tree = ET.parse(self.file_name)
         root = tree.getroot()
         for sim in root.iter('SimulationManager'):
             self.StartDateTime = Time(sim.find('StartDate').text,scale='utc').mjd
@@ -312,28 +312,28 @@ class AppConfig:
             ls.logger.info(['Loaded simulation, start:', str(self.StartDateTime), 'stop:', str(self.StopDateTime),
                             'TimeStep', str(self.TimeStep)])
 
-            for analysis in root.iter('Analysis'):
-                analysis_obj = Analysis()
-                analysis_obj.Type = analysis.find('Type').text
-                if analysis.find('Direction') is not None:
-                    analysis_obj.Direction = analysis.find('Direction').text
-                if analysis.find('Statistic') is not None:
-                    analysis_obj.Statistic = analysis.find('Statistic').text
-                if analysis.find('ConstellationID') is not None:
-                    analysis_obj.ConstellationID = int(analysis.find('ConstellationID').text)
-                if analysis.find('SatelliteID') is not None:
-                    analysis_obj.SatelliteID = int(analysis.find('SatelliteID').text)
-                if analysis.find('LatitudeRequested') is not None:
-                    analysis_obj.LatitudeRequested = float(analysis.find('LatitudeRequested').text) / 180.0 * pi
-                if analysis.find('LongitudeRequested') is not None:
-                    analysis_obj.LongitudeRequested = float(analysis.find('LongitudeRequested').text) / 180.0 * pi
-                if analysis.find('ElevationMask') is not None:
-                    analysis_obj.ElevationMask = float(analysis.find('ElevationMask').text) / 180.0 * pi
-                if analysis.find('RequiredNumberSatellites') is not None:
-                    analysis_obj.RequiredNumberSatellites = int(analysis.find('RequiredNumberSatellites').text)
-                if analysis.find('ConstellationName') is not None:
-                    analysis_obj.ConstellationName = analysis.find('ConstellationName').text
-                self.analysis = analysis_obj
+            for analysis_node in root.iter('Analysis'):  # Only one analysis can be performed at a time
+                if analysis_node.find('Type').text == 'cov_ground_track':
+                    self.analysis = AnalysisCovGroundTrack()
+                if analysis_node.find('Type').text == 'cov_depth_of_coverage':
+                    self.analysis = AnalysisCovDepthOfCoverage()
+                if analysis_node.find('Type').text == 'cov_pass_time':
+                    self.analysis = AnalysisCovPassTime()
+                if analysis_node.find('Type').text == 'cov_satellite_contour':
+                    self.analysis = AnalysisCovSatelliteContour()
+                if analysis_node.find('Type').text == 'cov_satellite_highest':
+                    self.analysis = AnalysisCovSatelliteHighest()
+                if analysis_node.find('Type').text == 'cov_satellite_pvt':
+                    self.analysis = AnalysisCovSatellitePvt()
+                if analysis_node.find('Type').text == 'cov_sky_angles':
+                    self.analysis = AnalysisCovSatelliteSkyAngles()
+                if analysis_node.find('Type').text == 'cov_satellite_visible':
+                    self.analysis = AnalysisCovSatelliteVisible()
+                if analysis_node.find('Type').text == 'cov_satellite_visible_grid':
+                    self.analysis = AnalysisCovSatelliteVisibleGrid()
+                if analysis_node.find('Type').text == 'cov_satellite_visible_id':
+                    self.analysis = AnalysisCovSatelliteVisibleId()
+                self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 
         self.NumEpoch = floor(86400 * (self.StopDateTime - self.StartDateTime) / self.TimeStep)
 
