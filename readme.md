@@ -224,7 +224,6 @@ median. The following parameters are needed:
       <Type>cov_satellite_visible_grid</Type>
       <Statistic>Min</Statistic>
 </Analysis>
-
 ```
 <img src="/docs/cov_satellite_visible_grid.png" alt="cov_satellite_visible_grid"/>
 
