@@ -1,5 +1,5 @@
 import math
-from math import sin, cos, tan, atan2, atan, sqrt, fabs, asin, acos, floor
+from math import sin, cos, tan, atan2, atan, sqrt, fabs, asin, acos, radians, degrees
 from constants import PI, GM_EARTH, R_EARTH
 import numpy as np
 
@@ -325,7 +325,9 @@ def calc_az_el(xs, xu):
 # @param iX1 Intersection point one
 # @param iX2 Intersection point two
 # @return Returns false if the line does not intersect the sphere
-def line_sphere_intersect(x1, x2, sphere_radius, sphere_center) :
+def line_sphere_intersect(x1, x2, sphere_radius, sphere_center):
+
+    intersect = True
 
     i_x1 = 3*[0.0]
     i_x2 = 3*[0.0]
@@ -345,19 +347,19 @@ def line_sphere_intersect(x1, x2, sphere_radius, sphere_center) :
     # No intersection
     if in_sqrt < 0:
         intersect = False
+    else:
+        # Tangent (0) or intersection (+)
+        u1 = (-b + sqrt(in_sqrt)) / 2.0 / a
+        u2 = (-b - sqrt(in_sqrt)) / 2.0 / a
 
-    # Tangent (0) or intersection (+)
-    u1 = (-b + sqrt(in_sqrt)) / 2.0 / a
-    u2 = (-b - sqrt(in_sqrt)) / 2.0 / a
+        # Intersection points
+        i_x1[0] = x1[0] + u1 * (x2[0] - x1[0])
+        i_x1[1] = x1[1] + u1 * (x2[1] - x1[1])
+        i_x1[2] = x1[2] + u1 * (x2[2] - x1[2])
 
-    # Intersection points
-    i_x1[0] = x1[0] + u1 * (x2[0] - x1[0])
-    i_x1[1] = x1[1] + u1 * (x2[1] - x1[1])
-    i_x1[2] = x1[2] + u1 * (x2[2] - x1[2])
-
-    i_x2[0] = x1[0] + u2 * (x2[0] - x1[0])
-    i_x2[1] = x1[1] + u2 * (x2[1] - x1[1])
-    i_x2[2] = x1[2] + u2 * (x2[2] - x1[2])
+        i_x2[0] = x1[0] + u2 * (x2[0] - x1[0])
+        i_x2[1] = x1[1] + u2 * (x2[1] - x1[1])
+        i_x2[2] = x1[2] + u2 * (x2[2] - x1[2])
 
     return intersect, i_x1, i_x2
 
@@ -420,16 +422,16 @@ def sat_contour(lla, elevation_mask):
     lat_t, lon_t = 0, 0
     delta_lon = 0
     cnt = 0
-    for i in np.arange(0.0, 360.0, step_size):
+    for idx_az in np.arange(0.0, 360.0, step_size):
 
         try:
-            az = i / 180 * PI
+            az = radians(idx_az)
             lat_t_acc = acos(cos(lam) * sin(lat_s) + sin(lam) * cos(lat_s) * cos(az))
             lat_t = PI / 2 - lat_t_acc
             delta_lon = acos((cos(lam)-(sin(lat_s) * sin(lat_t))) / (cos(lat_s) * cos(lat_t)))
         except:
             pass
-        if i < 180:
+        if idx_az < 180:
             lon_t = lon_s + delta_lon
         else:
             lon_t = lon_s - delta_lon

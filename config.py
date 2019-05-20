@@ -8,6 +8,9 @@ from segments import Constellation, Satellite, Station, User, Ground2SpaceLink, 
 import logging_svs as ls
 
 
+def str2bool(v):
+  return v.lower() in ("yes", "true", "t", "1")
+
 class AppConfig:
     
     def __init__(self, file_name=None):
@@ -31,6 +34,10 @@ class AppConfig:
         self.time_gmst = 0  # Loop time
         self.time_mjd = 0  # Loop time
         self.time_str = ''  # Loop time
+
+        self.include_gr2sp = True
+        self.include_usr2sp = True
+        self.include_sp2sp = True
 
         self.num_constellation = 0
         self.num_sat = 0
@@ -183,8 +190,8 @@ class AppConfig:
                         user.type = "Grid"
                         user.user_id = cnt_users
                         user.UserName = "Grid"
-                        user.lla[0] = latitude / 180 * PI
-                        user.lla[1] = longitude / 180 * PI
+                        user.lla[0] = radians(latitude)
+                        user.lla[1] = radians(longitude)
                         user.lla[2] = height
                         user.num_lat = num_lat
                         user.num_lon = num_lon
@@ -293,6 +300,9 @@ class AppConfig:
             self.time_mjd = self.start_time  # initiate the time loop
             self.stop_time = Time(sim.find('StopDate').text, scale='utc').mjd
             self.time_step = int(sim.find('TimeStep').text)
+            self.include_gr2sp = str2bool(sim.find('IncludeStation2SpaceLinks').text)
+            self.include_usr2sp = str2bool(sim.find('IncludeUser2SpaceLinks').text)
+            self.include_sp2sp = str2bool(sim.find('IncludeSpace2SpaceLinks').text)
             ls.logger.info(['Loaded simulation, start:', str(self.start_time), 'stop:', str(self.stop_time),
                             'TimeStep', str(self.time_step)])
 

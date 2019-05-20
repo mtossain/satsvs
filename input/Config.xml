@@ -685,9 +685,13 @@
 	</UserSegment>
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
-    <StartDate>2010-05-08 00:00:00</StartDate>
-    <StopDate>2010-05-08 12:00:00</StopDate>
-    <TimeStep>900</TimeStep>
+
+	    <StartDate>2010-05-08 00:00:00</StartDate>
+	    <StopDate>2010-05-08 12:00:00</StopDate>
+	    <TimeStep>900</TimeStep>
+		<IncludeStation2SpaceLinks>True</IncludeStation2SpaceLinks>
+		<IncludeUser2SpaceLinks>True</IncludeUser2SpaceLinks>
+		<IncludeSpace2SpaceLinks>False</IncludeSpace2SpaceLinks>
 
 <!--		<Analysis>-->
 <!--			<Type>cov_ground_track</Type>-->

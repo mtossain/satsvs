@@ -4,13 +4,12 @@
 # TODO analysis OBS
 
 # TODO satellite orbit run from previous run, so to save time
-# TODO S2G and S2S only when needed with flag...
 # TODO make available different blocks
 # TODO simplify config.xml (cleanup unused headings)
 # TODO receiverconstellation by list True/False with commas
 # TODO analysis visible satellite for users static, grid and satellite
 # TODO analysis one or more users or satellites
-
+# TODO Optimise white space around figures
 
 import os
 if os.path.exists('output/main.log'):
@@ -44,19 +43,22 @@ def convert_times(sm):
 
 
 def update_satellites(sm):
-    CntSatellite = 0
-    for satellite in sm.satellites:
+    # Compute satellite positions in ECF/ECI and compute the links
+    # and remember which ones are in view
+    for idx_sat, satellite in enumerate(sm.satellites):
         satellite.det_pvt_eci(sm.time_mjd)
         satellite.det_pvt_ecf(sm.time_gmst)
         satellite.num_stat_in_view = 0  # Reset before loop
-        # Compute satellite to satellite links # TODO Check space to space link
-        satellite.num_sat_in_view = 0
-        # for CntSatellite2 in range(sm.NumSat):
-        #     if sm.sp2sp[CntSatellite].LinkInUse:  # From Receiver Constellation of Spacecraft TBD
-        #         sm.sp2sp[CntSatellite].ComputeLink(satellite, sm.satellites[CntSatellite2])
-        #         satellite.IdxSatelliteInView = CntSatellite2
-        #         satellite.NumSatelliteInView += 1
-        #         CntSatellite += 1
+
+    # Compute satellite to satellite links
+    for idx_sat, satellite in enumerate(sm.satellites):
+        if sm.include_sp2sp:  # Only when links needed
+            satellite.num_sat_in_view = 0
+            for idx_sat2 in range(sm.num_sat):
+                if idx_sat != idx_sat2 and sm.sp2sp[idx_sat][idx_sat2].link_in_use:
+                    if sm.sp2sp[idx_sat][idx_sat2].compute_link(satellite, sm.satellites[idx_sat2]):
+                        satellite.idx_sat_in_view = idx_sat2
+                        satellite.num_sat_in_view += 1
 
 
 def update_stations(sm):
@@ -65,32 +67,38 @@ def update_stations(sm):
     for idx_station, station in enumerate(sm.stations):
         station.num_sat_in_view = 0  # Reset before loop
         station.det_pvt_eci(sm.time_gmst)
-        for idx_sat, satellite in enumerate(sm.satellites):
-            if sm.gr2sp[idx_station][idx_sat].link_in_use:  # from receiver constellation
-                sm.gr2sp[idx_station][idx_sat].compute_link(station, satellite)
-                if sm.gr2sp[idx_station][idx_sat].check_masking_station(station):  # Above elevation mask
-                    station.idx_sat_in_view[station.num_sat_in_view] = idx_sat
-                    station.num_sat_in_view += 1
-                    # Compute which stations are in view from this satellite (DOC)
-                    satellite.idx_stat_in_view[satellite.num_stat_in_view] = idx_station
-                    satellite.num_stat_in_view += 1
+
+        # Compute station to satellite links
+        if sm.include_gr2sp:  # Only when links needed
+            for idx_sat, satellite in enumerate(sm.satellites):
+                if sm.gr2sp[idx_station][idx_sat].link_in_use:  # from receiver constellation
+                    sm.gr2sp[idx_station][idx_sat].compute_link(station, satellite)
+                    if sm.gr2sp[idx_station][idx_sat].check_masking_station(station):  # Above elevation mask
+                        station.idx_sat_in_view[station.num_sat_in_view] = idx_sat
+                        station.num_sat_in_view += 1
+                        # Compute which stations are in view from this satellite (DOC)
+                        satellite.idx_stat_in_view[satellite.num_stat_in_view] = idx_station
+                        satellite.num_stat_in_view += 1
 
 
 def update_users(sm):
     # Compute user positions/velocities in ECI, compute connection to satellite,
     # and remember which ones are in view
-    for idx_user,user in enumerate(sm.users):
+    for idx_user, user in enumerate(sm.users):
         user.num_sat_in_view = 0  # Reset before loop
         if user.type == "Static" or user.type == "Grid":
             user.det_pvt_eci(sm.time_gmst)  # Compute position/velocity in ECI
         if user.type == "Spacecraft":
             user.det_pvt_tle(sm.time_gmst, sm.time_mjd)  # Spacecraft position from TLE
-        for idx_sat, satellite in enumerate(sm.satellites):
-            if sm.usr2sp[idx_user][idx_sat].link_in_use:  # From Receiver Constellation of User
-                sm.usr2sp[idx_user][idx_sat].compute_link(user, satellite)
-                if sm.usr2sp[idx_user][idx_sat].check_masking_user(user):  # Above elevation mask
-                    user.idx_sat_in_view[sm.users[idx_user].num_sat_in_view] = idx_sat
-                    user.num_sat_in_view += 1
+
+        # Compute user to satellite links
+        if sm.include_usr2sp:  # Only when links needed
+            for idx_sat, satellite in enumerate(sm.satellites):
+                if sm.usr2sp[idx_user][idx_sat].link_in_use:  # From Receiver Constellation of User
+                    sm.usr2sp[idx_user][idx_sat].compute_link(user, satellite)
+                    if sm.usr2sp[idx_user][idx_sat].check_masking_user(user):  # Above elevation mask
+                        user.idx_sat_in_view[sm.users[idx_user].num_sat_in_view] = idx_sat
+                        user.num_sat_in_view += 1
 
 
 def main():

@@ -1,7 +1,7 @@
 import numpy as np
 from math import floor
 
-from constants import PI
+from constants import PI, R_EARTH
 import misc_fn
 
 
@@ -238,10 +238,10 @@ class Space2SpaceLink:
         self.metric = []  # For analysis purposes
 
     def compute_link(self, sat_1, sat_2):
+        # Compute distance, vector and if Earth is in between...
+        # Returns True if the Earth is not in between both satellites
 
-        # For reasons of speed this function is coded inline, since this function is done for every time step,
-        # for every combination of user and satellite. Also the computation of azimuth is not done standard,
-        # since it takes more time and not needed by all analysis
+        intersect, i_x1, i_x2 = misc_fn.line_sphere_intersect(sat_1.pvt_eci, sat_2.pvt_eci, R_EARTH, [0,0,0])
 
         self.sp2sp_ecf = [sat_2.pvt_ecf[i] - sat_1.pvt_ecf[i] for i in range(3)]
 
@@ -250,7 +250,7 @@ class Space2SpaceLink:
         self.azimuth_tx, self.elevation_tx = misc_fn.calc_az_el(sat_1.pvt_ecf, sat_2.pvt_ecf)
         self.azimuth_rx, self.elevation_rx = misc_fn.calc_az_el(sat_2.pvt_ecf, sat_1.pvt_ecf)
 
-        return 1
+        return not intersect
 
     def check_masking(self, sat_tx, sat_rx):
 
