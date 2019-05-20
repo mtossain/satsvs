@@ -444,7 +444,6 @@ class AnalysisCovSatelliteVisibleGrid(AnalysisBase):
 
     def after_loop(self, sm):
         fig = plt.figure(figsize=(10, 5))
-        plt.subplots_adjust(left=.1, right=.9, top=0.99, bottom=0.01)
         metric, latitudes, longitudes = [], [], []
         for user in sm.users:
             if self.statistic == 'Min':
