@@ -264,7 +264,7 @@ class AppConfig:
                     self.gr2sp[idx_station][idx_sat].link_in_use = True
                 else:
                     self.gr2sp[idx_station][idx_sat].link_in_use = False
-        ls.logger.info(["Loaded: ", len(self.gr2sp), " number of Ground Station to Spacecraft links"])
+        ls.logger.info(f'Loaded {len(self.gr2sp)*self.num_sat} number of Station to Spacecraft links')
 
         # USER <->SATELLITE LINKS
         self.usr2sp = [[User2SpaceLink() for j in range(self.num_sat)] for i in range(self.num_user)]
@@ -274,7 +274,7 @@ class AppConfig:
                     self.usr2sp[idx_user][idx_sat].link_in_use = True
                 else:
                     self.usr2sp[idx_user][idx_sat].link_in_use = False
-        ls.logger.info(["Loaded: ", len(self.usr2sp), " number of User to Spacecraft links"])
+        ls.logger.info(f'Loaded {len(self.usr2sp)*self.num_sat} number of User to Spacecraft links')
 
         # SATELLITE <->SATELLITE LINKS
         self.sp2sp = [[Space2SpaceLink() for j in range(self.num_sat)] for i in range(self.num_sat)]
@@ -283,11 +283,11 @@ class AppConfig:
                 if idx_sat1 != idx_sat2:  # avoid link to itself
                     self.sp2sp[idx_sat1][idx_sat2].idx_sat_tx = idx_sat1
                     self.sp2sp[idx_sat1][idx_sat2].idx_sat_rx = idx_sat2
-        ls.logger.info(["Loaded: ", len(self.sp2sp), " number of Spacecraft to Spacecraft links"])
+        ls.logger.info(f'Loaded {len(self.sp2sp)*self.num_sat} number of Spacecraft to Spacecraft links')
 
         # Allocate the memory for the lists of links
         for j in range(self.num_sat):
-            self.satellites[j].idx_stat_in_view = self.num_station * [999999]
+            self.satellites[j].idx_stat_in_view = self.num_station * [999999]  # TODO is this the proper way to do it?
         for j in range(self.num_user):
             self.users[j].idx_sat_in_view = self.num_sat*[999999]
 
@@ -303,9 +303,9 @@ class AppConfig:
             self.include_gr2sp = str2bool(sim.find('IncludeStation2SpaceLinks').text)
             self.include_usr2sp = str2bool(sim.find('IncludeUser2SpaceLinks').text)
             self.include_sp2sp = str2bool(sim.find('IncludeSpace2SpaceLinks').text)
-            ls.logger.info(['Loaded simulation, start:', str(self.start_time), 'stop:', str(self.stop_time),
-                            'TimeStep', str(self.time_step)])
 
+            ls.logger.info(f'Loaded simulation, start MJD: {self.start_time}, stop MJD: {self.stop_time},' +
+                           f' number of time steps: {self.time_step}')
             for analysis_node in root.iter('Analysis'):  # Only one analysis can be performed at a time
                 if analysis_node.find('Type').text == 'cov_ground_track':
                     self.analysis = AnalysisCovGroundTrack()
@@ -327,6 +327,7 @@ class AppConfig:
                     self.analysis = AnalysisCovSatelliteVisibleGrid()
                 if analysis_node.find('Type').text == 'cov_satellite_visible_id':
                     self.analysis = AnalysisCovSatelliteVisibleId()
+                self.analysis.type = analysis_node.find('Type').text
                 self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 
         self.num_epoch = floor(86400 * (self.stop_time - self.start_time) / self.time_step)

@@ -56,8 +56,7 @@ class AnalysisCovDepthOfCoverage(AnalysisBase):
             satellite.metric[sm.cnt_epoch, 2] = satellite.num_stat_in_view
 
     def after_loop(self, sm):
-        fig = plt.figure(figsize=(10, 6))
-        plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
+        fig = plt.figure(figsize=(10, 5))
         for satellite in sm.satellites:
             plt.scatter(satellite.metric[:, 1], satellite.metric[:, 0],
                         c=satellite.metric[:, 2])
@@ -68,6 +67,7 @@ class AnalysisCovDepthOfCoverage(AnalysisBase):
         for station in sm.stations:
             plt.plot(degrees(station.lla[1]), degrees(station.lla[0]), 'r^')
         m.drawcoastlines()
+        plt.subplots_adjust(left=.12, right=.999, top=0.999, bottom=0.01)
         plt.text(50, 80, 'Red triangles: station locations')
         plt.savefig('output/'+self.type+'.png')
         plt.show()
@@ -107,8 +107,7 @@ class AnalysisCovGroundTrack(AnalysisBase):
 
     def after_loop(self, sm):
 
-        fig = plt.figure(figsize=(10, 6))
-        plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
+        fig = plt.figure(figsize=(10, 5))
         m = Basemap(projection='cyl', lon_0=0)
         m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
         m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
@@ -124,7 +123,7 @@ class AnalysisCovGroundTrack(AnalysisBase):
                 y, x = satellite.metric[:, 0], satellite.metric[:, 1]
                 plt.plot(x, y, '+', label=str(satellite.sat_id))
             plt.legend(fontsize=8)
-        plt.tight_layout()
+        plt.subplots_adjust(left=.08, right=.95, top=0.9, bottom=0.1)
         plt.savefig('output/'+self.type+'.png')
         plt.show()
 
@@ -153,14 +152,13 @@ class AnalysisCovPassTime(AnalysisBase):
                     user.metric[sm.cnt_epoch, user.idx_sat_in_view[j]] = True
 
     def after_loop(self, sm):
-        fig = plt.figure(figsize=(10, 6))
-        plt.subplots_adjust(left=.1, right=.9, top=0.99, bottom=0.01)
+        fig = plt.figure(figsize=(10, 5))
         lats, lons = [], []
         time_step = int((self.times_mjd[1] - self.times_mjd[0]) * 86400)
         metric = np.zeros(len(sm.users))
-        for idx_usr, user in sm.users:
+        for idx_usr, user in enumerate(sm.users):
             valid_value_list = []  # Define and clear
-            for idx_sat, satellite in sm.satellites:
+            for idx_sat, satellite in enumerate(sm.satellites):
                 for idx_tim in range(1, len(self.times_f_doy)):  # Loop over time (ignoring first)
                     if user.metric[idx_tim - 1][idx_sat] and not user.metric[idx_tim][idx_sat]:  # End pass detected
                         length_of_pass = 1  # Compute the length of the pass
@@ -201,6 +199,7 @@ class AnalysisCovPassTime(AnalysisBase):
         m.drawcoastlines()
         cb = m.colorbar(im1, "right", size="2%", pad="2%")
         cb.set_label(self.statistic + ' Pass Time Interval [s]', fontsize=10)
+        plt.subplots_adjust(left=.1, right=.9, top=0.9, bottom=0.1)
         plt.savefig('output/'+self.type+'.png')
         plt.show()
 
@@ -211,6 +210,7 @@ class AnalysisCovSatelliteContour(AnalysisBase):
         super().__init__()
         self.constellation_id = 0  # Mandatory
         self.satellite_id = ''  # Mandatory
+        self.elevation_mask = 0  # Mandatory
         self.idx_found_satellite = 0
 
     def read_config(self, node):
@@ -218,6 +218,8 @@ class AnalysisCovSatelliteContour(AnalysisBase):
             self.constellation_id = int(node.find('ConstellationID').text)
         if node.find('SatelliteID') is not None:
             self.satellite_id = int(node.find('SatelliteID').text)
+        if node.find('ElevationMask') is not None:
+            self.elevation_mask = float(node.find('ElevationMask').text)
 
     def before_loop(self, sm):
         # Find the index of the satellite that is needed
@@ -231,15 +233,15 @@ class AnalysisCovSatelliteContour(AnalysisBase):
         pass
 
     def after_loop(self, sm):
-        fig = plt.figure(figsize=(10, 6))
-        plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
+        fig = plt.figure(figsize=(10, 5))
         sm.satellites[self.idx_found_satellite].det_lla()
         contour = misc_fn.sat_contour(sm.satellites[self.idx_found_satellite].lla, self.elevation_mask)
         m = Basemap(projection='cyl', lon_0=0)
         m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
         m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
         m.drawcoastlines()
-        plt.plot(degrees(contour[:, 1]), degrees(contour[:, 0]), 'r.')
+        plt.plot(contour[:, 1]/PI*180, contour[:, 0]/PI*180, 'r.')
+        plt.subplots_adjust(left=.1, right=.9, top=0.9, bottom=0.1)
         plt.savefig('output/'+self.type+'.png')
         plt.show()
 
@@ -249,10 +251,13 @@ class AnalysisCovSatelliteHighest(AnalysisBase):
     def __init__(self):
         super().__init__()
         self.statistic = ''  # Mandatory
+        self.constellation_id = 0  # Mandatory
 
     def read_config(self, node):
         if node.find('Statistic') is not None:
             self.statistic = node.find('Statistic').text
+        if node.find('ConstellationID') is not None:
+            self.constellation_id = int(node.find('ConstellationID').text)
 
     def before_loop(self, sm):
         for user in sm.users:
@@ -269,8 +274,7 @@ class AnalysisCovSatelliteHighest(AnalysisBase):
             user.metric[sm.cnt_epoch] = best_satellite_value
 
     def after_loop(self, sm):
-        fig = plt.figure(figsize=(10, 6))
-        plt.subplots_adjust(left=.1, right=.9, top=0.99, bottom=0.01)
+        fig = plt.figure(figsize=(10, 5))
         metric, lats, lons = [], [], []
         for user in sm.users:
             if self.statistic == 'Min':
@@ -295,6 +299,7 @@ class AnalysisCovSatelliteHighest(AnalysisBase):
         m.drawcoastlines()
         cb = m.colorbar(im1, "right", size="2%", pad="2%")
         cb.set_label(self.statistic + ' of Max Elevation satellites in view', fontsize=10)
+        plt.subplots_adjust(left=.1, right=.9, top=0.9, bottom=0.1)
         plt.savefig('output/'+self.type+'.png')
         plt.show()
 
@@ -427,7 +432,7 @@ class AnalysisCovSatelliteVisibleGrid(AnalysisBase):
 
     def read_config(self, node):
         if node.find('Statistic') is not None:
-            self.statistic = int(node.find('Statistic').text)
+            self.statistic = node.find('Statistic').text
 
     def before_loop(self, sm):
         for user in sm.users:
@@ -438,9 +443,9 @@ class AnalysisCovSatelliteVisibleGrid(AnalysisBase):
             user.metric[sm.cnt_epoch] = user.num_sat_in_view
 
     def after_loop(self, sm):
-        fig = plt.figure(figsize=(10, 6))
+        fig = plt.figure(figsize=(10, 5))
         plt.subplots_adjust(left=.1, right=.9, top=0.99, bottom=0.01)
-        metric, lats, lons = [], [], []
+        metric, latitudes, longitudes = [], [], []
         for user in sm.users:
             if self.statistic == 'Min':
                 metric.append(np.min(user.metric))
@@ -452,10 +457,10 @@ class AnalysisCovSatelliteVisibleGrid(AnalysisBase):
                 metric.append(np.std(user.metric))
             if self.statistic == 'Median':
                 metric.append(np.median(user.metric))
-            lats.append(degrees(user.lla[0]))
-            lons.append(degrees(user.lla[1]))
-        x_new = np.reshape(np.array(lons), (sm.users[0].num_lat, sm.users[0].num_lon))
-        y_new = np.reshape(np.array(lats), (sm.users[0].num_lat, sm.users[0].num_lon))
+            latitudes.append(degrees(user.lla[0]))
+            longitudes.append(degrees(user.lla[1]))
+        x_new = np.reshape(np.array(longitudes), (sm.users[0].num_lat, sm.users[0].num_lon))
+        y_new = np.reshape(np.array(latitudes), (sm.users[0].num_lat, sm.users[0].num_lon))
         z_new = np.reshape(np.array(metric), (sm.users[0].num_lat, sm.users[0].num_lon))
         m = Basemap(projection='cyl', lon_0=0)
         im1 = m.pcolormesh(x_new, y_new, z_new, shading='flat', cmap=plt.cm.jet, latlon=True)
@@ -463,7 +468,8 @@ class AnalysisCovSatelliteVisibleGrid(AnalysisBase):
         m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])
         m.drawcoastlines()
         cb = m.colorbar(im1, "right", size="2%", pad="2%")
-        cb.set_label(self.Statistic + ' Number of satellites in view', fontsize=10)
+        cb.set_label(self.statistic + ' Number of satellites in view', fontsize=10)
+        plt.subplots_adjust(left=.1, right=.9, top=0.9, bottom=0.1)
         plt.savefig('output/'+self.type+'.png')
         plt.show()
 

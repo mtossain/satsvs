@@ -105,7 +105,7 @@ def main():
 
     sm = load_configuration()  # load config into sm status machine holds status of sat, station, user and links
     sm.analysis.before_loop(sm)  # Run analysis which is needed before time loop
-    ls.logger.info('Read configuration file')
+    ls.logger.info('Finished reading configuration file')
 
     while round(sm.time_mjd * 86400) < round(sm.stop_time * 86400):  # Loop over simulation time window
 
@@ -119,10 +119,10 @@ def main():
 
         sm.cnt_epoch += 1
         sm.time_mjd += sm.time_step / 86400.0 # Update time
-        ls.logger.info(['Sim Time:', sm.time_str, 'Time Step:', str(sm.cnt_epoch)])
+        ls.logger.info(f'Simulation time: {sm.time_str}, time step: {sm.cnt_epoch}')
 
     sm.analysis.after_loop(sm)  # Run analysis after time loop
-    ls.logger.info(['Plot Analysis:', sm.analysis.type])
+    ls.logger.info(f'Plotting analysis {sm.analysis.type}')
 
 
 if __name__ == '__main__':

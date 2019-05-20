@@ -19,7 +19,7 @@ parameters and analysis are defined. Analysis can be added as wished, the baseli
 - __cov_satellite_contour__: Satellite ground visibility contour at StopDate
 - __cov_satellite_sky_angles__: Satellite Azimuth and Elevation for selected user (also spacecraft user)
 - __cov_satellite_highest__: Satellite elevation statistics for highest satellite in view for user grid
-- __cov_depth_of_coverage__: Number of station in view of each satellite, depth of coverage (DOC) based on satellite ground track
+- __cov_depth_of_coverage__: Depth of station coverage (DOC) based on satellite ground track
 - __cov_pass_time__: Satellite passes time statistics for user grid
 
 To be implemented at a later stage:

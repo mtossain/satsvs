@@ -664,30 +664,30 @@
 	</GroundSegment>
   <!--Defines the users that should be simulated-->
 	<UserSegment>
-<!--	    <Type>Grid</Type>-->
-<!--	    <LatMin>-90</LatMin>-->
-<!--	    <LatMax>90</LatMax>-->
-<!--	    <LonMin>-180</LonMin>-->
-<!--	    <LonMax>180</LonMax>-->
-<!--	    <LatStep>10</LatStep>-->
-<!--	    <LonStep>10</LonStep>-->
-<!--	    <Height>0.0</Height>-->
-<!--	    <ReceiverConstellation>111</ReceiverConstellation>-->
-<!--	    <ElevationMask>5.0</ElevationMask>-->
-
-	    <Type>Static</Type>
-	    <Latitude>50</Latitude>
-	    <Longitude>10</Longitude>
-	    <Height>0</Height>
+	    <Type>Grid</Type>
+	    <LatMin>-90</LatMin>
+	    <LatMax>90</LatMax>
+	    <LonMin>-180</LonMin>
+	    <LonMax>180</LonMax>
+	    <LatStep>10</LatStep>
+	    <LonStep>10</LonStep>
+	    <Height>0.0</Height>
 	    <ReceiverConstellation>111</ReceiverConstellation>
-	    <ElevationMask>5</ElevationMask>
+	    <ElevationMask>5.0</ElevationMask>
+
+<!--	    <Type>Static</Type>-->
+<!--	    <Latitude>50</Latitude>-->
+<!--	    <Longitude>10</Longitude>-->
+<!--	    <Height>0</Height>-->
+<!--	    <ReceiverConstellation>111</ReceiverConstellation>-->
+<!--	    <ElevationMask>5</ElevationMask>-->
 
 	</UserSegment>
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
 
 	    <StartDate>2010-05-08 00:00:00</StartDate>
-	    <StopDate>2010-05-08 12:00:00</StopDate>
+	    <StopDate>2010-05-08 01:00:00</StopDate>
 	    <TimeStep>900</TimeStep>
 		<IncludeStation2SpaceLinks>True</IncludeStation2SpaceLinks>
 		<IncludeUser2SpaceLinks>True</IncludeUser2SpaceLinks>
@@ -713,12 +713,12 @@
 <!--      <ConstellationID>1</ConstellationID>-->
 <!--    </Analysis>-->
 
-<!--    <Analysis>-->
-<!--      <Type>cov_satellite_contour</Type>-->
-<!--      <ConstellationID>1</ConstellationID>-->
-<!--      <SatelliteID>1</SatelliteID>-->
-<!--      <ElevationMask>20</ElevationMask>-->
-<!--    </Analysis>-->
+    <Analysis>
+      <Type>cov_satellite_contour</Type>
+      <ConstellationID>1</ConstellationID>
+      <SatelliteID>1</SatelliteID>
+      <ElevationMask>20</ElevationMask>
+    </Analysis>
 
 <!--    <Analysis>-->
 <!--      <Type>cov_satellite_sky_angles</Type>-->
@@ -726,9 +726,9 @@
 <!--      <SatelliteID>1</SatelliteID>-->
 <!--    </Analysis>-->
 
-		<Analysis>
-			<Type>cov_depth_of_coverage</Type>
-		</Analysis>
+<!--		<Analysis>-->
+<!--			<Type>cov_depth_of_coverage</Type>-->
+<!--		</Analysis>-->
 
 <!--		<Analysis>-->
 <!--			<Type>cov_pass_time</Type>-->
