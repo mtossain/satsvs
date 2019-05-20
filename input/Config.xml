@@ -726,9 +726,9 @@
 <!--      <SatelliteID>1</SatelliteID>-->
 <!--    </Analysis>-->
 
-		<Analysis>
-			<Type>cov_depth_of_coverage</Type>
-		</Analysis>
+<!--		<Analysis>-->
+<!--			<Type>cov_depth_of_coverage</Type>-->
+<!--		</Analysis>-->
 
 <!--		<Analysis>-->
 <!--			<Type>cov_pass_time</Type>-->
@@ -736,11 +736,11 @@
 <!--			<Statistic>Max</Statistic>-->
 <!--		</Analysis>-->
 
-<!--    <Analysis>-->
-<!--      <Type>cov_satellite_highest</Type>-->
-<!--      <ConstellationID>1</ConstellationID>-->
-<!--      <Statistic>Mean</Statistic>-->
-<!--    </Analysis>-->
+    <Analysis>
+      <Type>cov_satellite_highest</Type>
+      <ConstellationID>1</ConstellationID>
+      <Statistic>Mean</Statistic>
+    </Analysis>
 
 <!--    <Analysis>-->
 <!--      <Type>cov_satellite_pvt</Type>-->
