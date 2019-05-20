@@ -1,15 +1,17 @@
-# TODO make available different block
-# TODO write user manual in GIT Readme
 # TODO different propagators including SGP4 and HPOP
+# TODO analysis COM
+# TODO analysis NAV
+# TODO analysis OBS
+
 # TODO satellite orbit run from previous run, so to save time
 # TODO S2G and S2S only when needed with flag...
-# TODO analysis 20 series
-# TODO analysis navigation
-# TODO analysis earth observation
-# TODO refactor names of variables and classes
+# TODO make available different blocks
 # TODO simplify config.xml (cleanup unused headings)
 # TODO receiverconstellation by list True/False with commas
 # TODO analysis visible satellite for users static, grid and satellite
+# TODO analysis one or more users or satellites
+
+
 import os
 if os.path.exists('output/main.log'):
     os.remove('output/main.log')
@@ -22,7 +24,7 @@ import logging_svs as ls
 
 
 def load_configuration():
-    sm = config.AppConfig('input/Config.xml' )
+    sm = config.AppConfig('input/Config.xml')
     sm.load_satellites()
     sm.load_stations()
     sm.load_users()
@@ -33,10 +35,10 @@ def load_configuration():
 
 def convert_times(sm):
     run_time_str = Time(sm.time_mjd, format='mjd').iso
-    sm.time_gmst = misc_fn.MJD2GMST(sm.time_mjd)  # Determine GMST from MJD
+    sm.time_gmst = misc_fn.mjd2gmst(sm.time_mjd)  # Determine GMST from MJD
     sm.analysis.times_mjd.append(sm.time_mjd)  # Keep for plotting
     date = datetime.datetime.strptime(run_time_str[:-4], '%Y-%m-%d %H:%M:%S')
-    sm.analysis.times_fDOY.append(date.timetuple().tm_yday + date.hour / 24 +
+    sm.analysis.times_f_doy.append(date.timetuple().tm_yday + date.hour / 24 +
                                date.minute / 60 / 24 + date.second / 3600 / 24)
     sm.time_str = run_time_str[:-4]
 
@@ -44,11 +46,11 @@ def convert_times(sm):
 def update_satellites(sm):
     CntSatellite = 0
     for satellite in sm.satellites:
-        satellite.DeterminePosVelECI(sm.time_mjd)
-        satellite.DeterminePosVelECF(sm.time_gmst)
-        satellite.NumStationInView = 0  # Reset before loop
+        satellite.det_pvt_eci(sm.time_mjd)
+        satellite.det_pvt_ecf(sm.time_gmst)
+        satellite.num_stat_in_view = 0  # Reset before loop
         # Compute satellite to satellite links # TODO Check space to space link
-        satellite.NumSatelliteInView = 0
+        satellite.num_sat_in_view = 0
         # for CntSatellite2 in range(sm.NumSat):
         #     if sm.sp2sp[CntSatellite].LinkInUse:  # From Receiver Constellation of Spacecraft TBD
         #         sm.sp2sp[CntSatellite].ComputeLink(satellite, sm.satellites[CntSatellite2])
@@ -56,66 +58,63 @@ def update_satellites(sm):
         #         satellite.NumSatelliteInView += 1
         #         CntSatellite += 1
 
+
 def update_stations(sm):
     # Compute ground station positions/velocities in ECI, compute connection to satellite,
     # and remember which ones are in view
-    for idx_station,station in enumerate(sm.stations):
-        station.NumSatInView = 0  # Reset before loop
-        station.DeterminePosVelECI(sm.time_gmst)
-        for idx_sat,satellite in enumerate(sm.satellites):
-            if sm.gr2sp[idx_station * sm.NumSat + idx_sat].LinkInUse:  # from receiver constellation
-                sm.gr2sp[idx_station * sm.NumSat + idx_sat].ComputeLinkGroundStation(station, satellite)
-                if sm.gr2sp[idx_station * sm.NumSat + idx_sat].CheckMaskingStation(station):  # Above elevation mask
-                    station.IdxSatInView[station.NumSatInView] = idx_sat
-                    station.NumSatInView += 1
+    for idx_station, station in enumerate(sm.stations):
+        station.num_sat_in_view = 0  # Reset before loop
+        station.det_pvt_eci(sm.time_gmst)
+        for idx_sat, satellite in enumerate(sm.satellites):
+            if sm.gr2sp[idx_station][idx_sat].link_in_use:  # from receiver constellation
+                sm.gr2sp[idx_station][idx_sat].compute_link(station, satellite)
+                if sm.gr2sp[idx_station][idx_sat].check_masking_station(station):  # Above elevation mask
+                    station.idx_sat_in_view[station.num_sat_in_view] = idx_sat
+                    station.num_sat_in_view += 1
                     # Compute which stations are in view from this satellite (DOC)
-                    satellite.IdxStationInView[satellite.NumStationInView] = idx_station
-                    satellite.NumStationInView += 1
+                    satellite.idx_stat_in_view[satellite.num_stat_in_view] = idx_station
+                    satellite.num_stat_in_view += 1
 
 
 def update_users(sm):
     # Compute user positions/velocities in ECI, compute connection to satellite,
     # and remember which ones are in view
     for idx_user,user in enumerate(sm.users):
-        user.NumSatInView = 0  # Reset before loop
-        if user.Type == "Static" or user.Type == "Grid":
-            user.DeterminePosVelECI(sm.time_gmst)  # Compute position/velocity in ECI
-        if user.Type == "Spacecraft":
-            user.DeterminePosVelTLE(sm.time_gmst, sm.time_mjd)  # Spacecraft position from TLE
+        user.num_sat_in_view = 0  # Reset before loop
+        if user.type == "Static" or user.type == "Grid":
+            user.det_pvt_eci(sm.time_gmst)  # Compute position/velocity in ECI
+        if user.type == "Spacecraft":
+            user.det_pvt_tle(sm.time_gmst, sm.time_mjd)  # Spacecraft position from TLE
         for idx_sat, satellite in enumerate(sm.satellites):
-            idx_usr2sat = idx_user * sm.NumSat + idx_sat
-            if sm.usr2sp[idx_usr2sat].LinkInUse:  # From Receiver Constellation of User
-                sm.usr2sp[idx_usr2sat].ComputeLinkUser(user, satellite)
-                if sm.usr2sp[idx_usr2sat].CheckMaskingUser(user):  # Above elevation mask
-                    user.IdxSatInView[sm.users[idx_user].NumSatInView] = idx_sat
-                    user.NumSatInView += 1
+            if sm.usr2sp[idx_user][idx_sat].link_in_use:  # From Receiver Constellation of User
+                sm.usr2sp[idx_user][idx_sat].compute_link(user, satellite)
+                if sm.usr2sp[idx_user][idx_sat].check_masking_user(user):  # Above elevation mask
+                    user.idx_sat_in_view[sm.users[idx_user].num_sat_in_view] = idx_sat
+                    user.num_sat_in_view += 1
 
 
 def main():
 
     sm = load_configuration()  # load config into sm status machine holds status of sat, station, user and links
+    sm.analysis.before_loop(sm)  # Run analysis which is needed before time loop
     ls.logger.info('Read configuration file')
 
-    sm.analysis.before_loop(sm)  # Run analysis which is needed before time loop
-
-    while round(sm.time_mjd * 86400) < round(sm.StopDateTime * 86400):  # Loop over simulation time window
+    while round(sm.time_mjd * 86400) < round(sm.stop_time * 86400):  # Loop over simulation time window
 
         convert_times(sm)  # Convert times in mjd, gmst, string format
 
         update_satellites(sm)  # Update pvt on satellites and links
-
         update_stations(sm)  # Update pvt on ground stations and links
-
         update_users(sm)  # Update pvt on users and links
 
         sm.analysis.in_loop(sm)  # Run analyses which are needed in time loop
 
         sm.cnt_epoch += 1
-        sm.time_mjd += sm.TimeStep / 86400.0 # Update time
+        sm.time_mjd += sm.time_step / 86400.0 # Update time
         ls.logger.info(['Sim Time:', sm.time_str, 'Time Step:', str(sm.cnt_epoch)])
 
     sm.analysis.after_loop(sm)  # Run analysis after time loop
-    ls.logger.info(['Plot Analysis:', sm.analysis.Type])
+    ls.logger.info(['Plot Analysis:', sm.analysis.type])
 
 
 if __name__ == '__main__':

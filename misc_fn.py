@@ -1,8 +1,7 @@
 import math
-from math import sin, cos, tan, atan2, atan, sqrt, fabs, asin, acos
-from constants import pi, GM_Earth, R_Earth
+from math import sin, cos, tan, atan2, atan, sqrt, fabs, asin, acos, floor
+from constants import PI, GM_EARTH, R_EARTH
 import numpy as np
-# TODO refactor names and variables
 
 
 # Compute Modified Julian Date from YYYY and Day Of Year pair
@@ -11,14 +10,14 @@ import numpy as np
 # @param YYYY Year (year)
 # @param DOY Day of year (days)
 # @return Modified Julian Date
-def YYYYDOY2MJD(YYYY, DOY):
+def yyyy_doy2mjd(yyyy, doy):
 
     mjd_jan1_1901 = 15385
     days_per_second = 0.00001157407407407407
 
-    yday = int(math.floor(DOY))
-    fDOY = DOY - yday
-    full_seconds = fDOY * 86400.0
+    y_day = int(math.floor(doy))
+    f_doy = doy - y_day
+    full_seconds = f_doy * 86400.0
     hours = full_seconds / 3600.0
     hour = int(math.floor(hours))
     rest = full_seconds - hour * 3600
@@ -26,40 +25,40 @@ def YYYYDOY2MJD(YYYY, DOY):
     minute = int(math.floor(minutes))
     second = full_seconds - hour * 3600 - minute * 60
 
-    years_into_election = (YYYY - 1) % 4
-    elections = int((YYYY - 1901) / 4)
+    years_into_election = (yyyy - 1) % 4
+    elections = int((yyyy - 1901) / 4)
 
-    pfmjd = (hour * 3600 + minute * 60 + second) * days_per_second
-    pmjd = mjd_jan1_1901 + elections * 1461 + years_into_election * 365 + yday - 1
+    pf_mjd = (hour * 3600 + minute * 60 + second) * days_per_second
+    p_mjd = mjd_jan1_1901 + elections * 1461 + years_into_election * 365 + y_day - 1
 
-    return pfmjd + pmjd
+    return pf_mjd + p_mjd
+
 
 # Compute Greenwich Mean Sidereal Time from Modified Julian Date
 # Ref. Time functions from SP3 library B.Remondi.
 #
 # @param MJD_Requested Modified Julian Date (days/double)
-# @return Greenwich Mean Sidereal Time (radians/double) [0 to 2pi]
+# @return Greenwich Mean Sidereal Time (radians/double) [0 to 2PI]
+def mjd2gmst(mjd_requested):
 
-def MJD2GMST(MJD_Requested):
-
-    JD = MJD_Requested + 2400000.5
+    jd = mjd_requested + 2400000.5
 
     # centuries elapsed since 2000,1,1.5
-    TU = (JD - 2451545) / 36525
+    tu = (jd - 2451545) / 36525
 
     # gmst in time-seconds at 0 ut
-    THETAN = 24110.54841 + (8640184.812866 * TU)+(0.093104 * TU * TU)-(6.2e-6 * TU * TU * TU)
+    theta_n = 24110.54841 + (8640184.812866 * tu)+(0.093104 * tu * tu)-(6.2e-6 * tu * tu * tu)
 
     # correction for other time than 0 ut modulo rotations
-    THETA0 = 43200.0 + (3155760000.0 * TU)
-    THETAN = THETAN + (THETA0 % 86400)
+    theta_0 = 43200.0 + (3155760000.0 * tu)
+    theta_n = theta_n + (theta_0 % 86400)
 
     # gmst in radians
-    THETAN = ((THETAN / 43200) * pi) % (2 * pi)
-    if THETAN < 0:
-        THETAN = THETAN + (2 * pi)
+    theta_n = ((theta_n / 43200) * PI) % (2 * PI)
+    if theta_n < 0:
+        theta_n = theta_n + (2 * PI)
 
-    return THETAN
+    return theta_n
 
 # Convert from latitude, longitude and height to ECF cartesian coordinates, taking
 # into account the Earth flattening
@@ -67,34 +66,32 @@ def MJD2GMST(MJD_Requested):
 # Ref. Understanding GPS: Principles and Applications,
 # Elliott D. Kaplan, Editor, Artech House Publishers, Boston 1996.
 #
-# @param LLA Latitude rad/[-pi/2,pi/2] positive N, Longitude rad/[-pi,pi] positive E, height above ellipsoid
+# @param LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
 # @param XYZ ECEF XYZ coordinates in m
+def lla2xyz(lla):
 
-
-def LLA2XYZ(LLA):
-
-    XYZ = 3*[0.0]
+    xyz = 3*[0.0]
     
     a = 6378137.0000
     b = 6356752.3142
     e = sqrt(1 - pow((b / a), 2))
     
-    sinphi = sin(LLA[0])
-    cosphi = cos(LLA[0])
-    coslam = cos(LLA[1])
-    sinlam = sin(LLA[1])
-    tan2phi = pow((tan(LLA[0])), 2.0)
+    sin_phi = sin(lla[0])
+    cos_phi = cos(lla[0])
+    cos_lam = cos(lla[1])
+    sin_lam = sin(lla[1])
+    tan2phi = pow((tan(lla[0])), 2.0)
     tmp = 1.0 - e*e
-    tmpden = sqrt(1.0 + tmp * tan2phi)
+    tmp_den = sqrt(1.0 + tmp * tan2phi)
     
-    XYZ[0] = (a * coslam) / tmpden + LLA[2] * coslam*cosphi
+    xyz[0] = (a * cos_lam) / tmp_den + lla[2] * cos_lam*cos_phi
     
-    XYZ[1] = (a * sinlam) / tmpden + LLA[2] * sinlam*cosphi
+    xyz[1] = (a * sin_lam) / tmp_den + lla[2] * sin_lam*cos_phi
     
-    tmp2 = sqrt(1 - e * e * sinphi * sinphi)
-    XYZ[2] = (a * tmp * sinphi) / tmp2 + LLA[2] * sinphi
+    tmp2 = sqrt(1 - e * e * sin_phi * sin_phi)
+    xyz[2] = (a * tmp * sin_phi) / tmp2 + lla[2] * sin_phi
     
-    return XYZ
+    return xyz
 
 
 # Convert from ECF cartesian coordinates to latitude, longitude and height, taking
@@ -105,14 +102,12 @@ def LLA2XYZ(LLA):
 #      "Electronic Surveying and Navigation", John Wiley & Sons (1976).
 #
 # @param XYZ ECEF XYZ coordinates in m
-# @param LLA Latitude rad/[-pi/2,pi/2] positive N, Longitude rad/[-pi,pi] positive E, height above ellipsoid
+# @param LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
+def xyz2lla(xyz):
 
-
-def XYZ2LLA(XYZ):
-
-    x2 = XYZ[0] * XYZ[0]
-    y2 = XYZ[1] * XYZ[1]
-    z2 = XYZ[2] * XYZ[2]
+    x2 = xyz[0] * xyz[0]
+    y2 = xyz[1] * xyz[1]
+    z2 = xyz[2] * xyz[2]
     
     sma = 6378137.0000  # earth radius in meters
     smb = 6356752.3142  # earth semi minor in meters
@@ -124,32 +119,34 @@ def XYZ2LLA(XYZ):
     r = sqrt(x2 + y2)
     r2 = r*r
     E2 = sma * sma - smb*smb
-    bigf = 54.0 * b2*z2
+    big_f = 54.0 * b2*z2
     G = r2 + (1.0 - e * e) * z2 - e * e*E2
-    smallc = (e * e * e * e * bigf * r2) / (G * G * G)
-    s = pow(1.0 + smallc + sqrt(smallc * smallc + 2.0 * smallc), 1.0 / 3.0)
-    P = bigf / (3.0 * (s + 1.0 / s + 1.0)*(s + 1.0 / s + 1.0) * G * G)
+    small_c = (e * e * e * e * big_f * r2) / (G * G * G)
+    s = pow(1.0 + small_c + sqrt(small_c * small_c + 2.0 * small_c), 1.0 / 3.0)
+    P = big_f / (3.0 * (s + 1.0 / s + 1.0)*(s + 1.0 / s + 1.0) * G * G)
     Q = sqrt(1 + 2 * e2 * e2 * P)
-    ro = -(P * e * e * r) / (1.0 + Q) + sqrt((sma * sma / 2.0)*(1.0 + 1.0 / Q)- (P * (1 - e * e) * z2) / (Q * (1.0 + Q)) - P * r2 / 2.0)
+    ro = -(P * e * e * r) / (1.0 + Q) + sqrt((sma * sma / 2.0)*(1.0 + 1.0 / Q) -
+                                             (P * (1 - e * e) * z2) / (Q * (1.0 + Q)) - P * r2 / 2.0)
     tmp = (r - e * e * ro)*(r - e * e * ro)
     U = sqrt(tmp + z2)
     V = sqrt(tmp + (1 - e * e) * z2)
-    zo = (b2 * XYZ[2]) / (sma * V)
+    zo = (b2 * xyz[2]) / (sma * V)
     
     height = U * (1 - b2 / (sma * V))
     
-    lat = atan((XYZ[2] + ep * ep * zo) / r)
+    lat = atan((xyz[2] + ep * ep * zo) / r)
     
-    temp = atan(XYZ[1] / XYZ[0])
+    temp = atan(xyz[1] / xyz[0])
     
-    if XYZ[0] >= 0:
+    if xyz[0] >= 0:
         lon = temp
-    elif XYZ[0] < 0 and XYZ[1] >= 0:
-        lon = pi + temp
+    elif xyz[0] < 0 and xyz[1] >= 0:
+        lon = PI + temp
     else:
-        lon = temp - pi
+        lon = temp - PI
     
     return [lat, lon, height]
+
 
 # Compute satellite position given Kepler set in ECI reference frame
 #
@@ -163,61 +160,57 @@ def XYZ2LLA(XYZ):
 # double Arg_Of_Perigee
 # double Mean_Anomaly
 # @param Out POS_VEL_XYZ in m and m/s
+def kep2xyz(mjd_requested, kepler):
 
-def KEP2XYZ(MJD_Requested, Kepler):
-
-    Out = 6*[0.0]
-
-    # Set constants
-    mu = GM_Earth
+    out = 6*[0.0]
 
     # Compute radius, corrected right ascension and mean anomaly
-    time_from_ref = (MJD_Requested - Kepler.EpochMJD)*86400
-    mean_motion = sqrt(mu / (pow(Kepler.SemiMajorAxis, 3))) #radians/s
-    mean_anomaly = Kepler.MeanAnomaly + (mean_motion * time_from_ref)
+    time_from_ref = (mjd_requested - kepler.epoch_mjd) * 86400
+    mean_motion = sqrt(GM_EARTH / (pow(kepler.semi_major_axis, 3)))  #radians/s
+    mean_anomaly = kepler.mean_anomaly + (mean_motion * time_from_ref)
 
     # if eccentricity equals zero eccentric anomaly is equal mean anomaly
-    if Kepler.Eccentricity == 0:
+    if kepler.eccentricity == 0:
         eccentric_anomaly = mean_anomaly
     else:
-        eccentric_anomaly = NewtonRaphson(mean_anomaly, Kepler.Eccentricity)
+        eccentric_anomaly = newton_raphson(mean_anomaly, kepler.eccentricity)
 
-    radius = Kepler.SemiMajorAxis * (1 - Kepler.Eccentricity * cos(eccentric_anomaly))
+    radius = kepler.semi_major_axis * (1 - kepler.eccentricity * cos(eccentric_anomaly))
 
-    sin_nu_k = ((sqrt(1 - Kepler.Eccentricity * Kepler.Eccentricity)) * sin(eccentric_anomaly)) / (1 - Kepler.Eccentricity * cos(eccentric_anomaly))
-    cos_nu_k = (cos(eccentric_anomaly) - Kepler.Eccentricity) / (1 - Kepler.Eccentricity * cos(eccentric_anomaly))
+    sin_nu_k = ((sqrt(1 - kepler.eccentricity * kepler.eccentricity)) * sin(eccentric_anomaly)) / (1 - kepler.eccentricity * cos(eccentric_anomaly))
+    cos_nu_k = (cos(eccentric_anomaly) - kepler.eccentricity) / (1 - kepler.eccentricity * cos(eccentric_anomaly))
     true_anomaly = atan2(sin_nu_k, cos_nu_k)
-    arg_of_lat = Kepler.ArgOfPerigee + true_anomaly
+    arg_of_lat = kepler.arg_perigee + true_anomaly
 
     # Apply rotation from elements to xyz
     xyk1 = radius * cos(arg_of_lat)
     xyk2 = radius * sin(arg_of_lat)
-    Out[0] = cos(Kepler.RAAN) * xyk1 + -cos(Kepler.Inclination) * sin(Kepler.RAAN) * xyk2
-    Out[1] = sin(Kepler.RAAN) * xyk1 + cos(Kepler.Inclination) * cos(Kepler.RAAN) * xyk2
-    Out[2] = sin(Kepler.Inclination) * xyk2
+    out[0] = cos(kepler.right_ascension) * xyk1 + -cos(kepler.inclination) * sin(kepler.right_ascension) * xyk2
+    out[1] = sin(kepler.right_ascension) * xyk1 + cos(kepler.inclination) * cos(kepler.right_ascension) * xyk2
+    out[2] = sin(kepler.inclination) * xyk2
 
     # Compute velocity components
-    factor = sqrt(mu / Kepler.SemiMajorAxis / (1 - pow(Kepler.Eccentricity, 2)))
-    sinw = sin(Kepler.ArgOfPerigee)
-    cosw = cos(Kepler.ArgOfPerigee)
-    sino = sin(Kepler.RAAN)
-    coso = cos(Kepler.RAAN)
-    sini = sin(Kepler.Inclination)
-    cosi = cos(Kepler.Inclination)
-    sint = sin(true_anomaly)
-    cost = cos(true_anomaly)
-    l1 = cosw * coso - sinw * sino*cosi
-    m1 = cosw * sino + sinw * coso*cosi
-    n1 = sinw*sini
-    l2 = -sinw * coso - cosw * sino*cosi
-    m2 = -sinw * sino + cosw * coso*cosi
-    n2 = cosw*sini
+    factor = sqrt(GM_EARTH / kepler.semi_major_axis / (1 - pow(kepler.eccentricity, 2)))
+    sin_w = sin(kepler.arg_perigee)
+    cos_w = cos(kepler.arg_perigee)
+    sin_o = sin(kepler.right_ascension)
+    cos_o = cos(kepler.right_ascension)
+    sin_i = sin(kepler.inclination)
+    cos_i = cos(kepler.inclination)
+    sin_t = sin(true_anomaly)
+    cos_t = cos(true_anomaly)
+    l1 = cos_w * cos_o - sin_w * sin_o*cos_i
+    m1 = cos_w * sin_o + sin_w * cos_o*cos_i
+    n1 = sin_w*sin_i
+    l2 = -sin_w * cos_o - cos_w * sin_o*cos_i
+    m2 = -sin_w * sin_o + cos_w * cos_o*cos_i
+    n2 = cos_w*sin_i
 
-    Out[3] = factor * (-l1 * sint + l2 * (Kepler.Eccentricity + cost))
-    Out[4] = factor * (-m1 * sint + m2 * (Kepler.Eccentricity + cost))
-    Out[5] = factor * (-n1 * sint + n2 * (Kepler.Eccentricity + cost))
+    out[3] = factor * (-l1 * sin_t + l2 * (kepler.eccentricity + cos_t))
+    out[4] = factor * (-m1 * sin_t + m2 * (kepler.eccentricity + cos_t))
+    out[5] = factor * (-n1 * sin_t + n2 * (kepler.eccentricity + cos_t))
 
-    return Out
+    return out
 
 
 # Iterates to solution of eccentric_anomaly using numerical solution
@@ -228,19 +221,18 @@ def KEP2XYZ(MJD_Requested, Kepler):
 # @param MeanAnomaly mean anomaly (radians)
 # @param Eccentricity eccentricity (-)
 # @return  Eccentric anomaly (radians)
-
-
-def NewtonRaphson (MeanAnomaly, Eccentricity):
+def newton_raphson (mean_anomaly, eccentricity):
     k = 0
-    E = 50*[0.0]
+    big_e = 50*[0.0]
 
-    E[1] = MeanAnomaly
-    E[0] = MeanAnomaly * 2
-    while fabs(E[k + 1] / E[k] - 1) > 1e-15:
+    big_e[1] = mean_anomaly
+    big_e[0] = mean_anomaly * 2
+
+    while fabs(big_e[k + 1] / big_e[k] - 1) > 1e-15:
         k += 1
-        E[k + 1] = E[k]-((E[k] - Eccentricity * sin(E[k]) - MeanAnomaly) / (1 - Eccentricity * cos(E[k])))
+        big_e[k + 1] = big_e[k]-((big_e[k] - eccentricity * sin(big_e[k]) - mean_anomaly) / (1 - eccentricity * cos(big_e[k])))
 
-    return E[k + 1]
+    return big_e[k + 1]
 
 
 # Rotate vector on z-axis
@@ -248,22 +240,21 @@ def NewtonRaphson (MeanAnomaly, Eccentricity):
 # @param Angle Rotation angle (radians/double)
 # @param Vector Position input vector (1:6) (meters/double)
 # @param Out Rotated position vector (1:6) (meters/double)
-
-def SpinVector(Angle, Vector):
+def spin_vector(angle, vector):
 
     out = 6*[0.0]
     
     # Compute angles to save time
-    cosst = cos(Angle)
-    sinst = sin(Angle)
+    cosst = cos(angle)
+    sinst = sin(angle)
     
-    out[0] = cosst * Vector[0] - sinst * Vector[1]
-    out[1] = sinst * Vector[0] + cosst * Vector[1]
-    out[2] = Vector[2]
+    out[0] = cosst * vector[0] - sinst * vector[1]
+    out[1] = sinst * vector[0] + cosst * vector[1]
+    out[2] = vector[2]
     
-    out[3] = cosst * Vector[3] - sinst * Vector[4]
-    out[4] = sinst * Vector[3] + cosst * Vector[4]
-    out[5] = Vector[5]
+    out[3] = cosst * vector[3] - sinst * vector[4]
+    out[4] = sinst * vector[3] + cosst * vector[4]
+    out[5] = vector[5]
     
     return out
 
@@ -273,16 +264,16 @@ def SpinVector(Angle, Vector):
 # @param Xs Satellite position in ECEF (m/double)
 # @param Xu User position in ECEF (m/double)
 # @param AzEl Azimuth [0] and Elevation [1] (radians/double)
-def CalcAzEl(Xs, Xu):
+def calc_az_el(xs, xu):
 
-    AzEl = 2*[0.0]
+    az_el = 2*[0.0]
 
     e3by3 = [[0,0,0],[0,0,0],[0,0,0]]
     d = 3*[0.0]
 
-    x = Xu[0]
-    y = Xu[1]
-    z = Xu[2]
+    x = xu[0]
+    y = xu[1]
+    z = xu[2]
     p = sqrt(x * x + y * y)
 
     R = sqrt(x * x + y * y + z * z)
@@ -300,26 +291,26 @@ def CalcAzEl(Xs, Xu):
     for k in range(3):
         d[k] = 0.0
         for i in range(3):
-            d[k] += (Xs[i] - Xu[i]) * e3by3[k][i]
+            d[k] += (xs[i] - xu[i]) * e3by3[k][i]
 
     s = d[2] / sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2])
     if s == 1.0:
-        AzEl[1] = 0.5 * pi
+        az_el[1] = 0.5 * PI
     else:
-        AzEl[1] = atan(s / sqrt(1.0 - s * s))
+        az_el[1] = atan(s / sqrt(1.0 - s * s))
 
     if d[1] == 0.0 and d[0] > 0.0:
-        AzEl[0] = 0.5 * pi
+        az_el[0] = 0.5 * PI
     elif d[1] == 0.0 and d[0] < 0.0:
-        AzEl[0] = 1.5 * pi
+        az_el[0] = 1.5 * PI
     else:
-        AzEl[0] = atan(d[0] / d[1])
+        az_el[0] = atan(d[0] / d[1])
         if d[1] < 0.0:
-            AzEl[0] += pi
+            az_el[0] += PI
         elif d[1] > 0.0 and d[0] < 0.0:
-            AzEl[0] += 2.0 * pi
+            az_el[0] += 2.0 * PI
 
-    return AzEl[0], AzEl[1]
+    return az_el[0], az_el[1]
 
 
 # Computes two intersection points for a line and a sphere
@@ -334,41 +325,41 @@ def CalcAzEl(Xs, Xu):
 # @param iX1 Intersection point one
 # @param iX2 Intersection point two
 # @return Returns false if the line does not intersect the sphere
-def GetLineSphereIntersection(X1, X2, SphereRadius, SphereCenterX) :
+def line_sphere_intersect(x1, x2, sphere_radius, sphere_center) :
 
-    iX1 = 3*[0.0]
-    iX2 = 3*[0.0]
+    i_x1 = 3*[0.0]
+    i_x2 = 3*[0.0]
 
-    a = (X2[0] - X1[0])*(X2[0] - X1[0]) + (X2[1] - X1[1])*(X2[1] - X1[1]) + (X2[2] - X1[2])*(X2[2] - X1[2])
+    a = (x2[0] - x1[0]) * (x2[0] - x1[0]) + (x2[1] - x1[1]) * (x2[1] - x1[1]) + (x2[2] - x1[2]) * (x2[2] - x1[2])
 
-    b = 2.0 * ((X2[0] - X1[0])*(X1[0] - SphereCenterX[0]) +(X2[1] - X1[1])*(X1[1] - SphereCenterX[1]) +
-               (X2[2] - X1[2])*(X1[2] - SphereCenterX[2]))
+    b = 2.0 * ((x2[0] - x1[0]) * (x1[0] - sphere_center[0]) + (x2[1] - x1[1]) * (x1[1] - sphere_center[1]) +
+               (x2[2] - x1[2]) * (x1[2] - sphere_center[2]))
 
-    c = SphereCenterX[0] * SphereCenterX[0] + SphereCenterX[1] * SphereCenterX[1] + \
-        SphereCenterX[2] * SphereCenterX[2] + X1[0] * X1[0] + X1[1] * X1[1] + X1[2] * X1[2] - \
-        2.0 * (SphereCenterX[0] * X1[0] + SphereCenterX[1] * X1[1] + SphereCenterX[2] * X1[2]) - \
-        SphereRadius*SphereRadius
+    c = sphere_center[0] * sphere_center[0] + sphere_center[1] * sphere_center[1] + \
+        sphere_center[2] * sphere_center[2] + x1[0] * x1[0] + x1[1] * x1[1] + x1[2] * x1[2] - \
+        2.0 * (sphere_center[0] * x1[0] + sphere_center[1] * x1[1] + sphere_center[2] * x1[2]) - \
+        sphere_radius * sphere_radius
 
-    inSqrt = (b * b - 4.0 * a * c)
+    in_sqrt = (b * b - 4.0 * a * c)
 
     # No intersection
-    if inSqrt < 0:
-        Intersect = False
+    if in_sqrt < 0:
+        intersect = False
 
     # Tangent (0) or intersection (+)
-    u1 = (-b + sqrt(inSqrt)) / 2.0 / a
-    u2 = (-b - sqrt(inSqrt)) / 2.0 / a
+    u1 = (-b + sqrt(in_sqrt)) / 2.0 / a
+    u2 = (-b - sqrt(in_sqrt)) / 2.0 / a
 
     # Intersection points
-    iX1[0] = X1[0] + u1 * (X2[0] - X1[0])
-    iX1[1] = X1[1] + u1 * (X2[1] - X1[1])
-    iX1[2] = X1[2] + u1 * (X2[2] - X1[2])
+    i_x1[0] = x1[0] + u1 * (x2[0] - x1[0])
+    i_x1[1] = x1[1] + u1 * (x2[1] - x1[1])
+    i_x1[2] = x1[2] + u1 * (x2[2] - x1[2])
 
-    iX2[0] = X1[0] + u2 * (X2[0] - X1[0])
-    iX2[1] = X1[1] + u2 * (X2[1] - X1[1])
-    iX2[2] = X1[2] + u2 * (X2[2] - X1[2])
+    i_x2[0] = x1[0] + u2 * (x2[0] - x1[0])
+    i_x2[1] = x1[1] + u2 * (x2[1] - x1[1])
+    i_x2[2] = x1[2] + u2 * (x2[2] - x1[2])
 
-    return Intersect, iX1, iX2
+    return intersect, i_x1, i_x2
 
 
 # Returns the geometry matrix from user to satellite (in local ENU frame rather than
@@ -381,22 +372,22 @@ def GetLineSphereIntersection(X1, X2, SphereRadius, SphereCenterX) :
 # @param iUser Index of user to UserList & User2SatelliteList (-/integer)
 #
 # @return Geometry matrix nx4 with n equal to number of satellites in view
+def usr2sat_geometry_matrix (users, gr2sp, usr2sat, idx_user):
 
-def User2SatGeometryMatrix (UserList, Ground2SpaceLink, User2SatelliteList, iUser):
+    g_mat = users[idx_user].num_sat_in_view * [[0.0, 0.0, 0.0, 0.0]]
 
-    G = UserList[iUser].NumSatInView*[[0.0, 0.0, 0.0, 0.0]]
+    num_sat = gr2sp.num_sat  # ??? is this true??? should it not be user2space link?
 
-    NumSat = Ground2SpaceLink.NumSat  # ??? is this true??? should it not be user2space link?
+    for i in range(users[idx_user].num_sat_in_view):  # Loop satellites in view
+        el = usr2sat[idx_user * num_sat + users[idx_user].idx_sat_in_view[i]].elevation
+        az = usr2sat[idx_user * num_sat + users[idx_user].idx_sat_in_view[i]].azimuth
+        g_mat[i][0] = -cos(el) * sin(az)
+        g_mat[i][1] = -cos(el) * cos(az)
+        g_mat[i][2] = -sin(el)
+        g_mat[i][3] = 1.0
 
-    for i in range(UserList[iUser].NumSatInView):  # Loop satellites in view
-        el = User2SatelliteList[iUser * NumSat + UserList[iUser].IdxSatInView[i]].Elevation
-        az = User2SatelliteList[iUser * NumSat + UserList[iUser].IdxSatInView[i]].Azimuth
-        G[i][0] = -cos(el) * sin(az)
-        G[i][1] = -cos(el) * cos(az)
-        G[i][2] = -sin(el)
-        G[i][3] = 1.0
+    return g_mat
 
-    return G
 
 # Compute satellite visibility contour for a certain ElevationMask of the users,
 # assuming the Earth is a perfect sphere
@@ -408,49 +399,48 @@ def User2SatGeometryMatrix (UserList, Ground2SpaceLink, User2SatelliteList, iUse
 # @param LLA Sub Satellite Point Latitude, Longitude, Altitude rad/m
 # @param ElevationMask User to satellite elevation mask (rad)
 # @param Contour Array with Lat Lon points on the satellite visibility contour lat/lon in (rad)
-def SatGrndVis(LLA, ElevationMask):
+def sat_contour(lla, elevation_mask):
 
-    StepSize = 0.3
+    step_size = 0.3
 
-    Contour = np.zeros((math.ceil(360.0/StepSize), 2))
+    contour = np.zeros((math.ceil(360.0/step_size), 2))
 
-    LatS = LLA[0]
-    LonS = LLA[1]
-    Re = R_Earth
+    lat_s = lla[0]
+    lon_s = lla[1]
 
-    Lam=0
-    if ElevationMask == 0:
-        Lam = acos(Re / (Re + LLA[2]))
+    lam=0
+    if elevation_mask == 0:
+        lam = acos(R_EARTH / (R_EARTH + lla[2]))
     else:
-        Lam = pi / 2 - ElevationMask - asin(cos(ElevationMask) * Re / (Re + LLA[2]))
+        lam = PI / 2 - elevation_mask - asin(cos(elevation_mask) * R_EARTH / (R_EARTH + lla[2]))
 
 
     # Problem detected at Az=180 for acos, so step size set to 0.3 iso 0.5
 
-    LatT, LonT = 0, 0
-    DeltaLon= 0
+    lat_t, lon_t = 0, 0
+    delta_lon = 0
     cnt = 0
-    for i in np.arange(0.0, 360.0, StepSize):
+    for i in np.arange(0.0, 360.0, step_size):
 
         try:
-            Az = i / 180 * pi
-            LatTAcc = acos(cos(Lam) * sin(LatS) + sin(Lam) * cos(LatS) * cos(Az))
-            LatT = pi / 2 - LatTAcc
-            DeltaLon = acos((cos(Lam)-(sin(LatS) * sin(LatT))) / (cos(LatS) * cos(LatT)))
+            az = i / 180 * PI
+            lat_t_acc = acos(cos(lam) * sin(lat_s) + sin(lam) * cos(lat_s) * cos(az))
+            lat_t = PI / 2 - lat_t_acc
+            delta_lon = acos((cos(lam)-(sin(lat_s) * sin(lat_t))) / (cos(lat_s) * cos(lat_t)))
         except:
             pass
         if i < 180:
-            LonT = LonS + DeltaLon
+            lon_t = lon_s + delta_lon
         else:
-            LonT = LonS - DeltaLon
+            lon_t = lon_s - delta_lon
 
-        if LonT > pi:
-            LonT = LonT - 2 * pi
-        if LonT < -pi:
-            LonT = LonT + 2 * pi
+        if lon_t > PI:
+            lon_t = lon_t - 2 * PI
+        if lon_t < -PI:
+            lon_t = lon_t + 2 * PI
 
-        Contour[cnt, :] = [LatT, LonT]
+        contour[cnt, :] = [lat_t, lon_t]
 
         cnt += 1
 
-    return Contour
+    return contour

@@ -689,11 +689,11 @@
     <StopDate>2010-05-08 12:00:00</StopDate>
     <TimeStep>900</TimeStep>
 
-		<Analysis>
-			<Type>cov_ground_track</Type>
-			<ConstellationID>1</ConstellationID>
-			<SatelliteID>1</SatelliteID>
-		</Analysis>
+<!--		<Analysis>-->
+<!--			<Type>cov_ground_track</Type>-->
+<!--			<ConstellationID>1</ConstellationID>-->
+<!--			<SatelliteID>1</SatelliteID>-->
+<!--		</Analysis>-->
 
 <!--        <Analysis>-->
 <!--			<Type>cov_satellite_visible</Type>-->
@@ -722,9 +722,9 @@
 <!--      <SatelliteID>1</SatelliteID>-->
 <!--    </Analysis>-->
 
-<!--		<Analysis>-->
-<!--			<Type>cov_depth_of_coverage</Type>-->
-<!--		</Analysis>-->
+		<Analysis>
+			<Type>cov_depth_of_coverage</Type>
+		</Analysis>
 
 <!--		<Analysis>-->
 <!--			<Type>cov_pass_time</Type>-->
