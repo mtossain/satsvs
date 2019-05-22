@@ -1,7 +1,10 @@
+# Standard python packages
 import numpy as np
-from math import floor
-
-from constants import PI, R_EARTH
+from math import floor, degrees
+from astropy.coordinates import EarthLocation
+from astropy.time import Time
+# Modules from the project
+from constants import PI, R_EARTH, OMEGA_EARTH
 import misc_fn
 
 
@@ -25,6 +28,7 @@ class Constellation:
         self.num_sat = 0
         self.num_planes = 0
         self.tle_file_name = ''
+        self.rx_constellation = ''
 
 
 class Satellite:
@@ -36,6 +40,7 @@ class Satellite:
         self.sat_id = 0
         self.plane = 0
         self.name = ''
+        self.rx_constellation = ''
 
         self.antenna_mask = []  # Could be varying over azimuth...
         self.antenna_mask_max = []  # Could be varying over azimuth...
@@ -47,18 +52,14 @@ class Satellite:
         self.lla = 3*[0.0]  # For ground track
 
         self.idx_stat_in_view = []  # Indices of station which are in view
-        self.num_stat_in_view = 0  # Number of stations that 'see' this satellite
-
-        # int* IdxSatelliteInView  # Indices of satellites which are in view
         self.idx_sat_in_view = []
-        self.num_sat_in_view = 0  # Number of satellites that 'see' this satellite
 
         self.metric = []  # For analysis purposes
 
-    def det_pvt_eci(self, mjd_requested):
+    def det_posvel_eci(self, mjd_requested):
         self.pvt_eci = misc_fn.kep2xyz(mjd_requested, self.kepler)
 
-    def det_pvt_ecf(self, gmst_requested):  # ECF
+    def det_posvel_ecf(self, gmst_requested):  # ECF
         self.pvt_ecf = misc_fn.spin_vector(-gmst_requested, self.pvt_eci)  # assume ECI and GMST computed elsewhere
 
     def det_lla(self):
@@ -78,16 +79,24 @@ class Station:
         self.pvt_eci = 6*[0.0]
         self.pvt_ecf = 6*[0.0]
         self.lla = 3*[0.0]
+
         self.idx_sat_in_view = []  # Indices of satellites which are in view
-        self.num_sat_in_view = 0
 
-    def det_pvt_ecf(self):
-        xyz = misc_fn.lla2xyz(self.lla)  # ECF
-        self.pvt_ecf[0:3] = xyz
+    def det_posvel_ecf(self):
+        self.pvt_ecf[0:3] = misc_fn.lla2xyz(self.lla)  # ECF
 
-    def det_pvt_eci(self, gmst_requested):
-        self.pvt_eci = misc_fn.spin_vector(gmst_requested, self.pvt_ecf)
-        # TODO Velocity of ground stations, currently set to zero....
+    def det_posvel_eci(self, gmst_requested):
+        self.pvt_eci = misc_fn.spin_vector(gmst_requested, self.pvt_ecf)  # Requires the ECF to be computed first
+        self.pvt_eci[3:6] = np.cross(self.pvt_eci[0:3], [0, 0, -OMEGA_EARTH])
+
+    def det_posvel_eci_astropy(self):
+        # Same as det_posvel_eci but now using Astropy
+        # It is however much slower: about .05s vs 0.000005s
+        location = EarthLocation.from_geodetic(degrees(self.lla[1]), degrees(self.lla[0]), self.lla[2])
+        mjd = Time(55324.0, format='mjd')
+        eci = location.get_gcrs_posvel(mjd)
+        self.pvt_eci[0:3] = eci[0].xyz.value
+        self.pvt_eci[3:6] = eci[1].xyz.value
 
 
 class User:
@@ -107,23 +116,20 @@ class User:
         self.num_lon = 0
 
         self.idx_sat_in_view = []  # Indices of satellites which are in view
-        self.num_sat_in_view = 0
 
         self.tle_file_name = ''  # In case user is a spacecraft
         self.kepler = KeplerSet()  # In case user is a spacecraft
 
         self.metric = []  # For analysis purposes
 
-    def det_pvt_ecf(self):
-        xyz = misc_fn.lla2xyz(self.lla)
-        self.pvt_ecf[0:3] = xyz  # ECF
+    def det_posvel_ecf(self):
+        self.pvt_ecf[0:3] = misc_fn.lla2xyz(self.lla)
 
-    def det_pvt_eci(self, gmst_requested):
-        # Compute ECI coordinates from ECF set and GMST
-        # Requires the ECF to be computed first
-        self.pvt_eci = misc_fn.spin_vector(gmst_requested, self.pvt_ecf)  # ECI
+    def det_posvel_eci(self, gmst_requested):
+        self.pvt_eci = misc_fn.spin_vector(gmst_requested, self.pvt_ecf)  # Requires the ECF to be computed first
+        self.pvt_eci[3:6] = np.cross(self.pvt_eci[0:3], [0, 0, -OMEGA_EARTH])
 
-    def det_pvt_tle(self, gmst_requested, mjd_requested):  # For spacecraft user
+    def det_posvel_tle(self, gmst_requested, mjd_requested):  # For spacecraft user
         # Compute ECF and ECI coordinates from MJD and TLE set
         self.pvt_eci = misc_fn.kep2xyz(mjd_requested, self.kepler)  # ECI
         self.pvt_ecf = misc_fn.spin_vector(-gmst_requested, self.pvt_eci)  # ECF
@@ -157,7 +163,7 @@ class Ground2SpaceLink:
         self.azimuth, self.elevation = misc_fn.calc_az_el(satellite.pvt_ecf, station.pvt_ecf)  # From Station to Satellite
         self.azimuth2, self.elevation2 = misc_fn.calc_az_el(station.pvt_ecf, satellite.pvt_ecf)  # From Satellite to Station
 
-    def check_masking_station(self, station):
+    def check_masking(self, station):
         # Check whether satellite is above masking angle defined for station/user
         # Optionally also a maximum mask angle is defined
         in_view = False
@@ -199,7 +205,7 @@ class User2SpaceLink:
 
         self.azimuth, self.elevation = misc_fn.calc_az_el(satellite.pvt_ecf, user.pvt_ecf)
 
-    def check_masking_user(self, user):
+    def check_masking(self, user):
         # Check whether satellite is above masking angle defined for station/user
         # Optionally also a maximum mask angle is defined
 
@@ -227,10 +233,10 @@ class Space2SpaceLink:
         self.idx_sat_tx = 0  # Pointer to transmitting sat
         self.idx_sat_rx = 0  # Pointer to receiving sat
 
-        self.azimuth_tx = 0.0  # Radians
-        self.elevation_tx = 0.0  # Radians (is really the LOS-NADIR angle from one sat to the other)
-        self.azimuth_rx = 0.0  # Radians
-        self.elevation_rx = 0.0  # Radians
+        self.azimuth = 0.0  # Radians
+        self.elevation = 0.0  # Radians (is really the LOS-NADIR angle from one sat to the other)
+        self.azimuth2 = 0.0  # Radians
+        self.elevation2 = 0.0  # Radians
 
         self.sp2sp_ecf = 3*[0]
         self.distance = 0  # m
@@ -241,58 +247,38 @@ class Space2SpaceLink:
         # Compute distance, vector and if Earth is in between...
         # Returns True if the Earth is not in between both satellites
 
-        intersect, i_x1, i_x2 = misc_fn.line_sphere_intersect(sat_1.pvt_eci, sat_2.pvt_eci, R_EARTH, [0,0,0])
-
         self.sp2sp_ecf = [sat_2.pvt_ecf[i] - sat_1.pvt_ecf[i] for i in range(3)]
 
         self.distance = np.linalg.norm(self.sp2sp_ecf)
 
-        self.azimuth_tx, self.elevation_tx = misc_fn.calc_az_el(sat_1.pvt_ecf, sat_2.pvt_ecf)
-        self.azimuth_rx, self.elevation_rx = misc_fn.calc_az_el(sat_2.pvt_ecf, sat_1.pvt_ecf)
+        self.azimuth, self.elevation = misc_fn.calc_az_el(sat_1.pvt_ecf, sat_2.pvt_ecf)
+        self.azimuth2, self.elevation2 = misc_fn.calc_az_el(sat_2.pvt_ecf, sat_1.pvt_ecf)
 
-        return not intersect
+    def check_masking(self, sat_1, sat_2):
 
-    def check_masking(self, sat_tx, sat_rx):
-
-        # Check whether satellite is above masking angle defined for station/user
+        # Check whether satellite is above masking angle defined for sat/sat
         # Optionally also a maximum mask angle is defined
 
-        in_view_tx = False
-        in_view_rx = False
+        in_view_elevation = False
 
-        num_of_masks_tx = len(sat_tx.antenna_mask)  # If only one value
-        num_of_masks_rx = len(sat_rx.antenna_mask)  # If only one value
+        num_masks = len(sat_1.antenna_mask)  # If only one value
+        if num_masks == 0:  # omnidirectional antenna
+            in_view_elevation = True
+        if num_masks == 1:
+            # checking for mask of satellite 1
+            if sat_1.antenna_mask[0] < self.elevation < sat_1.antenna_mask_max[0]:
+                in_view_elevation = True
+        if num_masks > 1:  # More than one mask
+            az_cake_piece_angle = 2 * PI / num_masks
+            idx_az = int(floor(self.azimuth / az_cake_piece_angle))
+            if sat_1.antenna_mask[idx_az] < self.elevation < sat_1.antenna_mask_max[idx_az]:
+                in_view_elevation = True
 
-        # if satellite_tx and satellite_rx are identical
-        if self.distance == 0.0:
+        # Also check whether the link is not passing through the Earth
+        intersect_earth, i_x1, i_x2 = misc_fn.line_sphere_intersect(sat_1.pvt_eci, sat_2.pvt_eci, R_EARTH, [0,0,0])
+
+        if not intersect_earth and in_view_elevation:
+            return True
+        else:
             return False
 
-        if num_of_masks_tx == 0:  # omnidirectional antenna
-            in_view_tx = True
-
-        if num_of_masks_tx == 1:
-            # checking for mask of satellite 1
-            if sat_tx.antenna_mask[0] < self.elevation_tx < sat_tx.antenna_mask_max[0]:
-                in_view_tx = True
-
-        else:  # More than one mask
-            az_cake_piece_angle = 2 * PI / num_of_masks_tx
-            idx_az = int(floor(self.azimuth_tx / az_cake_piece_angle))
-            if sat_tx.antenna_mask[idx_az] < self.elevation_tx < sat_tx.antenna_mask_max[idx_az]:
-                in_view_tx = True
-
-        if num_of_masks_rx == 0: # omnidirectional antenna
-            in_view_rx = True
-
-        if num_of_masks_rx == 1:
-            # checking for mask of satellite 2
-            if sat_rx.antenna_mask[0] < self.elevation_rx < sat_rx.antenna_mask_max[0]:
-                in_view_rx = True
-
-        else:  # More than one mask
-            az_cake_piece_angle = 2 * pi / num_of_masks_rx
-            idx_az = int(floor(self.azimuth_rx / az_cake_piece_angle))
-            if sat_rx.antenna_mask[idx_az] < self.elevation_rx < sat_rx.antenna_mask_max[idx_az]:
-                in_view_rx = True
-
-        return in_view_tx, in_view_rx

@@ -2,7 +2,7 @@ import math
 from math import sin, cos, tan, atan2, atan, sqrt, fabs, asin, acos, radians, degrees
 from constants import PI, GM_EARTH, R_EARTH
 import numpy as np
-
+from astropy.coordinates import EarthLocation
 
 # Compute Modified Julian Date from YYYY and Day Of Year pair
 # Time functions from SP3 library B.Remondi.
@@ -60,6 +60,7 @@ def mjd2gmst(mjd_requested):
 
     return theta_n
 
+
 # Convert from latitude, longitude and height to ECF cartesian coordinates, taking
 # into account the Earth flattening
 #
@@ -92,6 +93,13 @@ def lla2xyz(lla):
     xyz[2] = (a * tmp * sin_phi) / tmp2 + lla[2] * sin_phi
     
     return xyz
+
+
+# Same as lla2xyz but now in Astropy
+# Not used because it is too slow
+def lla2xyz_astropy(lla):
+    xyz = EarthLocation.from_geodetic(degrees(lla[1]), degrees(lla[0]), lla[2], 'WGS84')
+    return list(xyz.value)
 
 
 # Convert from ECF cartesian coordinates to latitude, longitude and height, taking
@@ -362,33 +370,6 @@ def line_sphere_intersect(x1, x2, sphere_radius, sphere_center):
         i_x2[2] = x1[2] + u2 * (x2[2] - x1[2])
 
     return intersect, i_x1, i_x2
-
-
-# Returns the geometry matrix from user to satellite (in local ENU frame rather than
-# observation matrix in ECEF frame)
-#
-# Ref. http://en.wikipedia.org/wiki/Newton's_method
-#
-# @param User Object with user values (see segments.h)
-# @param User2SatelliteList Array with Ground2SpaceLink objects (see segments.h)
-# @param iUser Index of user to UserList & User2SatelliteList (-/integer)
-#
-# @return Geometry matrix nx4 with n equal to number of satellites in view
-def usr2sat_geometry_matrix (users, gr2sp, usr2sat, idx_user):
-
-    g_mat = users[idx_user].num_sat_in_view * [[0.0, 0.0, 0.0, 0.0]]
-
-    num_sat = gr2sp.num_sat  # ??? is this true??? should it not be user2space link?
-
-    for i in range(users[idx_user].num_sat_in_view):  # Loop satellites in view
-        el = usr2sat[idx_user * num_sat + users[idx_user].idx_sat_in_view[i]].elevation
-        az = usr2sat[idx_user * num_sat + users[idx_user].idx_sat_in_view[i]].azimuth
-        g_mat[i][0] = -cos(el) * sin(az)
-        g_mat[i][1] = -cos(el) * cos(az)
-        g_mat[i][2] = -sin(el)
-        g_mat[i][3] = 1.0
-
-    return g_mat
 
 
 # Compute satellite visibility contour for a certain ElevationMask of the users,

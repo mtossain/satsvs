@@ -201,7 +201,7 @@ The following parameters are needed:
 <Type>cov_satellite_pvt</Type>
 <ConstellationID>1</ConstellationID>
 ```
-Optional are:
+Optional is:
 ```
 <SatelliteID>1</SatelliteID>
 ``` 
@@ -238,17 +238,20 @@ Plots the satellite IDs in view over time for the first user. The following para
 <img src="/docs/cov_satellite_visible_id.png" alt="cov_satellite_visible_id"/>
 
 ### cov_satellite_contour
-Plots the satellite ground contour on the world map. The following parameters are needed:
+Plots the satellite(s) ground contour on the world map. The following parameters are needed:
 ```
 <Analysis>
     <Type>cov_satellite_contour</Type>
     <ConstellationID>1</ConstellationID>
-    <SatelliteID>1</SatelliteID>
     <ElevationMask>20</ElevationMask>
 </Analysis>
 ```
+Optional is:
+```
+    <SatelliteID>1</SatelliteID>
+``` 
 The elevation mask is for the user who has to receive the satellite. The satellite is selected by constellation ID and
-satellite ID.
+satellite ID or multiple if satellite ID is omitted.
 <img src="/docs/cov_satellite_contour.png" alt="cov_satellite_contour"/>
 
 ### cov_satellite_sky_angles
