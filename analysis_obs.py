@@ -13,7 +13,7 @@ from constants import PI
 from analysis import AnalysisBase
 
 
-class AnalysisCovDepthOfCoverage(AnalysisBase):
+class AnalysisObsSwathCoverage(AnalysisBase):
 
     def __init__(self):
         super().__init__()

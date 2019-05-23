@@ -328,6 +328,8 @@ class AppConfig:
                     self.analysis = AnalysisCovSatelliteVisibleGrid()
                 if analysis_node.find('Type').text == 'cov_satellite_visible_id':
                     self.analysis = AnalysisCovSatelliteVisibleId()
+                if analysis_node.find('Type').text == 'obs_swath_coverage':
+                    self.analysis = AnalysisObsSwathCoverage()
                 self.analysis.type = analysis_node.find('Type').text
                 self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 
