@@ -30,6 +30,7 @@ def convert_times(sm):
     sm.analysis.times_f_doy.append(date.timetuple().tm_yday + date.hour / 24 +
                                    date.minute / 60 / 24 + date.second / 3600 / 24)
     sm.time_str = run_time_str[:-4]
+    sm.time_datetime = date
 
 
 def update_satellites(sm):
@@ -42,7 +43,10 @@ def update_satellites(sm):
             satellite.idx_stat_in_view = []  # Reset before loop
     else:
         for idx_sat, satellite in enumerate(sm.satellites):
-            satellite.det_posvel_eci(sm.time_mjd)
+            if sm.orbit_propagator == 'Keplerian':
+                satellite.det_posvel_eci_keplerian(sm.time_mjd)
+            if sm.orbit_propagator == 'SGP4':
+                satellite.det_posvel_eci_sgp4(sm.time_datetime)
             satellite.det_posvel_ecf(sm.time_gmst)
             satellite.idx_stat_in_view = []  # Reset before loop
         write_posvel_satellites(sm)
@@ -145,6 +149,4 @@ if __name__ == '__main__':
 
 # TODO analysis COM
 # TODO analysis NAV
-
-# TODO different propagators including SGP4 and HPOP
 

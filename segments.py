@@ -3,6 +3,8 @@ import numpy as np
 from math import floor, degrees
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
+from sgp4.earth_gravity import wgs84
+from sgp4.io import twoline2rv
 # Modules from the project
 from constants import PI, R_EARTH, OMEGA_EARTH
 import misc_fn
@@ -46,6 +48,8 @@ class Satellite:
         self.antenna_mask_max = []  # Could be varying over azimuth...
 
         self.kepler = KeplerSet()
+        self.tle_line1 = ''
+        self.tle_line2 = ''
 
         self.pvt_eci = 6*[0.0]
         self.pvt_ecf = 6*[0.0]
@@ -56,8 +60,16 @@ class Satellite:
 
         self.metric = []  # For analysis purposes
 
-    def det_posvel_eci(self, mjd_requested):
+    def det_posvel_eci_keplerian(self, mjd_requested):
         self.pvt_eci = misc_fn.kep2xyz(mjd_requested, self.kepler)
+
+    def det_posvel_eci_sgp4(self, time_req):
+        satellite = twoline2rv(self.tle_line1, self.tle_line2, wgs84)
+        pos,vel = satellite.propagate(time_req.year, time_req.month, time_req.day,
+                                      time_req.hour, time_req.minute, time_req.second)
+        for i in range(3):
+            self.pvt_eci[i] = float(pos[i])*1000
+            self.pvt_eci[i+3] = float(vel[i])*1000
 
     def det_posvel_ecf(self, gmst_requested):  # ECF
         self.pvt_ecf = misc_fn.spin_vector(-gmst_requested, self.pvt_eci)  # assume ECI and GMST computed elsewhere

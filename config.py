@@ -1,9 +1,10 @@
 import xml.etree.ElementTree as ET
 from math import floor, radians, degrees
 from astropy.time import Time
-
+# Project modules
 from constants import *
-from analysis import *
+from analysis_cov import *
+from analysis_obs import *
 from segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
 import logging_svs as ls
 
@@ -35,13 +36,14 @@ class AppConfig:
         self.time_gmst = 0  # Loop time
         self.time_mjd = 0  # Loop time
         self.time_str = ''  # Loop time
+        self.time_datetime = None  # Loop time
 
         self.include_gr2sp = True
         self.include_usr2sp = True
         self.include_sp2sp = True
         self.orbits_from_previous_run = False
         self.data_orbits = []  # Orbits from previous run
-
+        self.orbit_propagator =''  # Text with either Keplerian / SGP4
         self.num_constellation = 0
         self.num_sat = 0
         self.num_station = 0
@@ -92,11 +94,13 @@ class AppConfig:
                             sat.sat_id = int(line[2:7])  # NORAD Catalog Number
                             sat.constellation_id = const.constellation_id
                             sat.constellation_name = const.constellation_name
+                            sat.tle_line1 = line
                             full_year = "20" + line[18:20]
                             epoch_yr = int(full_year)
                             epoch_doy = float(line[20:31])
                             sat.kepler.epoch_mjd = misc_fn.yyyy_doy2mjd(epoch_yr, epoch_doy)
                         if cnt == 2:
+                            sat.tle_line2 = line
                             mean_motion = float(line[52:59]) / 86400 * 2 * PI  # rad / s
                             sat.kepler.semi_major_axis = pow((GM_EARTH/(pow(mean_motion, 2))), (1.0 / 3.0))
                             eccentricity = "0." + line[26:33]
@@ -299,6 +303,7 @@ class AppConfig:
             self.include_usr2sp = str2bool(sim.find('IncludeUser2SpaceLinks').text)
             self.include_sp2sp = str2bool(sim.find('IncludeSpace2SpaceLinks').text)
             self.orbits_from_previous_run = str2bool(sim.find('OrbitsFromPreviousRun').text)
+            self.orbit_propagator = sim.find('OrbitPropagator').text
 
             ls.logger.info(f'Loaded simulation, start MJD: {self.start_time}, stop MJD: {self.stop_time},' +
                            f' number of time steps: {self.time_step}')

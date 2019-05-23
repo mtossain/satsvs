@@ -162,6 +162,7 @@ The following xml is used to setup the simulation parameters:
     <IncludeStation2SpaceLinks>True</IncludeStation2SpaceLinks>
     <IncludeUser2SpaceLinks>True</IncludeUser2SpaceLinks>
     <IncludeSpace2SpaceLinks>False</IncludeSpace2SpaceLinks>
+    <OrbitPropagator>SGP4</OrbitPropagator>
 
     <Analysis>
           <Type>9</Type>
@@ -169,9 +170,13 @@ The following xml is used to setup the simulation parameters:
     </Analysis>
 </SimulationManager>
 ```
-The time parameters are in UTC time and TimeStep in seconds. The Include parameters determine whether links between 
-different objects: sat, station, user are computed. Normally leave these to True so that all analysis works. Time could
-be saved by disabling some. The analysis are described below:
+The following explanations apply for the parameters:
+- The Start/Stop time parameters are in UTC time and TimeStep in seconds. 
+- The IncludeStation2SpaceLinks, etc. parameters determine whether links between different objects: sat, station and user are computed. Normally leave these to True so that all analysis works. Time could
+be saved by disabling some. 
+- The OrbitPropagator determines which propagator: 'Keplerian' or 'SGP4' to take.
+
+The analysis are described below:
 
 ## Analysis parameters
 In order to run an analysis block it has to be uncommented and the parameters adapted. To add a new analysis to the code the following has to be performed:
