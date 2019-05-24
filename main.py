@@ -66,12 +66,12 @@ def update_satellites(sm):
 def update_stations(sm):
     # Compute ground station positions/velocities in ECI, compute connection to satellite,
     # and remember which ones are in view
-    for idx_station, station in enumerate(sm.stations):
-        station.idx_sat_in_view = []  # Reset before loop
-        station.det_posvel_eci(sm.time_gmst)
+    if sm.include_gr2sp:  # Only when links needed
+        for idx_station, station in enumerate(sm.stations):
+            station.idx_sat_in_view = []  # Reset before loop
+            station.det_posvel_eci(sm.time_gmst)
 
-        # Compute station to satellite links
-        if sm.include_gr2sp:  # Only when links needed
+            # Compute station to satellite links
             for idx_sat, satellite in enumerate(sm.satellites):
                 if sm.gr2sp[idx_station][idx_sat].link_in_use:  # from receiver constellation
                     sm.gr2sp[idx_station][idx_sat].compute_link(station, satellite)
@@ -84,15 +84,15 @@ def update_stations(sm):
 def update_users(sm):
     # Compute user positions/velocities in ECI, compute connection to satellite,
     # and remember which ones are in view
-    for idx_user, user in enumerate(sm.users):
-        user.idx_sat_in_view = []  # Reset before loop
-        if user.type == "Static" or user.type == "Grid":
-            user.det_posvel_eci(sm.time_gmst)  # Compute position/velocity in ECI
-        if user.type == "Spacecraft":
-            user.det_posvel_tle(sm.time_gmst, sm.time_mjd)  # Spacecraft position from TLE
+    if sm.include_usr2sp:  # Only when links needed
+        for idx_user, user in enumerate(sm.users):
+            user.idx_sat_in_view = []  # Reset before loop
+            if user.type == "Static" or user.type == "Grid":
+                user.det_posvel_eci(sm.time_gmst)  # Compute position/velocity in ECI
+            if user.type == "Spacecraft":
+                user.det_posvel_tle(sm.time_gmst, sm.time_mjd)  # Spacecraft position from TLE
 
-        # Compute user to satellite links
-        if sm.include_usr2sp:  # Only when links needed
+            # Compute user to satellite links
             for idx_sat, satellite in enumerate(sm.satellites):
                 if sm.usr2sp[idx_user][idx_sat].link_in_use:  # From Receiver Constellation of User
                     sm.usr2sp[idx_user][idx_sat].compute_link(user, satellite)

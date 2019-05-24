@@ -22,10 +22,14 @@ parameters and analysis are defined. Analysis can be added as wished, the baseli
 - __cov_depth_of_coverage__: Depth of station coverage (DOC) based on satellite ground track
 - __cov_pass_time__: Satellite passes time statistics for user grid
 
+### Earth observation
+- __obs_swath_conical__: Swath coverage for satellite(s) with conical scanners
+
+
 To be implemented at a later stage:
 
 ### Earth observation
-- __obs_swath_coverage__: Swath coverage for satellite(s)
+- __obs_swath_pushbroom__: Swath coverage for satellite(s)
 - __obs_time_between_passes__: Time between satellite swath passes
 
 ### Communication
@@ -303,6 +307,25 @@ Plots elevation for the highest satellite in view over a user grid. The followin
 </Analysis>
 ```
 <img src="/docs/cov_satellite_highest.png" alt="cov_satellite_highest"/>
+
+### obs_swath_conical
+Plots the swath coverage for a conical scanner on one or more satellites defined in the space segment.
+The following parameters are needed:
+```
+<Analysis>
+    <Type>obs_swath_conical</Type>
+    <ObsInclinationAngle>44.8</ObsInclinationAngle>
+</Analysis>
+```
+The incidence angle is defined as the angle between the line-of-sight and the nadir vector. 
+This is not to be confused with the observation zenith angle which applies to the user.
+
+Optional are:
+```
+    <OrthoViewLatitude>90</OrthoViewLatitude>
+```
+This parameter can be given to see one part of the globe, eg. the polar region.
+<img src="/docs/obs_swath_conical.png" alt="cov_satellite_highest"/>
 
 
 

@@ -7,14 +7,14 @@
         <NumOfSatellites>1</NumOfSatellites>
         <NumOfPlanes>1</NumOfPlanes>
         <ConstellationName>METOPA</ConstellationName>
-        <ReceiverConstellation>1111</ReceiverConstellation>
+        <ReceiverConstellation>1</ReceiverConstellation>
         <TLEFileName>input/example_tle_files/metop_a.txt</TLEFileName>
     </Constellation>
 
 	</SpaceSegment>
 	<!--Defines the ground stations that should be simulated-->
 	<GroundSegment>
-      <NumStation>34</NumStation>
+      <NumStation>1</NumStation>
       <NetworkName>RIMS</NetworkName>
       <GroundStation>
         <Type>RIMS</Type>
@@ -24,7 +24,7 @@
         <Latitude>57.10</Latitude>
         <Longitude>9.90</Longitude>
         <Height>0</Height>
-        <ReceiverConstellation>1111</ReceiverConstellation>
+        <ReceiverConstellation>1</ReceiverConstellation>
         <ElevationMask>5</ElevationMask>
       </GroundStation>
 	</GroundSegment>
@@ -36,8 +36,8 @@
             <LatMax>90</LatMax>
             <LonMin>-180</LonMin>
             <LonMax>180</LonMax>
-            <LatStep>3</LatStep>
-            <LonStep>3</LonStep>
+            <LatStep>1</LatStep>
+            <LonStep>1</LonStep>
             <Height>0.0</Height>
             <ReceiverConstellation>1111</ReceiverConstellation>
             <ElevationMask>5.0</ElevationMask>
@@ -63,18 +63,20 @@
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
 	    <StartDate>2010-05-08 00:00:00</StartDate>
-	    <StopDate>2010-05-08 01:10:00</StopDate>
-	    <TimeStep>180</TimeStep>
+	    <StopDate>2010-05-08 01:00:00</StopDate>
+	    <TimeStep>600</TimeStep>
+
 		<IncludeStation2SpaceLinks>False</IncludeStation2SpaceLinks>
 		<IncludeUser2SpaceLinks>False</IncludeUser2SpaceLinks>
 		<IncludeSpace2SpaceLinks>False</IncludeSpace2SpaceLinks>
+
         <OrbitsFromPreviousRun>False</OrbitsFromPreviousRun>
         <OrbitPropagator>Keplerian</OrbitPropagator>
 
         <Analysis>
             <Type>obs_swath_conical</Type>
-            <ObsZenithAngle>50</ObsZenithAngle>
             <ObsInclinationAngle>44.8</ObsInclinationAngle>
+            <OrthoViewLatitude>90</OrthoViewLatitude>
         </Analysis>
 
 

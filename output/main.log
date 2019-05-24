@@ -1,34 +1,16 @@
-2019-05-24 11:47:38,733 - main - INFO - {'constellation_id': 1, 'constellation_name': 'METOPA', 'num_sat': 1, 'num_planes': 1, 'tle_file_name': '', 'rx_constellation': '1111'}
-2019-05-24 11:47:38,733 - main - INFO - ['Found satellite:', '29499', 'Kepler Elements', "{'epoch_mjd': 58378.6172223, 'semi_major_axis': 7198353.8526316015, 'eccentricity': 4.53e-05, 'inclination': 1.721191348439248, 'right_ascension': 5.514839010574122, 'arg_perigee': 0.844564825040056, 'mean_anomaly': 1.8728430071450353}"]
-2019-05-24 11:47:38,734 - main - INFO - {'constellation_id': 1, 'station_id': 1, 'station_name': 'ALB', 'rx_constellation': '1111', 'elevation_mask': [0.08726646259971647], 'el_mask_max': [1.5707963267948966], 'posvel_eci': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'posvel_ecf': [3420934.916457177, 597048.7200610382, 5331957.088686384, 0.0, 0.0, 0.0], 'lla': [0.9965830028887622, 0.17278759594743864, 0.0], 'idx_sat_in_view': []}
-2019-05-24 11:47:38,825 - main - INFO - {'type': 'Grid', 'user_id': 7380, 'rx_constellation': '1111', 'elevation_mask': [0.08726646259971647], 'el_mask_max': [1.5707963267948966], 'posvel_eci': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'posvel_ecf': [-3.918620924842322e-10, 4.798926572679991e-26, 6356752.3142, 0.0, 0.0, 0.0], 'lla': [1.5707963267948966, 3.141592653589793, 0.0], 'num_lat': 61, 'num_lon': 121, 'idx_sat_in_view': [], 'tle_file_name': '', 'kepler': <segments.KeplerSet object at 0x11d8e6c50>, 'metric': [], 'UserName': 'Grid'}
-2019-05-24 11:47:38,826 - main - INFO - Loaded simulation, start MJD: 55324.0, stop MJD: 55324.04861111111, number of time steps: 180
-2019-05-24 11:47:38,826 - main - INFO - Loaded 1 number of Station to Spacecraft links
-2019-05-24 11:47:38,848 - main - INFO - Loaded 7381 number of User to Spacecraft links
-2019-05-24 11:47:38,848 - main - INFO - Loaded 1 number of Spacecraft to Spacecraft links
-2019-05-24 11:47:38,861 - main - INFO - Finished reading configuration file
-2019-05-24 11:47:39,229 - main - INFO - Simulation time: 2010-05-08 00:00:00, time step: 1
-2019-05-24 11:47:39,589 - main - INFO - Simulation time: 2010-05-08 00:03:00, time step: 2
-2019-05-24 11:47:39,955 - main - INFO - Simulation time: 2010-05-08 00:06:00, time step: 3
-2019-05-24 11:47:40,313 - main - INFO - Simulation time: 2010-05-08 00:09:00, time step: 4
-2019-05-24 11:47:40,678 - main - INFO - Simulation time: 2010-05-08 00:12:00, time step: 5
-2019-05-24 11:47:41,037 - main - INFO - Simulation time: 2010-05-08 00:15:00, time step: 6
-2019-05-24 11:47:41,401 - main - INFO - Simulation time: 2010-05-08 00:18:00, time step: 7
-2019-05-24 11:47:41,760 - main - INFO - Simulation time: 2010-05-08 00:21:00, time step: 8
-2019-05-24 11:47:42,120 - main - INFO - Simulation time: 2010-05-08 00:24:00, time step: 9
-2019-05-24 11:47:42,481 - main - INFO - Simulation time: 2010-05-08 00:27:00, time step: 10
-2019-05-24 11:47:42,842 - main - INFO - Simulation time: 2010-05-08 00:30:00, time step: 11
-2019-05-24 11:47:43,199 - main - INFO - Simulation time: 2010-05-08 00:33:00, time step: 12
-2019-05-24 11:47:43,560 - main - INFO - Simulation time: 2010-05-08 00:36:00, time step: 13
-2019-05-24 11:47:43,922 - main - INFO - Simulation time: 2010-05-08 00:39:00, time step: 14
-2019-05-24 11:47:44,281 - main - INFO - Simulation time: 2010-05-08 00:42:00, time step: 15
-2019-05-24 11:47:44,643 - main - INFO - Simulation time: 2010-05-08 00:45:00, time step: 16
-2019-05-24 11:47:45,002 - main - INFO - Simulation time: 2010-05-08 00:48:00, time step: 17
-2019-05-24 11:47:45,362 - main - INFO - Simulation time: 2010-05-08 00:51:00, time step: 18
-2019-05-24 11:47:45,721 - main - INFO - Simulation time: 2010-05-08 00:54:00, time step: 19
-2019-05-24 11:47:46,078 - main - INFO - Simulation time: 2010-05-08 00:57:00, time step: 20
-2019-05-24 11:47:46,439 - main - INFO - Simulation time: 2010-05-08 01:00:00, time step: 21
-2019-05-24 11:47:46,799 - main - INFO - Simulation time: 2010-05-08 01:03:00, time step: 22
-2019-05-24 11:47:47,157 - main - INFO - Simulation time: 2010-05-08 01:06:00, time step: 23
-2019-05-24 11:47:47,521 - main - INFO - Simulation time: 2010-05-08 01:09:00, time step: 24
-2019-05-24 11:53:30,413 - main - INFO - Plotting analysis obs_swath_conical
+2019-05-24 14:55:11,114 - main - INFO - {'constellation_id': 1, 'constellation_name': 'METOPA', 'num_sat': 1, 'num_planes': 1, 'tle_file_name': '', 'rx_constellation': '1'}
+2019-05-24 14:55:11,114 - main - INFO - ['Found satellite:', '29499', 'Kepler Elements', "{'epoch_mjd': 58378.6172223, 'semi_major_axis': 7198353.8526316015, 'eccentricity': 4.53e-05, 'inclination': 1.721191348439248, 'right_ascension': 5.514839010574122, 'arg_perigee': 0.844564825040056, 'mean_anomaly': 1.8728430071450353}"]
+2019-05-24 14:55:11,115 - main - INFO - {'constellation_id': 1, 'station_id': 1, 'station_name': 'ALB', 'rx_constellation': '1', 'elevation_mask': [0.08726646259971647], 'el_mask_max': [1.5707963267948966], 'posvel_eci': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'posvel_ecf': [3420934.916457177, 597048.7200610382, 5331957.088686384, 0.0, 0.0, 0.0], 'lla': [0.9965830028887622, 0.17278759594743864, 0.0], 'idx_sat_in_view': []}
+2019-05-24 14:55:11,897 - main - INFO - {'type': 'Grid', 'user_id': 65340, 'rx_constellation': '1111', 'elevation_mask': [0.08726646259971647], 'el_mask_max': [1.5707963267948966], 'posvel_eci': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'posvel_ecf': [-3.918620924842322e-10, 4.798926572679991e-26, 6356752.3142, 0.0, 0.0, 0.0], 'norm_ecf': 0, 'lla': [1.5707963267948966, 3.141592653589793, 0.0], 'num_lat': 181, 'num_lon': 361, 'idx_sat_in_view': [], 'tle_file_name': '', 'kepler': <segments.KeplerSet object at 0x1248cfb38>, 'metric': [], 'UserName': 'Grid'}
+2019-05-24 14:55:11,898 - main - INFO - Loaded simulation, start MJD: 55324.0, stop MJD: 55324.041666666664, number of time steps: 600
+2019-05-24 14:55:11,898 - main - INFO - Loaded 1 number of Station to Spacecraft links
+2019-05-24 14:55:12,227 - main - INFO - Loaded 65341 number of User to Spacecraft links
+2019-05-24 14:55:12,228 - main - INFO - Loaded 1 number of Spacecraft to Spacecraft links
+2019-05-24 14:55:12,701 - main - INFO - Finished reading configuration file
+2019-05-24 14:55:13,097 - main - INFO - Simulation time: 2010-05-08 00:00:00, time step: 1
+2019-05-24 14:55:13,501 - main - INFO - Simulation time: 2010-05-08 00:10:00, time step: 2
+2019-05-24 14:55:13,904 - main - INFO - Simulation time: 2010-05-08 00:20:00, time step: 3
+2019-05-24 14:55:14,287 - main - INFO - Simulation time: 2010-05-08 00:30:00, time step: 4
+2019-05-24 14:55:14,676 - main - INFO - Simulation time: 2010-05-08 00:40:00, time step: 5
+2019-05-24 14:55:15,082 - main - INFO - Simulation time: 2010-05-08 00:50:00, time step: 6
+2019-05-24 14:55:25,680 - main - INFO - Plotting analysis obs_swath_conical

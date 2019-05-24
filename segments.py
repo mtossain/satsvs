@@ -123,6 +123,7 @@ class User:
 
         self.posvel_eci = 6*[0.0]
         self.posvel_ecf = 6*[0.0]
+        self.norm_ecf = 0  # For speeding up processes
         self.lla = 3*[0.0]
         self.num_lat = 0
         self.num_lon = 0
