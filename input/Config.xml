@@ -36,8 +36,8 @@
             <LatMax>90</LatMax>
             <LonMin>-180</LonMin>
             <LonMax>180</LonMax>
-            <LatStep>1</LatStep>
-            <LonStep>1</LonStep>
+            <LatStep>2</LatStep>
+            <LonStep>2</LonStep>
             <Height>0.0</Height>
             <ReceiverConstellation>1111</ReceiverConstellation>
             <ElevationMask>5.0</ElevationMask>
@@ -63,8 +63,8 @@
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
 	    <StartDate>2010-05-08 00:00:00</StartDate>
-	    <StopDate>2010-05-08 01:00:00</StopDate>
-	    <TimeStep>600</TimeStep>
+	    <StopDate>2010-05-08 12:00:00</StopDate>
+	    <TimeStep>120</TimeStep>
 
 		<IncludeStation2SpaceLinks>False</IncludeStation2SpaceLinks>
 		<IncludeUser2SpaceLinks>False</IncludeUser2SpaceLinks>
@@ -76,7 +76,7 @@
         <Analysis>
             <Type>obs_swath_conical</Type>
             <ObsInclinationAngle>44.8</ObsInclinationAngle>
-            <OrthoViewLatitude>90</OrthoViewLatitude>
+<!--            <OrthoViewLatitude>90</OrthoViewLatitude>-->
         </Analysis>
 
 
