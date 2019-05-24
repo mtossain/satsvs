@@ -51,8 +51,8 @@ class Satellite:
         self.tle_line1 = ''
         self.tle_line2 = ''
 
-        self.pvt_eci = 6*[0.0]
-        self.pvt_ecf = 6*[0.0]
+        self.posvel_eci = 6*[0.0]
+        self.posvel_ecf = 6*[0.0]
         self.lla = 3*[0.0]  # For ground track
 
         self.idx_stat_in_view = []  # Indices of station which are in view
@@ -61,21 +61,21 @@ class Satellite:
         self.metric = []  # For analysis purposes
 
     def det_posvel_eci_keplerian(self, mjd_requested):
-        self.pvt_eci = misc_fn.kep2xyz(mjd_requested, self.kepler)
+        self.posvel_eci = misc_fn.kep2xyz(mjd_requested, self.kepler)
 
     def det_posvel_eci_sgp4(self, time_req):
         satellite = twoline2rv(self.tle_line1, self.tle_line2, wgs84)
         pos,vel = satellite.propagate(time_req.year, time_req.month, time_req.day,
                                       time_req.hour, time_req.minute, time_req.second)
         for i in range(3):
-            self.pvt_eci[i] = float(pos[i])*1000
-            self.pvt_eci[i+3] = float(vel[i])*1000
+            self.posvel_eci[i] = float(pos[i])*1000
+            self.posvel_eci[i+3] = float(vel[i])*1000
 
     def det_posvel_ecf(self, gmst_requested):  # ECF
-        self.pvt_ecf = misc_fn.spin_vector(-gmst_requested, self.pvt_eci)  # assume ECI and GMST computed elsewhere
+        self.posvel_ecf = misc_fn.spin_vector(-gmst_requested, self.posvel_eci)  # assume ECI and GMST computed elsewhere
 
     def det_lla(self):
-        self.lla = misc_fn.xyz2lla(self.pvt_ecf)
+        self.lla = misc_fn.xyz2lla(self.posvel_ecf)
 
 
 class Station:
@@ -88,18 +88,18 @@ class Station:
         self.elevation_mask = []  # Could be varying over azimuth...
         self.el_mask_max = []  # Could be varying over azimuth...
 
-        self.pvt_eci = 6*[0.0]
-        self.pvt_ecf = 6*[0.0]
+        self.posvel_eci = 6*[0.0]
+        self.posvel_ecf = 6*[0.0]
         self.lla = 3*[0.0]
 
         self.idx_sat_in_view = []  # Indices of satellites which are in view
 
     def det_posvel_ecf(self):
-        self.pvt_ecf[0:3] = misc_fn.lla2xyz(self.lla)  # ECF
+        self.posvel_ecf[0:3] = misc_fn.lla2xyz(self.lla)  # ECF
 
     def det_posvel_eci(self, gmst_requested):
-        self.pvt_eci = misc_fn.spin_vector(gmst_requested, self.pvt_ecf)  # Requires the ECF to be computed first
-        self.pvt_eci[3:6] = np.cross(self.pvt_eci[0:3], [0, 0, -OMEGA_EARTH])
+        self.posvel_eci = misc_fn.spin_vector(gmst_requested, self.posvel_ecf)  # Requires the ECF to be computed first
+        self.posvel_eci[3:6] = np.cross(self.posvel_eci[0:3], [0, 0, -OMEGA_EARTH])
 
     def det_posvel_eci_astropy(self):
         # Same as det_posvel_eci but now using Astropy
@@ -107,8 +107,8 @@ class Station:
         location = EarthLocation.from_geodetic(degrees(self.lla[1]), degrees(self.lla[0]), self.lla[2])
         mjd = Time(55324.0, format='mjd')
         eci = location.get_gcrs_posvel(mjd)
-        self.pvt_eci[0:3] = eci[0].xyz.value
-        self.pvt_eci[3:6] = eci[1].xyz.value
+        self.posvel_eci[0:3] = eci[0].xyz.value
+        self.posvel_eci[3:6] = eci[1].xyz.value
 
 
 class User:
@@ -121,8 +121,8 @@ class User:
         self.elevation_mask = []  # Could be varying over azimuth...
         self.el_mask_max = []  # Could be varying over azimuth...
 
-        self.pvt_eci = 6*[0.0]
-        self.pvt_ecf = 6*[0.0]
+        self.posvel_eci = 6*[0.0]
+        self.posvel_ecf = 6*[0.0]
         self.lla = 3*[0.0]
         self.num_lat = 0
         self.num_lon = 0
@@ -135,16 +135,16 @@ class User:
         self.metric = []  # For analysis purposes
 
     def det_posvel_ecf(self):
-        self.pvt_ecf[0:3] = misc_fn.lla2xyz(self.lla)
+        self.posvel_ecf[0:3] = misc_fn.lla2xyz(self.lla)
 
     def det_posvel_eci(self, gmst_requested):
-        self.pvt_eci = misc_fn.spin_vector(gmst_requested, self.pvt_ecf)  # Requires the ECF to be computed first
-        self.pvt_eci[3:6] = np.cross(self.pvt_eci[0:3], [0, 0, -OMEGA_EARTH])
+        self.posvel_eci = misc_fn.spin_vector(gmst_requested, self.posvel_ecf)  # Requires the ECF to be computed first
+        self.posvel_eci[3:6] = np.cross(self.posvel_eci[0:3], [0, 0, -OMEGA_EARTH])
 
     def det_posvel_tle(self, gmst_requested, mjd_requested):  # For spacecraft user
         # Compute ECF and ECI coordinates from MJD and TLE set
-        self.pvt_eci = misc_fn.kep2xyz(mjd_requested, self.kepler)  # ECI
-        self.pvt_ecf = misc_fn.spin_vector(-gmst_requested, self.pvt_eci)  # ECF
+        self.posvel_eci = misc_fn.kep2xyz(mjd_requested, self.kepler)  # ECI
+        self.posvel_ecf = misc_fn.spin_vector(-gmst_requested, self.posvel_eci)  # ECF
 
 
 class Ground2SpaceLink:
@@ -168,12 +168,12 @@ class Ground2SpaceLink:
         # for every combination of user and satellite. Also the computation of azimuth is not done standard,
         # since it takes more time and not needed by all analysis
 
-        self.gr2sp_ecf = [satellite.pvt_ecf[i] - station.pvt_ecf[i] for i in range(3)]
+        self.gr2sp_ecf = [satellite.posvel_ecf[i] - station.posvel_ecf[i] for i in range(3)]
 
         self.distance = np.linalg.norm(self.gr2sp_ecf)
 
-        self.azimuth, self.elevation = misc_fn.calc_az_el(satellite.pvt_ecf, station.pvt_ecf)  # From Station to Satellite
-        self.azimuth2, self.elevation2 = misc_fn.calc_az_el(station.pvt_ecf, satellite.pvt_ecf)  # From Satellite to Station
+        self.azimuth, self.elevation = misc_fn.calc_az_el(satellite.posvel_ecf, station.posvel_ecf)  # From Station to Satellite
+        self.azimuth2, self.elevation2 = misc_fn.calc_az_el(station.posvel_ecf, satellite.posvel_ecf)  # From Satellite to Station
 
     def check_masking(self, station):
         # Check whether satellite is above masking angle defined for station/user
@@ -211,11 +211,11 @@ class User2SpaceLink:
 
     def compute_link(self, user, satellite):
 
-        self.usr2sp_ecf = [satellite.pvt_ecf[i] - user.pvt_ecf[i] for i in range(3)]
+        self.usr2sp_ecf = [satellite.posvel_ecf[i] - user.posvel_ecf[i] for i in range(3)]
 
         self.distance = np.linalg.norm(self.usr2sp_ecf)
 
-        self.azimuth, self.elevation = misc_fn.calc_az_el(satellite.pvt_ecf, user.pvt_ecf)
+        self.azimuth, self.elevation = misc_fn.calc_az_el(satellite.posvel_ecf, user.posvel_ecf)
 
     def check_masking(self, user):
         # Check whether satellite is above masking angle defined for station/user
@@ -259,12 +259,12 @@ class Space2SpaceLink:
         # Compute distance, vector and if Earth is in between...
         # Returns True if the Earth is not in between both satellites
 
-        self.sp2sp_ecf = [sat_2.pvt_ecf[i] - sat_1.pvt_ecf[i] for i in range(3)]
+        self.sp2sp_ecf = [sat_2.posvel_ecf[i] - sat_1.posvel_ecf[i] for i in range(3)]
 
         self.distance = np.linalg.norm(self.sp2sp_ecf)
 
-        self.azimuth, self.elevation = misc_fn.calc_az_el(sat_1.pvt_ecf, sat_2.pvt_ecf)
-        self.azimuth2, self.elevation2 = misc_fn.calc_az_el(sat_2.pvt_ecf, sat_1.pvt_ecf)
+        self.azimuth, self.elevation = misc_fn.calc_az_el(sat_1.posvel_ecf, sat_2.posvel_ecf)
+        self.azimuth2, self.elevation2 = misc_fn.calc_az_el(sat_2.posvel_ecf, sat_1.posvel_ecf)
 
     def check_masking(self, sat_1, sat_2):
 
@@ -287,7 +287,7 @@ class Space2SpaceLink:
                 in_view_elevation = True
 
         # Also check whether the link is not passing through the Earth
-        intersect_earth, i_x1, i_x2 = misc_fn.line_sphere_intersect(sat_1.pvt_eci, sat_2.pvt_eci, R_EARTH, [0,0,0])
+        intersect_earth, i_x1, i_x2 = misc_fn.line_sphere_intersect(sat_1.posvel_eci, sat_2.posvel_eci, R_EARTH, [0,0,0])
 
         if not intersect_earth and in_view_elevation:
             return True

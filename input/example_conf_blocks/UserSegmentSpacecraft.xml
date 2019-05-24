@@ -1,0 +1,6 @@
+﻿<UserSegment>
+  <Type>Spacecraft</Type>
+  <TLEFileName>C:\Documents and Settings\Michel Tossaint\My Documents\Navigation Data\TLE\TLE_MetopA_2006_12_26.txt</TLEFileName>
+  <ElevationMask>20</ElevationMask>
+  <ReceiverConstellation>1000</ReceiverConstellation>
+</UserSegment>

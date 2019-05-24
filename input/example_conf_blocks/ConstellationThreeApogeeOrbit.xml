@@ -1,0 +1,17 @@
+<Constellation>
+    <ConstellationID>3</ConstellationID>
+    <ConstellationName>PCW_TAP</ConstellationName>
+    <NumOfPlanes>1</NumOfPlanes>
+    <NumOfSatellites>1</NumOfSatellites>
+    <Satellite>
+        <SatelliteID>1</SatelliteID>
+        <Plane>1</Plane>
+        <EpochMJD>54465.5</EpochMJD>
+        <SemiMajorAxis>32235991</SemiMajorAxis>
+        <Eccentricity>0.55</Eccentricity>
+        <Inclination>63.40</Inclination>
+        <RAAN>-100.0</RAAN>
+        <ArgOfPerigee>270.00</ArgOfPerigee>
+        <MeanAnomaly>0.00</MeanAnomaly>
+    </Satellite>
+</Constellation>

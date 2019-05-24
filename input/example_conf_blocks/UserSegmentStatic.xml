@@ -1,0 +1,8 @@
+﻿<UserSegment>
+  <Type>Static</Type>
+  <Latitude>50</Latitude>
+  <Longitude>10</Longitude>
+  <Height>0</Height>
+  <ElevationMask>5</ElevationMask>
+  <ReceiverConstellation>1001</ReceiverConstellation>
+</UserSegment>

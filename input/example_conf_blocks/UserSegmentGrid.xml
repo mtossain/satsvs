@@ -1,0 +1,12 @@
+﻿<UserSegment>
+  <Type>Grid</Type>
+  <LatMin>-90</LatMin>
+  <LatMax>90</LatMax>
+  <LonMin>-180</LonMin>
+  <LonMax>180</LonMax>
+  <LatStep>2.5</LatStep>
+  <LonStep>2.5</LonStep>
+  <Height>0</Height>
+  <ReceiverConstellation>111111</ReceiverConstellation>
+  <ElevationMask>5</ElevationMask>
+</UserSegment>

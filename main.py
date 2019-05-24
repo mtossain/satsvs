@@ -38,7 +38,7 @@ def update_satellites(sm):
     # and remember which ones are in view
     if sm.orbits_from_previous_run:  # Read the ECI posvel from all satellites for one epoch from file
         for idx_sat, satellite in enumerate(sm.satellites):
-            satellite.pvt_eci = sm.data_orbits[sm.cnt_epoch * sm.num_sat + idx_sat, :]
+            satellite.posvel_eci = sm.data_orbits[sm.cnt_epoch * sm.num_sat + idx_sat, :]
             satellite.det_posvel_ecf(sm.time_gmst)
             satellite.idx_stat_in_view = []  # Reset before loop
     else:
@@ -104,8 +104,8 @@ def write_posvel_satellites(sm):  # Write the orbits from file
     for idx_sat, satellite in enumerate(sm.satellites):
         with open('output/orbits_internal.txt', 'a') as f:
             f.write("%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n"
-                    % (satellite.pvt_eci[0], satellite.pvt_eci[1], satellite.pvt_eci[2],
-                       satellite.pvt_eci[3], satellite.pvt_eci[4], satellite.pvt_eci[5]))
+                    % (satellite.posvel_eci[0], satellite.posvel_eci[1], satellite.posvel_eci[2],
+                       satellite.posvel_eci[3], satellite.posvel_eci[4], satellite.posvel_eci[5]))
 
 
 def clear_load_orbit_file(sm):  # Clear or load previous orbit file
@@ -135,7 +135,7 @@ def main():
         sm.analysis.in_loop(sm)  # Run analyses which are needed in time loop
 
         sm.cnt_epoch += 1
-        sm.time_mjd += sm.time_step / 86400.0 # Update time
+        sm.time_mjd += sm.time_step / 86400.0  # Update time
         ls.logger.info(f'Simulation time: {sm.time_str}, time step: {sm.cnt_epoch}')
 
     sm.analysis.after_loop(sm)  # Run analysis after time loop

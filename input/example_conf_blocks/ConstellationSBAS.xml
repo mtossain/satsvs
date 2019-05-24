@@ -1,0 +1,20 @@
+<Constellation>
+  <ConstellationID>5</ConstellationID>
+  <ConstellationName>EGNOS</ConstellationName>
+  <TLEFileName>C:\Users\Michel Tossaint\My Data\Navigation Data\TLE\egnos_20100330.txt</TLEFileName>
+</Constellation>
+<Constellation>
+  <ConstellationID>6</ConstellationID>
+  <ConstellationName>WAAS</ConstellationName>
+  <TLEFileName>C:\Users\Michel Tossaint\My Data\Navigation Data\TLE\waas_20100330.txt</TLEFileName>
+</Constellation>
+<Constellation>
+  <ConstellationID>7</ConstellationID>
+  <ConstellationName>MSAS</ConstellationName>
+  <TLEFileName>C:\Users\Michel Tossaint\My Data\Navigation Data\TLE\msas_20100330.txt</TLEFileName>
+</Constellation>
+<Constellation>
+  <ConstellationID>8</ConstellationID>
+  <ConstellationName>GAGAN</ConstellationName>
+  <TLEFileName>C:\Users\Michel Tossaint\My Data\Navigation Data\TLE\gagan_20100330.txt</TLEFileName>
+</Constellation>

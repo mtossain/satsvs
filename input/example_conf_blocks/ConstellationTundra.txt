@@ -1,0 +1,17 @@
+<Constellation>
+    <ConstellationID>2</ConstellationID>
+    <ConstellationName>PCW_Tundra</ConstellationName>
+    <NumOfPlanes>1</NumOfPlanes>
+    <NumOfSatellites>1</NumOfSatellites>
+    <Satellite>
+        <SatelliteID>1</SatelliteID>
+        <Plane>1</Plane>
+        <EpochMJD>54465.5</EpochMJD>
+        <SemiMajorAxis>42163846</SemiMajorAxis>
+        <Eccentricity>0.30</Eccentricity>
+        <Inclination>63.40</Inclination>
+        <RAAN>-100.0</RAAN>
+        <ArgOfPerigee>270.00</ArgOfPerigee>
+        <MeanAnomaly>0.00</MeanAnomaly>
+    </Satellite>
+</Constellation>

@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from math import floor, radians, degrees
+from math import floor, radians, degrees, ceil
 from astropy.time import Time
 # Project modules
 from constants import *
@@ -295,10 +295,11 @@ class AppConfig:
         tree = ET.parse(self.file_name)
         root = tree.getroot()
         for sim in root.iter('SimulationManager'):
-            self.start_time = Time(sim.find('StartDate').text,scale='utc').mjd
+            self.start_time = Time(sim.find('StartDate').text, scale='utc').mjd
             self.time_mjd = self.start_time  # initiate the time loop
             self.stop_time = Time(sim.find('StopDate').text, scale='utc').mjd
             self.time_step = int(sim.find('TimeStep').text)
+
             self.include_gr2sp = str2bool(sim.find('IncludeStation2SpaceLinks').text)
             self.include_usr2sp = str2bool(sim.find('IncludeUser2SpaceLinks').text)
             self.include_sp2sp = str2bool(sim.find('IncludeSpace2SpaceLinks').text)
@@ -328,9 +329,9 @@ class AppConfig:
                     self.analysis = AnalysisCovSatelliteVisibleGrid()
                 if analysis_node.find('Type').text == 'cov_satellite_visible_id':
                     self.analysis = AnalysisCovSatelliteVisibleId()
-                if analysis_node.find('Type').text == 'obs_swath_coverage':
-                    self.analysis = AnalysisObsSwathCoverage()
+                if analysis_node.find('Type').text == 'obs_swath_conical':
+                    self.analysis = AnalysisObsSwathConical()
                 self.analysis.type = analysis_node.find('Type').text
                 self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 
-        self.num_epoch = floor(86400 * (self.stop_time - self.start_time) / self.time_step)
+        self.num_epoch = ceil(86400 * (self.stop_time - self.start_time) / self.time_step)

@@ -322,15 +322,15 @@ class AnalysisCovSatellitePvt(AnalysisBase):
                     with open('output/orbits.txt', 'a') as f:
                         f.write("%13.6f,%d,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n" \
                                 % (sm.time_mjd, satellite.sat_id,
-                                   satellite.pvt_eci[0], satellite.pvt_eci[1], satellite.pvt_eci[2],
-                                   satellite.pvt_eci[3], satellite.pvt_eci[4], satellite.pvt_eci[5]))
+                                   satellite.posvel_eci[0], satellite.posvel_eci[1], satellite.posvel_eci[2],
+                                   satellite.posvel_eci[3], satellite.posvel_eci[4], satellite.posvel_eci[5]))
             else:  # All satellites in constellation
                 if satellite.constellation_id == self.constellation_id:
                     with open('output/orbits.txt', 'a') as f:
                         f.write("%13.6f,%d,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n" \
                                 % (sm.time_mjd, satellite.sat_id,
-                                   satellite.pvt_eci[0], satellite.pvt_eci[1], satellite.pvt_eci[2],
-                                   satellite.pvt_eci[3], satellite.pvt_eci[4], satellite.pvt_eci[5]))
+                                   satellite.posvel_eci[0], satellite.posvel_eci[1], satellite.posvel_eci[2],
+                                   satellite.posvel_eci[3], satellite.posvel_eci[4], satellite.posvel_eci[5]))
 
     def after_loop(self, sm):
         data = pd.read_csv('output/orbits.txt', sep=',', header=None,
@@ -419,7 +419,7 @@ class AnalysisCovSatelliteVisible(AnalysisBase):
         plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
         for user in sm.users:
             plt.plot(self.times_f_doy, user.metric, '-',
-                     label=f'User lat/lon {degrees(user.lla[0])} {degrees(user.lla[1])}')
+                     label=f'User lat/lon {round(degrees(user.lla[0]),1)} {round(degrees(user.lla[1]),1)}')
         plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view [-]')
         plt.grid(); plt.legend()
         plt.savefig('output/'+self.type+'.png')

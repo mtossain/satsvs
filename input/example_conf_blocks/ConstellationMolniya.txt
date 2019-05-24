@@ -1,0 +1,28 @@
+<Constellation>
+    <ConstellationID>1</ConstellationID>
+    <ConstellationName>PCW_Molniya</ConstellationName>
+    <NumOfPlanes>1</NumOfPlanes>
+    <NumOfSatellites>2</NumOfSatellites>
+    <Satellite>
+        <SatelliteID>1</SatelliteID>
+        <Plane>1</Plane>
+        <EpochMJD>53712</EpochMJD>
+        <SemiMajorAxis>26546250</SemiMajorAxis>
+        <Eccentricity>0.741169</Eccentricity>
+        <Inclination>63.4349</Inclination>
+        <RAAN>162.0</RAAN>
+        <ArgOfPerigee>270.00</ArgOfPerigee>
+        <MeanAnomaly>0.0</MeanAnomaly>
+    </Satellite>
+    <Satellite>
+        <SatelliteID>2</SatelliteID>
+        <Plane>1</Plane>
+        <EpochMJD>53712</EpochMJD>
+        <SemiMajorAxis>26546250</SemiMajorAxis>
+        <Eccentricity>0.741169</Eccentricity>
+        <Inclination>63.4349</Inclination>
+        <RAAN>162.0</RAAN>
+        <ArgOfPerigee>270.00</ArgOfPerigee>
+        <MeanAnomaly>180.0</MeanAnomaly>
+    </Satellite>
+</Constellation>
