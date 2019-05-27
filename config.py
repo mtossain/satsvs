@@ -64,6 +64,7 @@ class AppConfig:
             const.num_planes = int(constellation.find('NumOfPlanes').text)
             const.constellation_name = constellation.find('ConstellationName').text
             const.rx_constellation = constellation.find('ReceiverConstellation').text
+            const.tle_file_name = constellation.find('TLEFileName').text
             ls.logger.info(const.__dict__)
             self.constellations.append(const)
 
@@ -331,7 +332,9 @@ class AppConfig:
                     self.analysis = AnalysisCovSatelliteVisibleId()
                 if analysis_node.find('Type').text == 'obs_swath_conical':
                     self.analysis = AnalysisObsSwathConical()
+                if analysis_node.find('Type').text == 'obs_swath_push_broom':
+                    self.analysis = AnalysisObsSwathPushBroom()
                 self.analysis.type = analysis_node.find('Type').text
                 self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 
-        self.num_epoch = ceil(86400 * (self.stop_time - self.start_time) / self.time_step)
+        self.num_epoch = ceil(86400 * (self.stop_time - self.start_time) / self.time_step)  # TODO fix when multiple of timesteps...

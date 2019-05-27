@@ -7,7 +7,7 @@
         <NumOfSatellites>1</NumOfSatellites>
         <NumOfPlanes>1</NumOfPlanes>
         <ConstellationName>METOPA</ConstellationName>
-        <ReceiverConstellation>1</ReceiverConstellation>
+        <ReceiverConstellation>1111</ReceiverConstellation>
         <TLEFileName>input/example_tle_files/metop_a.txt</TLEFileName>
     </Constellation>
 
@@ -36,8 +36,8 @@
             <LatMax>90</LatMax>
             <LonMin>-180</LonMin>
             <LonMax>180</LonMax>
-            <LatStep>2</LatStep>
-            <LonStep>2</LonStep>
+            <LatStep>1</LatStep>
+            <LonStep>1</LonStep>
             <Height>0.0</Height>
             <ReceiverConstellation>1111</ReceiverConstellation>
             <ElevationMask>5.0</ElevationMask>
@@ -63,7 +63,7 @@
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
 	    <StartDate>2010-05-08 00:00:00</StartDate>
-	    <StopDate>2010-05-08 12:00:00</StopDate>
+	    <StopDate>2010-05-08 03:00:00</StopDate>
 	    <TimeStep>120</TimeStep>
 
 		<IncludeStation2SpaceLinks>False</IncludeStation2SpaceLinks>
@@ -71,19 +71,28 @@
 		<IncludeSpace2SpaceLinks>False</IncludeSpace2SpaceLinks>
 
         <OrbitsFromPreviousRun>False</OrbitsFromPreviousRun>
-        <OrbitPropagator>Keplerian</OrbitPropagator>
+        <OrbitPropagator>SGP4</OrbitPropagator>
 
-        <Analysis>
-            <Type>obs_swath_conical</Type>
-            <ObsInclinationAngle>44.8</ObsInclinationAngle>
+<!--        <Analysis>-->
+<!--            <Type>obs_swath_conical</Type>-->
+<!--            <ObsInclinationAngle>44.8</ObsInclinationAngle>-->
 <!--            <OrthoViewLatitude>90</OrthoViewLatitude>-->
-        </Analysis>
+<!--        </Analysis>-->
+
+			<Analysis>
+				<Type>obs_swath_push_broom</Type>
+				<ObsSwathStart>250000.0</ObsSwathStart>
+				<ObsSwathStop>650000.0</ObsSwathStop>
+<!--				<ObsInclinationAngle1>20.0</ObsInclinationAngle1>-->
+<!--				<ObsInclinationAngle2>52.0</ObsInclinationAngle2>-->
+<!--	            <OrthoViewLatitude>90</OrthoViewLatitude>-->
+			</Analysis>
 
 
 <!--		<Analysis>-->
 <!--			<Type>cov_ground_track</Type>-->
 <!--			<ConstellationID>1</ConstellationID>-->
-<!--			<SatelliteID>1</SatelliteID>-->
+<!--			<SatelliteID>29499</SatelliteID>-->
 <!--		</Analysis>-->
 
 <!--        <Analysis>-->

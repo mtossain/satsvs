@@ -1,5 +1,5 @@
 # Satellite Service Volume Simulator
-## Open Source satellite, ground station and satellite user tool
+## Open Source satellite, ground station and user tool
 ### M. Tossaint - 2019 - v1
 
 
@@ -309,7 +309,10 @@ Plots elevation for the highest satellite in view over a user grid. The followin
 <img src="/docs/cov_satellite_highest.png" alt="cov_satellite_highest"/>
 
 ### obs_swath_conical
-Plots the swath coverage for a conical scanner on one or more satellites defined in the space segment.
+Plots the swath coverage for a conical scanner on one or more satellites defined in the space segment. 
+The user segment is used to define the grid of analysis and defines the granularity of the result.
+Typically a grid of 1x1 deg is sufficient otherwise for a complete globe the simulation will take lots of time.
+
 The following parameters are needed:
 ```
 <Analysis>
@@ -324,7 +327,7 @@ Optional are:
 ```
     <OrthoViewLatitude>90</OrthoViewLatitude>
 ```
-This parameter can be given to see one part of the globe, eg. the polar region.
+This parameter can be given to see one part of the globe in an orthometric view, eg.  for the polar region.
 <img src="/docs/obs_swath_conical.png" alt="cov_satellite_highest"/>
 
 

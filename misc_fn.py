@@ -1,8 +1,22 @@
 import math
 from math import sin, cos, tan, atan2, atan, sqrt, fabs, asin, acos, radians, degrees
-from constants import PI, GM_EARTH, R_EARTH
 import numpy as np
 from astropy.coordinates import EarthLocation
+from math import tan, sqrt, asin, degrees, radians
+from numpy import dot, arccos, clip, cross, sin, cos
+from numpy.linalg import norm
+from scipy.optimize import fsolve
+# Modules from project
+from constants import R_EARTH, PI, GM_EARTH
+
+
+class Plane:  # Definition of a plane class to be used in OBS analysis
+    def __init__(self, a, b, c):
+        # self.n = normalize(cross(b - a, c - a))  # n is plane normal. Point X on the plane satisfies Dot(n, X) = d
+        # n is plane normal. Point X on the plane satisfies Dot(n, X) = d. Do not need to normalize here.
+        self.n = cross(b - a, c - a)
+        # self.d = dot(self.n, a)  # d = dot(n, p)  # distance plane to origin, in this case always 0
+
 
 # Compute Modified Julian Date from YYYY and Day Of Year pair
 # Time functions from SP3 library B.Remondi.
@@ -427,3 +441,100 @@ def sat_contour(lla, elevation_mask):
         cnt += 1
 
     return contour
+
+
+def dist_point_plane(point_q, plane_p):  # not really distance but if point is more than 90 deg away from normal
+    return dot(point_q, plane_p.n)  # - plane_p.d
+
+
+def test_point_within_pyramid(point_q, planes_h):
+    for i in range(4):
+        if dist_point_plane(point_q, planes_h[i]) > 0.0:  # on bad side of plane, faster implementation
+            return False
+    return True
+
+
+def make_unit(x):
+    """Normalize entire input to norm 1. Not what you want for 2D arrays!"""
+    return x / norm(x)
+
+
+def x_parallel_v(x, v):
+    """Project x onto v. Result will be parallel to v."""
+    # (x' * v / norm(v)) * v / norm(v)
+    # = (x' * v) * v / norm(v)^2
+    # = (x' * v) * v / (v' * v)
+    return dot(x, v) / dot(v, v) * v
+
+
+def x_perpendicular_v(x, v):
+    """Component of x orthogonal to v. Result is perpendicular to v."""
+    return x - x_parallel_v(x, v)
+
+
+def x_project_on_v(x, v):
+    """Project x onto v, returning parallel and perpendicular components
+    >> d = xProject(x, v)
+    >> np.allclose(d['par'] + d['perp'], x)
+    True
+    """
+    par = x_parallel_v(x, v)
+    perp = x - par
+    return {'par': par, 'perp': perp}
+
+
+def rotate_vec_about_vec(a, b, theta):
+    """Rotate vector a about vector b by theta radians."""
+    # Thanks user MNKY at http://math.stackexchange.com/a/1432182/81266
+    proj = x_project_on_v(a, b)
+    w = cross(b, proj['perp'])
+    return proj['par'] + proj['perp'] * cos(theta) + norm(proj['perp']) * make_unit(w) * sin(theta)
+
+
+def det_swath_radius(H, inc_angle): # altitude in [m], incidence angle alfa in [radians]
+    A = (1 / tan(inc_angle) / tan(inc_angle) + 1)
+    B = -2*(H+R_EARTH)
+    C = (H+R_EARTH) * (H+R_EARTH) - R_EARTH * R_EARTH / tan(inc_angle) / tan(inc_angle)
+    det = sqrt(B*B-4*A*C)
+    y1 = (-B + det)/2/A
+    x = sqrt(R_EARTH*R_EARTH - y1*y1)
+    return x # in [m]
+
+
+def det_oza(H, inc_angle):  # altitude in [m], incidence angle  in [radians]
+    x = det_swath_radius(H, inc_angle)
+    beta = degrees(asin(x / R_EARTH))
+    ia = 90 - degrees(inc_angle) - beta
+    oza = 90 - ia
+    return oza  # in [deg]
+
+
+def det_oza_fast(H, R_EARTH, inc_angle):  # altitude and R_EARTH in [m], incidence angle  in [radians]
+    oza = asin((R_EARTH+H)/R_EARTH*sin(inc_angle))
+    return oza
+
+
+def earth_angle_beta_deg(x):
+    # Returns the Earth beta angle in degrees
+    beta = degrees(asin(x / R_EARTH))
+    return beta
+
+
+def angle_two_vectors(u, v, norm_u, norm_v):
+    # Returns angle in [radians]
+    # Pre computed the norm of the second vector
+    c = dot(u, v) / norm_u / norm_v
+    return arccos(clip(c, -1, 1))
+
+
+# Compute numerically the solution to the incidence angle alfa from a swath width from nadir
+# swath width in [m]
+# radius Earth in [m]
+# altitude satellite in [m]
+def solve_inc_angle_from_swath_width(swath_width, radius_earth, altitude):
+    def equation(alfa):
+        return asin((radius_earth+altitude)/radius_earth * sin(alfa)) - alfa - swath_width/radius_earth
+    sol = fsolve(equation, 1)
+    return sol[0]
+
+
