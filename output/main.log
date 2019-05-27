@@ -1,100 +1,99 @@
-2019-05-27 17:51:29,677 - main - INFO - {'constellation_id': 1, 'constellation_name': 'METOPA', 'num_sat': 1, 'num_planes': 1, 'tle_file_name': 'input/example_tle_files/metop_a.txt', 'rx_constellation': '1111'}
-2019-05-27 17:51:29,678 - main - INFO - ['Found satellite:', '29499', 'Kepler Elements', "{'epoch_mjd': 58378.6172223, 'semi_major_axis': 7198353.8526316015, 'eccentricity': 4.53e-05, 'inclination': 1.721191348439248, 'right_ascension': 5.514839010574122, 'arg_perigee': 0.844564825040056, 'mean_anomaly': 1.8728430071450353}"]
-2019-05-27 17:51:29,678 - main - INFO - {'constellation_id': 1, 'station_id': 1, 'station_name': 'ALB', 'rx_constellation': '1', 'elevation_mask': [0.08726646259971647], 'el_mask_max': [1.5707963267948966], 'posvel_eci': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'posvel_ecf': [3420934.916457177, 597048.7200610382, 5331957.088686384, 0.0, 0.0, 0.0], 'lla': [0.9965830028887622, 0.17278759594743864, 0.0], 'idx_sat_in_view': []}
-2019-05-27 17:51:30,652 - main - INFO - {'type': 'Grid', 'user_id': 65340, 'rx_constellation': '1111', 'elevation_mask': [0.08726646259971647], 'el_mask_max': [1.5707963267948966], 'posvel_eci': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'posvel_ecf': [-3.918620924842322e-10, 4.798926572679991e-26, 6356752.3142, 0.0, 0.0, 0.0], 'norm_ecf': 0, 'lla': [1.5707963267948966, 3.141592653589793, 0.0], 'num_lat': 181, 'num_lon': 361, 'idx_sat_in_view': [], 'tle_file_name': '', 'kepler': <segments.KeplerSet object at 0x12f3b72e8>, 'metric': [], 'UserName': 'Grid'}
-2019-05-27 17:51:30,654 - main - INFO - Loaded simulation, start MJD: 55324.0, stop MJD: 55324.125, number of time steps: 120
-2019-05-27 17:51:30,654 - main - INFO - Loaded 1 number of Station to Spacecraft links
-2019-05-27 17:51:30,925 - main - INFO - Loaded 65341 number of User to Spacecraft links
-2019-05-27 17:51:30,925 - main - INFO - Loaded 1 number of Spacecraft to Spacecraft links
-2019-05-27 17:51:31,421 - main - INFO - Finished reading configuration file
-2019-05-27 17:51:31,423 - main - INFO - Simulation time: 2010-05-08 00:00:00, time step: 1
-2019-05-27 17:51:31,608 - main - INFO - Simulation time: 2010-05-08 00:02:00, time step: 2
-2019-05-27 17:51:31,794 - main - INFO - Simulation time: 2010-05-08 00:04:00, time step: 3
-2019-05-27 17:51:31,986 - main - INFO - Simulation time: 2010-05-08 00:06:00, time step: 4
-2019-05-27 17:51:32,170 - main - INFO - Simulation time: 2010-05-08 00:08:00, time step: 5
-2019-05-27 17:51:32,348 - main - INFO - Simulation time: 2010-05-08 00:10:00, time step: 6
-2019-05-27 17:51:32,531 - main - INFO - Simulation time: 2010-05-08 00:12:00, time step: 7
-2019-05-27 17:51:32,711 - main - INFO - Simulation time: 2010-05-08 00:14:00, time step: 8
-2019-05-27 17:51:32,897 - main - INFO - Simulation time: 2010-05-08 00:16:00, time step: 9
-2019-05-27 17:51:33,077 - main - INFO - Simulation time: 2010-05-08 00:18:00, time step: 10
-2019-05-27 17:51:33,254 - main - INFO - Simulation time: 2010-05-08 00:20:00, time step: 11
-2019-05-27 17:51:33,433 - main - INFO - Simulation time: 2010-05-08 00:22:00, time step: 12
-2019-05-27 17:51:33,611 - main - INFO - Simulation time: 2010-05-08 00:24:00, time step: 13
-2019-05-27 17:51:33,792 - main - INFO - Simulation time: 2010-05-08 00:26:00, time step: 14
-2019-05-27 17:51:33,972 - main - INFO - Simulation time: 2010-05-08 00:28:00, time step: 15
-2019-05-27 17:51:34,152 - main - INFO - Simulation time: 2010-05-08 00:30:00, time step: 16
-2019-05-27 17:51:34,339 - main - INFO - Simulation time: 2010-05-08 00:32:00, time step: 17
-2019-05-27 17:51:34,520 - main - INFO - Simulation time: 2010-05-08 00:34:00, time step: 18
-2019-05-27 17:51:34,701 - main - INFO - Simulation time: 2010-05-08 00:36:00, time step: 19
-2019-05-27 17:51:34,881 - main - INFO - Simulation time: 2010-05-08 00:38:00, time step: 20
-2019-05-27 17:51:35,070 - main - INFO - Simulation time: 2010-05-08 00:40:00, time step: 21
-2019-05-27 17:51:35,252 - main - INFO - Simulation time: 2010-05-08 00:42:00, time step: 22
-2019-05-27 17:51:35,433 - main - INFO - Simulation time: 2010-05-08 00:44:00, time step: 23
-2019-05-27 17:51:35,618 - main - INFO - Simulation time: 2010-05-08 00:46:00, time step: 24
-2019-05-27 17:51:35,805 - main - INFO - Simulation time: 2010-05-08 00:48:00, time step: 25
-2019-05-27 17:51:35,985 - main - INFO - Simulation time: 2010-05-08 00:50:00, time step: 26
-2019-05-27 17:51:36,169 - main - INFO - Simulation time: 2010-05-08 00:52:00, time step: 27
-2019-05-27 17:51:36,349 - main - INFO - Simulation time: 2010-05-08 00:54:00, time step: 28
-2019-05-27 17:51:36,526 - main - INFO - Simulation time: 2010-05-08 00:56:00, time step: 29
-2019-05-27 17:51:36,704 - main - INFO - Simulation time: 2010-05-08 00:58:00, time step: 30
-2019-05-27 17:51:36,884 - main - INFO - Simulation time: 2010-05-08 01:00:00, time step: 31
-2019-05-27 17:51:37,063 - main - INFO - Simulation time: 2010-05-08 01:02:00, time step: 32
-2019-05-27 17:51:37,239 - main - INFO - Simulation time: 2010-05-08 01:04:00, time step: 33
-2019-05-27 17:51:37,417 - main - INFO - Simulation time: 2010-05-08 01:06:00, time step: 34
-2019-05-27 17:51:37,594 - main - INFO - Simulation time: 2010-05-08 01:08:00, time step: 35
-2019-05-27 17:51:37,772 - main - INFO - Simulation time: 2010-05-08 01:10:00, time step: 36
-2019-05-27 17:51:37,953 - main - INFO - Simulation time: 2010-05-08 01:12:00, time step: 37
-2019-05-27 17:51:38,129 - main - INFO - Simulation time: 2010-05-08 01:14:00, time step: 38
-2019-05-27 17:51:38,305 - main - INFO - Simulation time: 2010-05-08 01:16:00, time step: 39
-2019-05-27 17:51:38,484 - main - INFO - Simulation time: 2010-05-08 01:18:00, time step: 40
-2019-05-27 17:51:38,663 - main - INFO - Simulation time: 2010-05-08 01:20:00, time step: 41
-2019-05-27 17:51:38,841 - main - INFO - Simulation time: 2010-05-08 01:22:00, time step: 42
-2019-05-27 17:51:39,018 - main - INFO - Simulation time: 2010-05-08 01:24:00, time step: 43
-2019-05-27 17:51:39,196 - main - INFO - Simulation time: 2010-05-08 01:26:00, time step: 44
-2019-05-27 17:51:39,375 - main - INFO - Simulation time: 2010-05-08 01:28:00, time step: 45
-2019-05-27 17:51:39,554 - main - INFO - Simulation time: 2010-05-08 01:30:00, time step: 46
-2019-05-27 17:51:39,731 - main - INFO - Simulation time: 2010-05-08 01:32:00, time step: 47
-2019-05-27 17:51:39,913 - main - INFO - Simulation time: 2010-05-08 01:34:00, time step: 48
-2019-05-27 17:51:40,096 - main - INFO - Simulation time: 2010-05-08 01:36:00, time step: 49
-2019-05-27 17:51:40,273 - main - INFO - Simulation time: 2010-05-08 01:38:00, time step: 50
-2019-05-27 17:51:40,452 - main - INFO - Simulation time: 2010-05-08 01:40:00, time step: 51
-2019-05-27 17:51:40,629 - main - INFO - Simulation time: 2010-05-08 01:42:00, time step: 52
-2019-05-27 17:51:40,812 - main - INFO - Simulation time: 2010-05-08 01:44:00, time step: 53
-2019-05-27 17:51:40,990 - main - INFO - Simulation time: 2010-05-08 01:46:00, time step: 54
-2019-05-27 17:51:41,169 - main - INFO - Simulation time: 2010-05-08 01:48:00, time step: 55
-2019-05-27 17:51:41,344 - main - INFO - Simulation time: 2010-05-08 01:50:00, time step: 56
-2019-05-27 17:51:41,522 - main - INFO - Simulation time: 2010-05-08 01:52:00, time step: 57
-2019-05-27 17:51:41,700 - main - INFO - Simulation time: 2010-05-08 01:54:00, time step: 58
-2019-05-27 17:51:41,880 - main - INFO - Simulation time: 2010-05-08 01:56:00, time step: 59
-2019-05-27 17:51:42,056 - main - INFO - Simulation time: 2010-05-08 01:58:00, time step: 60
-2019-05-27 17:51:42,236 - main - INFO - Simulation time: 2010-05-08 02:00:00, time step: 61
-2019-05-27 17:51:42,412 - main - INFO - Simulation time: 2010-05-08 02:02:00, time step: 62
-2019-05-27 17:51:42,588 - main - INFO - Simulation time: 2010-05-08 02:04:00, time step: 63
-2019-05-27 17:51:42,766 - main - INFO - Simulation time: 2010-05-08 02:06:00, time step: 64
-2019-05-27 17:51:42,952 - main - INFO - Simulation time: 2010-05-08 02:08:00, time step: 65
-2019-05-27 17:51:43,126 - main - INFO - Simulation time: 2010-05-08 02:10:00, time step: 66
-2019-05-27 17:51:43,303 - main - INFO - Simulation time: 2010-05-08 02:12:00, time step: 67
-2019-05-27 17:51:43,481 - main - INFO - Simulation time: 2010-05-08 02:14:00, time step: 68
-2019-05-27 17:51:43,660 - main - INFO - Simulation time: 2010-05-08 02:16:00, time step: 69
-2019-05-27 17:51:43,838 - main - INFO - Simulation time: 2010-05-08 02:18:00, time step: 70
-2019-05-27 17:51:44,018 - main - INFO - Simulation time: 2010-05-08 02:20:00, time step: 71
-2019-05-27 17:51:44,197 - main - INFO - Simulation time: 2010-05-08 02:22:00, time step: 72
-2019-05-27 17:51:44,377 - main - INFO - Simulation time: 2010-05-08 02:24:00, time step: 73
-2019-05-27 17:51:44,556 - main - INFO - Simulation time: 2010-05-08 02:26:00, time step: 74
-2019-05-27 17:51:44,739 - main - INFO - Simulation time: 2010-05-08 02:28:00, time step: 75
-2019-05-27 17:51:44,916 - main - INFO - Simulation time: 2010-05-08 02:30:00, time step: 76
-2019-05-27 17:51:45,099 - main - INFO - Simulation time: 2010-05-08 02:32:00, time step: 77
-2019-05-27 17:51:45,279 - main - INFO - Simulation time: 2010-05-08 02:34:00, time step: 78
-2019-05-27 17:51:45,457 - main - INFO - Simulation time: 2010-05-08 02:36:00, time step: 79
-2019-05-27 17:51:45,633 - main - INFO - Simulation time: 2010-05-08 02:38:00, time step: 80
-2019-05-27 17:51:45,817 - main - INFO - Simulation time: 2010-05-08 02:40:00, time step: 81
-2019-05-27 17:51:45,996 - main - INFO - Simulation time: 2010-05-08 02:42:00, time step: 82
-2019-05-27 17:51:46,175 - main - INFO - Simulation time: 2010-05-08 02:44:00, time step: 83
-2019-05-27 17:51:46,352 - main - INFO - Simulation time: 2010-05-08 02:46:00, time step: 84
-2019-05-27 17:51:46,534 - main - INFO - Simulation time: 2010-05-08 02:48:00, time step: 85
-2019-05-27 17:51:46,712 - main - INFO - Simulation time: 2010-05-08 02:50:00, time step: 86
-2019-05-27 17:51:46,892 - main - INFO - Simulation time: 2010-05-08 02:52:00, time step: 87
-2019-05-27 17:51:47,068 - main - INFO - Simulation time: 2010-05-08 02:54:00, time step: 88
-2019-05-27 17:51:47,250 - main - INFO - Simulation time: 2010-05-08 02:56:00, time step: 89
-2019-05-27 17:51:47,431 - main - INFO - Simulation time: 2010-05-08 02:58:00, time step: 90
-2019-05-27 17:52:41,090 - main - INFO - Plotting analysis obs_swath_push_broom
+2019-05-27 18:24:13,079 - main - INFO - {'constellation_id': 1, 'constellation_name': 'METOPA', 'num_sat': 1, 'num_planes': 1, 'rx_constellation': '1111', 'tle_file_name': 'input/example_tle_files/metop_a.txt', 'obs_incl_angle_start': None, 'obs_incl_angle_stop': None, 'obs_swath_start': 250000.0, 'obs_swath_stop': 650000.0}
+2019-05-27 18:24:13,079 - main - INFO - ['Found satellite:', '29499', 'Kepler Elements', "{'epoch_mjd': 58378.6172223, 'semi_major_axis': 7198353.8526316015, 'eccentricity': 4.53e-05, 'inclination': 1.721191348439248, 'right_ascension': 5.514839010574122, 'arg_perigee': 0.844564825040056, 'mean_anomaly': 1.8728430071450353}"]
+2019-05-27 18:24:13,080 - main - INFO - {'constellation_id': 1, 'station_id': 1, 'station_name': 'ALB', 'rx_constellation': '1', 'elevation_mask': [0.08726646259971647], 'el_mask_max': [1.5707963267948966], 'posvel_eci': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'posvel_ecf': [3420934.916457177, 597048.7200610382, 5331957.088686384, 0.0, 0.0, 0.0], 'lla': [0.9965830028887622, 0.17278759594743864, 0.0], 'idx_sat_in_view': []}
+2019-05-27 18:24:14,039 - main - INFO - {'type': 'Grid', 'user_id': 65340, 'rx_constellation': '1111', 'elevation_mask': [0.08726646259971647], 'el_mask_max': [1.5707963267948966], 'posvel_eci': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'posvel_ecf': [-3.918620924842322e-10, 4.798926572679991e-26, 6356752.3142, 0.0, 0.0, 0.0], 'norm_ecf': 0, 'lla': [1.5707963267948966, 3.141592653589793, 0.0], 'num_lat': 181, 'num_lon': 361, 'idx_sat_in_view': [], 'tle_file_name': '', 'kepler': <segments.KeplerSet object at 0x131281160>, 'metric': [], 'UserName': 'Grid'}
+2019-05-27 18:24:14,040 - main - INFO - Loaded simulation, start MJD: 55324.0, stop MJD: 55324.125, number of time steps: 120
+2019-05-27 18:24:14,040 - main - INFO - Loaded 1 number of Station to Spacecraft links
+2019-05-27 18:24:14,315 - main - INFO - Loaded 65341 number of User to Spacecraft links
+2019-05-27 18:24:14,315 - main - INFO - Loaded 1 number of Spacecraft to Spacecraft links
+2019-05-27 18:24:14,441 - main - INFO - Finished reading configuration file
+2019-05-27 18:24:14,443 - main - INFO - Simulation time: 2010-05-08 00:00:00, time step: 1
+2019-05-27 18:24:14,618 - main - INFO - Simulation time: 2010-05-08 00:02:00, time step: 2
+2019-05-27 18:24:14,789 - main - INFO - Simulation time: 2010-05-08 00:04:00, time step: 3
+2019-05-27 18:24:14,956 - main - INFO - Simulation time: 2010-05-08 00:06:00, time step: 4
+2019-05-27 18:24:15,127 - main - INFO - Simulation time: 2010-05-08 00:08:00, time step: 5
+2019-05-27 18:24:15,296 - main - INFO - Simulation time: 2010-05-08 00:10:00, time step: 6
+2019-05-27 18:24:15,461 - main - INFO - Simulation time: 2010-05-08 00:12:00, time step: 7
+2019-05-27 18:24:15,628 - main - INFO - Simulation time: 2010-05-08 00:14:00, time step: 8
+2019-05-27 18:24:15,800 - main - INFO - Simulation time: 2010-05-08 00:16:00, time step: 9
+2019-05-27 18:24:15,970 - main - INFO - Simulation time: 2010-05-08 00:18:00, time step: 10
+2019-05-27 18:24:16,134 - main - INFO - Simulation time: 2010-05-08 00:20:00, time step: 11
+2019-05-27 18:24:16,303 - main - INFO - Simulation time: 2010-05-08 00:22:00, time step: 12
+2019-05-27 18:24:16,475 - main - INFO - Simulation time: 2010-05-08 00:24:00, time step: 13
+2019-05-27 18:24:16,642 - main - INFO - Simulation time: 2010-05-08 00:26:00, time step: 14
+2019-05-27 18:24:16,813 - main - INFO - Simulation time: 2010-05-08 00:28:00, time step: 15
+2019-05-27 18:24:16,981 - main - INFO - Simulation time: 2010-05-08 00:30:00, time step: 16
+2019-05-27 18:24:17,146 - main - INFO - Simulation time: 2010-05-08 00:32:00, time step: 17
+2019-05-27 18:24:17,314 - main - INFO - Simulation time: 2010-05-08 00:34:00, time step: 18
+2019-05-27 18:24:17,483 - main - INFO - Simulation time: 2010-05-08 00:36:00, time step: 19
+2019-05-27 18:24:17,656 - main - INFO - Simulation time: 2010-05-08 00:38:00, time step: 20
+2019-05-27 18:24:17,825 - main - INFO - Simulation time: 2010-05-08 00:40:00, time step: 21
+2019-05-27 18:24:17,994 - main - INFO - Simulation time: 2010-05-08 00:42:00, time step: 22
+2019-05-27 18:24:18,162 - main - INFO - Simulation time: 2010-05-08 00:44:00, time step: 23
+2019-05-27 18:24:18,334 - main - INFO - Simulation time: 2010-05-08 00:46:00, time step: 24
+2019-05-27 18:24:18,504 - main - INFO - Simulation time: 2010-05-08 00:48:00, time step: 25
+2019-05-27 18:24:18,674 - main - INFO - Simulation time: 2010-05-08 00:50:00, time step: 26
+2019-05-27 18:24:18,843 - main - INFO - Simulation time: 2010-05-08 00:52:00, time step: 27
+2019-05-27 18:24:19,011 - main - INFO - Simulation time: 2010-05-08 00:54:00, time step: 28
+2019-05-27 18:24:19,177 - main - INFO - Simulation time: 2010-05-08 00:56:00, time step: 29
+2019-05-27 18:24:19,346 - main - INFO - Simulation time: 2010-05-08 00:58:00, time step: 30
+2019-05-27 18:24:19,513 - main - INFO - Simulation time: 2010-05-08 01:00:00, time step: 31
+2019-05-27 18:24:19,681 - main - INFO - Simulation time: 2010-05-08 01:02:00, time step: 32
+2019-05-27 18:24:19,850 - main - INFO - Simulation time: 2010-05-08 01:04:00, time step: 33
+2019-05-27 18:24:20,018 - main - INFO - Simulation time: 2010-05-08 01:06:00, time step: 34
+2019-05-27 18:24:20,189 - main - INFO - Simulation time: 2010-05-08 01:08:00, time step: 35
+2019-05-27 18:24:20,355 - main - INFO - Simulation time: 2010-05-08 01:10:00, time step: 36
+2019-05-27 18:24:20,523 - main - INFO - Simulation time: 2010-05-08 01:12:00, time step: 37
+2019-05-27 18:24:20,694 - main - INFO - Simulation time: 2010-05-08 01:14:00, time step: 38
+2019-05-27 18:24:20,866 - main - INFO - Simulation time: 2010-05-08 01:16:00, time step: 39
+2019-05-27 18:24:21,037 - main - INFO - Simulation time: 2010-05-08 01:18:00, time step: 40
+2019-05-27 18:24:21,208 - main - INFO - Simulation time: 2010-05-08 01:20:00, time step: 41
+2019-05-27 18:24:21,382 - main - INFO - Simulation time: 2010-05-08 01:22:00, time step: 42
+2019-05-27 18:24:21,555 - main - INFO - Simulation time: 2010-05-08 01:24:00, time step: 43
+2019-05-27 18:24:21,729 - main - INFO - Simulation time: 2010-05-08 01:26:00, time step: 44
+2019-05-27 18:24:21,899 - main - INFO - Simulation time: 2010-05-08 01:28:00, time step: 45
+2019-05-27 18:24:22,068 - main - INFO - Simulation time: 2010-05-08 01:30:00, time step: 46
+2019-05-27 18:24:22,235 - main - INFO - Simulation time: 2010-05-08 01:32:00, time step: 47
+2019-05-27 18:24:22,409 - main - INFO - Simulation time: 2010-05-08 01:34:00, time step: 48
+2019-05-27 18:24:22,580 - main - INFO - Simulation time: 2010-05-08 01:36:00, time step: 49
+2019-05-27 18:24:22,751 - main - INFO - Simulation time: 2010-05-08 01:38:00, time step: 50
+2019-05-27 18:24:22,921 - main - INFO - Simulation time: 2010-05-08 01:40:00, time step: 51
+2019-05-27 18:24:23,089 - main - INFO - Simulation time: 2010-05-08 01:42:00, time step: 52
+2019-05-27 18:24:23,258 - main - INFO - Simulation time: 2010-05-08 01:44:00, time step: 53
+2019-05-27 18:24:23,425 - main - INFO - Simulation time: 2010-05-08 01:46:00, time step: 54
+2019-05-27 18:24:23,596 - main - INFO - Simulation time: 2010-05-08 01:48:00, time step: 55
+2019-05-27 18:24:23,770 - main - INFO - Simulation time: 2010-05-08 01:50:00, time step: 56
+2019-05-27 18:24:23,938 - main - INFO - Simulation time: 2010-05-08 01:52:00, time step: 57
+2019-05-27 18:24:24,105 - main - INFO - Simulation time: 2010-05-08 01:54:00, time step: 58
+2019-05-27 18:24:24,273 - main - INFO - Simulation time: 2010-05-08 01:56:00, time step: 59
+2019-05-27 18:24:24,441 - main - INFO - Simulation time: 2010-05-08 01:58:00, time step: 60
+2019-05-27 18:24:24,610 - main - INFO - Simulation time: 2010-05-08 02:00:00, time step: 61
+2019-05-27 18:24:24,778 - main - INFO - Simulation time: 2010-05-08 02:02:00, time step: 62
+2019-05-27 18:24:24,955 - main - INFO - Simulation time: 2010-05-08 02:04:00, time step: 63
+2019-05-27 18:24:25,124 - main - INFO - Simulation time: 2010-05-08 02:06:00, time step: 64
+2019-05-27 18:24:25,290 - main - INFO - Simulation time: 2010-05-08 02:08:00, time step: 65
+2019-05-27 18:24:25,459 - main - INFO - Simulation time: 2010-05-08 02:10:00, time step: 66
+2019-05-27 18:24:25,623 - main - INFO - Simulation time: 2010-05-08 02:12:00, time step: 67
+2019-05-27 18:24:25,795 - main - INFO - Simulation time: 2010-05-08 02:14:00, time step: 68
+2019-05-27 18:24:25,966 - main - INFO - Simulation time: 2010-05-08 02:16:00, time step: 69
+2019-05-27 18:24:26,133 - main - INFO - Simulation time: 2010-05-08 02:18:00, time step: 70
+2019-05-27 18:24:26,303 - main - INFO - Simulation time: 2010-05-08 02:20:00, time step: 71
+2019-05-27 18:24:26,476 - main - INFO - Simulation time: 2010-05-08 02:22:00, time step: 72
+2019-05-27 18:24:26,645 - main - INFO - Simulation time: 2010-05-08 02:24:00, time step: 73
+2019-05-27 18:24:26,816 - main - INFO - Simulation time: 2010-05-08 02:26:00, time step: 74
+2019-05-27 18:24:26,986 - main - INFO - Simulation time: 2010-05-08 02:28:00, time step: 75
+2019-05-27 18:24:27,155 - main - INFO - Simulation time: 2010-05-08 02:30:00, time step: 76
+2019-05-27 18:24:27,322 - main - INFO - Simulation time: 2010-05-08 02:32:00, time step: 77
+2019-05-27 18:24:27,493 - main - INFO - Simulation time: 2010-05-08 02:34:00, time step: 78
+2019-05-27 18:24:27,661 - main - INFO - Simulation time: 2010-05-08 02:36:00, time step: 79
+2019-05-27 18:24:27,832 - main - INFO - Simulation time: 2010-05-08 02:38:00, time step: 80
+2019-05-27 18:24:28,003 - main - INFO - Simulation time: 2010-05-08 02:40:00, time step: 81
+2019-05-27 18:24:28,169 - main - INFO - Simulation time: 2010-05-08 02:42:00, time step: 82
+2019-05-27 18:24:28,337 - main - INFO - Simulation time: 2010-05-08 02:44:00, time step: 83
+2019-05-27 18:24:28,508 - main - INFO - Simulation time: 2010-05-08 02:46:00, time step: 84
+2019-05-27 18:24:28,674 - main - INFO - Simulation time: 2010-05-08 02:48:00, time step: 85
+2019-05-27 18:24:28,847 - main - INFO - Simulation time: 2010-05-08 02:50:00, time step: 86
+2019-05-27 18:24:29,014 - main - INFO - Simulation time: 2010-05-08 02:52:00, time step: 87
+2019-05-27 18:24:29,183 - main - INFO - Simulation time: 2010-05-08 02:54:00, time step: 88
+2019-05-27 18:24:29,353 - main - INFO - Simulation time: 2010-05-08 02:56:00, time step: 89
+2019-05-27 18:24:29,526 - main - INFO - Simulation time: 2010-05-08 02:58:00, time step: 90

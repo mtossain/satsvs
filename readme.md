@@ -24,13 +24,12 @@ parameters and analysis are defined. Analysis can be added as wished, the baseli
 
 ### Earth observation
 - __obs_swath_conical__: Swath coverage for satellite(s) with conical scanners
-
+- __obs_swath_pushbroom__: Swath coverage for satellite(s)
 
 To be implemented at a later stage:
 
 ### Earth observation
-- __obs_swath_pushbroom__: Swath coverage for satellite(s)
-- __obs_time_between_passes__: Time between satellite swath passes
+- __obs_swath_revisit__: Revisit time between satellite swath passes
 
 ### Communication
 - __com_sp2sp_budget__: for satellite-satellite received power, bitrate and C/N0
@@ -317,18 +316,56 @@ The following parameters are needed:
 ```
 <Analysis>
     <Type>obs_swath_conical</Type>
-    <ObsInclinationAngle>44.8</ObsInclinationAngle>
 </Analysis>
 ```
-The incidence angle is defined as the angle between the line-of-sight and the nadir vector. 
-This is not to be confused with the observation zenith angle which applies to the user.
+In the constellation part of the space segment are defined the instrument characteristics:
+```
+<ObsSwathStop>650000.0</ObsSwathStop>
+```
+as above in meters, at the edge, or in degrees incidence angle:
+```
+<ObsInclinationAngleStop>52.0</ObsInclinationAngleStop>
+```
+The incidence angle is defined as the angle between the line-of-sight and the nadir vector from the satellite. 
+This is not to be confused with the user observation zenith angle.
 
 Optional are:
 ```
     <OrthoViewLatitude>90</OrthoViewLatitude>
 ```
 This parameter can be given to see one part of the globe in an orthometric view, eg.  for the polar region.
-<img src="/docs/obs_swath_conical.png" alt="cov_satellite_highest"/>
+<img src="/docs/obs_swath_conical.png" alt="obs_swath_conical"/>
+
+### obs_swath_push_broom
+Plots the swath coverage for a push broom scanner on one or more satellites defined in the space segment. 
+The user segment is used to define the grid of analysis and defines the granularity of the result.
+Typically a grid of 1x1 deg is sufficient otherwise for a complete globe the simulation will take lots of time.
+
+The following parameters are needed:
+```
+<Analysis>
+    <Type>obs_swath_push_broom</Type>
+</Analysis>
+```
+In the constellation part of the space segment are defined the instrument characteristics:
+```
+<ObsSwathStart>250000.0</ObsSwathStart>
+<ObsSwathStop>650000.0</ObsSwathStop>
+```
+as above in meters, at the edge, or in degrees incidence angle:
+```
+<ObsInclinationAngleStart>20.0</ObsInclinationAngleStart>
+<ObsInclinationAngleStop>52.0</ObsInclinationAngleStop>
+```
+The incidence angle is defined as the angle between the line-of-sight and the nadir vector from the satellite. 
+This is not to be confused with the user observation zenith angle.
+
+Optional are:
+```
+    <OrthoViewLatitude>90</OrthoViewLatitude>
+```
+This parameter can be given to see one part of the globe in an orthometric view, eg.  for the polar region.
+<img src="/docs/obs_swath_push_broom.png" alt="cov_satellite_push_broom"/>
 
 
 

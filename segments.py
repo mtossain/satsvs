@@ -29,8 +29,13 @@ class Constellation:
         self.constellation_name = ''
         self.num_sat = 0
         self.num_planes = 0
-        self.tle_file_name = ''
         self.rx_constellation = ''
+
+        self.tle_file_name = None
+        self.obs_incl_angle_start = None
+        self.obs_incl_angle_stop = None
+        self.obs_swath_start = None
+        self.obs_swath_stop = None
 
 
 class Satellite:
@@ -59,6 +64,11 @@ class Satellite:
         self.idx_sat_in_view = []
 
         self.metric = []  # For analysis purposes
+
+        self.obs_incl_angle_start = None  # If satellite contains instrument
+        self.obs_incl_angle_stop = None
+        self.obs_swath_start = None
+        self.obs_swath_stop = None
 
     def det_posvel_eci_keplerian(self, mjd_requested):
         self.posvel_eci = misc_fn.kep2xyz(mjd_requested, self.kepler)

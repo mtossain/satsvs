@@ -43,7 +43,7 @@ class AppConfig:
         self.include_sp2sp = True
         self.orbits_from_previous_run = False
         self.data_orbits = []  # Orbits from previous run
-        self.orbit_propagator =''  # Text with either Keplerian / SGP4
+        self.orbit_propagator = ''  # Text with either Keplerian / SGP4
         self.num_constellation = 0
         self.num_sat = 0
         self.num_station = 0
@@ -64,7 +64,17 @@ class AppConfig:
             const.num_planes = int(constellation.find('NumOfPlanes').text)
             const.constellation_name = constellation.find('ConstellationName').text
             const.rx_constellation = constellation.find('ReceiverConstellation').text
-            const.tle_file_name = constellation.find('TLEFileName').text
+            # Now some optional parameters
+            if constellation.find('TLEFileName') is not None:
+                const.tle_file_name = constellation.find('TLEFileName').text
+            if constellation.find('ObsInclinationAngleStart') is not None:
+                const.obs_incl_angle_start = radians(float(constellation.find('ObsInclinationAngleStart').text))
+            if constellation.find('ObsInclinationAngleStop') is not None:
+                const.obs_incl_angle_stop = radians(float(constellation.find('ObsInclinationAngleStop').text))
+            if constellation.find('ObsSwathStart') is not None:
+                const.obs_swath_start = float(constellation.find('ObsSwathStart').text)
+            if constellation.find('ObsSwathStop') is not None:
+                const.obs_swath_stop = float(constellation.find('ObsSwathStop').text)
             ls.logger.info(const.__dict__)
             self.constellations.append(const)
 

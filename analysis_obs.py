@@ -16,20 +16,33 @@ from analysis import AnalysisBase
 import logging_svs as ls
 
 
-class AnalysisObsSwathConical(AnalysisBase):
+class AnalysisObsSwathConical(AnalysisBase):  # TODO Speed up by just checking distance...
 
     def __init__(self):
         super().__init__()
         self.ortho_view_latitude = 0
-        self.obs_inclination_angle = 0
 
     def read_config(self, node):
-        if node.find('ObsInclinationAngle') is not None:
-            self.obs_inclination_angle = radians(float(node.find('ObsInclinationAngle').text))
         if node.find('OrthoViewLatitude') is not None:
             self.ortho_view_latitude = float(node.find('OrthoViewLatitude').text)
 
     def before_loop(self, sm):
+        for satellite in sm.satellites:
+            for idx, constellation in enumerate(sm.constellations):
+                if satellite.constellation_id == constellation.constellation_id:
+                    idx_found = idx
+            const = sm.constellations[idx_found]
+            sat_altitude = satellite.kepler.semi_major_axis - R_EARTH
+            if const.obs_swath_stop is not None:  # if swath defined by swath length rather than incidence
+                satellite.obs_incl_angle_stop = misc_fn.solve_inc_angle_from_swath_width(
+                    const.obs_swath_stop, R_EARTH, sat_altitude)
+            else:
+                satellite.obs_incl_angle_stop = const.obs_incl_angle_stop
+            alfa_critical = asin(R_EARTH / (R_EARTH + sat_altitude))  # If incidence angle shooting off Earth -> error
+            if satellite.obs_incl_angle_start > alfa_critical:
+                ls.logger.error(f'Inclination angle stop: {degrees(satellite.obs_incl_angle_stop)} ' +
+                                f'larger than critical angle {round(degrees(alfa_critical),1)}')
+                exit()
         for user in sm.users:
             user.metric = np.zeros(sm.num_epoch)
             user.norm_ecf = norm(user.posvel_ecf[0:3])
@@ -38,11 +51,11 @@ class AnalysisObsSwathConical(AnalysisBase):
         for satellite in sm.satellites:
             norm_sat = norm(satellite.posvel_ecf[0:3])
             sat_altitude = norm_sat - R_EARTH  # TODO Compute real radius Earth at latitude
-            radius = misc_fn.det_swath_radius(sat_altitude, self.obs_inclination_angle)
+            radius = misc_fn.det_swath_radius(sat_altitude, satellite.obs_incl_angle_stop)
             earth_angle_swath = radians(misc_fn.earth_angle_beta_deg(radius))
             for user in sm.users:
                 angle_user_zenith = misc_fn.angle_two_vectors(user.posvel_ecf[0:3], satellite.posvel_ecf[0:3],
-                                                      user.norm_ecf, norm_sat)
+                                                              user.norm_ecf, norm_sat)
                 if angle_user_zenith < earth_angle_swath:
                     user.metric[sm.cnt_epoch] = 1  # Within swath
 
@@ -75,46 +88,42 @@ class AnalysisObsSwathPushBroom(AnalysisBase):
     def __init__(self):
         super().__init__()
         self.ortho_view_latitude = 0
-        self.p1 = [0,0,0]
-        self.p2 = [0,0,0]
-        self.p3 = [0,0,0]
-        self.p4 = [0,0,0]
-        self.obs_inclination_angle1 = 0
-        self.obs_inclination_angle2 = 0
-        self.obs_swath_start = 0.0  # start from nadir in meters
-        self.obs_swath_stop = 0.0  # stop from nadir in meters
+        self.p1 = [0,0,0]  # four corners of the swath
+        self.p2 = [0,0,0]  # four corners of the swath
+        self.p3 = [0,0,0]  # four corners of the swath
+        self.p4 = [0,0,0]  # four corners of the swath
 
     def read_config(self, node):
-        if node.find('ObsInclinationAngle1') is not None:
-            self.obs_inclination_angle1 = radians(float(node.find('ObsInclinationAngle1').text))
-        if node.find('ObsInclinationAngle2') is not None:
-            self.obs_inclination_angle2 = radians(float(node.find('ObsInclinationAngle2').text))
-        if node.find('ObsSwathStart') is not None:
-            self.obs_swath_start = float(node.find('ObsSwathStart').text)
-        if node.find('ObsSwathStop') is not None:
-            self.obs_swath_stop = float(node.find('ObsSwathStop').text)
         if node.find('OrthoViewLatitude') is not None:
             self.ortho_view_latitude = float(node.find('OrthoViewLatitude').text)
 
     def before_loop(self, sm):
-        sat_altitude = sm.satellites[0].kepler.semi_major_axis - R_EARTH
-        if self.obs_swath_start > 0:
-            self.obs_inclination_angle1 = misc_fn.solve_inc_angle_from_swath_width(
-                self.obs_swath_start, R_EARTH, sat_altitude)
-            self.obs_inclination_angle2 = misc_fn.solve_inc_angle_from_swath_width(
-                self.obs_swath_stop, R_EARTH, sat_altitude)
-        alfa_critical = asin(R_EARTH / (R_EARTH + sat_altitude))
-        if self.obs_inclination_angle1 > alfa_critical:
-            ls.logger.error(f'Inclination angle 1: {degrees(self.obs_inclination_angle1)} ' +
-                            f'larger than critical angle {round(degrees(alfa_critical),1)}')
-            exit()
-        if self.obs_inclination_angle2 > alfa_critical:
-            ls.logger.error(f'Inclination angle 2: {degrees(self.obs_inclination_angle2)} ' +
-                            f'larger than critical angle {round(degrees(alfa_critical),1)}')
-            exit()
+        # Get the incidence angles for each of the satelllites
+        for satellite in sm.satellites:
+            for idx, constellation in enumerate(sm.constellations):
+                if satellite.constellation_id == constellation.constellation_id:
+                    idx_found = idx
+            const = sm.constellations[idx_found]
+            sat_altitude = satellite.kepler.semi_major_axis - R_EARTH
+            if const.obs_swath_start is not None:  # if swath defined by swath length rather than incidence
+                satellite.obs_incl_angle_start = misc_fn.solve_inc_angle_from_swath_width(
+                    const.obs_swath_start, R_EARTH, sat_altitude)
+                satellite.obs_incl_angle_stop = misc_fn.solve_inc_angle_from_swath_width(
+                    const.obs_swath_stop, R_EARTH, sat_altitude)
+            else:
+                satellite.obs_incl_angle_start = const.obs_incl_angle_start
+                satellite.obs_incl_angle_stop = const.obs_incl_angle_stop
+            alfa_critical = asin(R_EARTH / (R_EARTH + sat_altitude))  # If incidence angle shooting off Earth -> error
+            if satellite.obs_incl_angle_start > alfa_critical:
+                ls.logger.error(f'Inclination angle start: {degrees(satellite.obs_incl_angle_start)} ' +
+                                f'larger than critical angle {round(degrees(alfa_critical),1)}')
+                exit()
+            if satellite.obs_incl_angle_stop > alfa_critical:
+                ls.logger.error(f'Inclination angle stop: {degrees(satellite.obs_incl_angle_stop)} ' +
+                                f'larger than critical angle {round(degrees(alfa_critical),1)}')
+                exit()
         for user in sm.users:
             user.metric = np.zeros(sm.num_epoch)
-            user.norm_ecf = norm(user.posvel_ecf[0:3])
 
     def in_loop(self, sm):
 
@@ -122,12 +131,12 @@ class AnalysisObsSwathPushBroom(AnalysisBase):
         for satellite in sm.satellites:
             sat_pos = np.array(satellite.posvel_ecf[0:3])  # Need np array for easy manipulation
             pointing_vec1 = misc_fn.rotate_vec_about_vec(-sat_pos, np.array(satellite.posvel_ecf[3:6]),
-                                                 -self.obs_inclination_angle1)  # minus for right looking, plus for left
+                                                 -satellite.obs_incl_angle_start)  # minus for right looking, plus for left
             pointing_vec2 = misc_fn.rotate_vec_about_vec(-sat_pos, np.array(satellite.posvel_ecf[3:6]),
-                                                 -self.obs_inclination_angle2)  # minus for right looking, plus for left
+                                                 -satellite.obs_incl_angle_stop)  # minus for right looking, plus for left
             intersect, p1b, self.p1 = misc_fn.line_sphere_intersect(sat_pos, sat_pos+pointing_vec1, R_EARTH, [0, 0, 0])
             intersect, p2b, self.p2 = misc_fn.line_sphere_intersect(sat_pos, sat_pos+pointing_vec2, R_EARTH, [0, 0, 0])
-            # 4 Planes of pyramid need to be carefully choosen with normal outwards of pyramid
+            # 4 Planes of pyramid need to be carefully chosen with normal outwards of pyramid
             planes.append(misc_fn.Plane(np.array([0, 0, 0]), np.array(self.p1), np.array(self.p2)))
             planes.append(misc_fn.Plane(np.array([0, 0, 0]), np.array(self.p4), np.array(self.p3)))
             planes.append(misc_fn.Plane(np.array([0, 0, 0]), np.array(self.p2), np.array(self.p4)))

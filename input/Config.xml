@@ -9,6 +9,10 @@
         <ConstellationName>METOPA</ConstellationName>
         <ReceiverConstellation>1111</ReceiverConstellation>
         <TLEFileName>input/example_tle_files/metop_a.txt</TLEFileName>
+		<ObsSwathStart>250000.0</ObsSwathStart>
+		<ObsSwathStop>650000.0</ObsSwathStop>
+		<ObsInclinationAngleStart>20.0</ObsInclinationAngleStart>
+		<ObsInclinationAngleStop>52.0</ObsInclinationAngleStop>
     </Constellation>
 
 	</SpaceSegment>
@@ -81,10 +85,6 @@
 
 			<Analysis>
 				<Type>obs_swath_push_broom</Type>
-				<ObsSwathStart>250000.0</ObsSwathStart>
-				<ObsSwathStop>650000.0</ObsSwathStop>
-<!--				<ObsInclinationAngle1>20.0</ObsInclinationAngle1>-->
-<!--				<ObsInclinationAngle2>52.0</ObsInclinationAngle2>-->
 <!--	            <OrthoViewLatitude>90</OrthoViewLatitude>-->
 			</Analysis>
 
