@@ -2,9 +2,11 @@
 ## Open Source satellite, ground station and user tool
 ### M. Tossaint - 2019 - v1
 
+<img src="/docs/schema.png" alt="schema"/>
 
 ## Introduction
 Framework takes care of geometry computations, satellite propagation, ground station and user rotation in ECI/ECF.
+It will also automatically compute links between stations and satellites, users and satellites, and between satellites.
 
 Configuration of the tool can be done in the config.xml file where satellites, ground stations, users, simulation
 parameters and analysis are defined. Analysis can be added as wished, the baseline of analysis available are below 
@@ -329,7 +331,7 @@ as above in meters, at the edge, or in degrees incidence angle:
 The incidence angle is defined as the angle between the line-of-sight and the nadir vector from the satellite. 
 This is not to be confused with the user observation zenith angle.
 
-Optional are:
+Optional in the analysis part are:
 ```
     <OrthoViewLatitude>90</OrthoViewLatitude>
 ```
@@ -360,7 +362,7 @@ as above in meters, at the edge, or in degrees incidence angle:
 The incidence angle is defined as the angle between the line-of-sight and the nadir vector from the satellite. 
 This is not to be confused with the user observation zenith angle.
 
-Optional are:
+Optional in the analysis part are:
 ```
     <OrthoViewLatitude>90</OrthoViewLatitude>
 ```
