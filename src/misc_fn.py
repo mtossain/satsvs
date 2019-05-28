@@ -5,9 +5,8 @@ from astropy.coordinates import EarthLocation
 from math import tan, sqrt, asin, degrees, radians
 from numpy import dot, arccos, clip, cross, sin, cos
 from numpy.linalg import norm
-from scipy.optimize import fsolve
 # Modules from project
-from src.constants import R_EARTH, PI, GM_EARTH
+from constants import R_EARTH, PI, GM_EARTH
 
 
 class Plane:  # Definition of a plane class to be used in OBS analysis
@@ -483,7 +482,7 @@ def x_project_on_v(x, v):
     return {'par': par, 'perp': perp}
 
 
-def rotate_vec_about_vec(a, b, theta):
+def rot_vec_vec(a, b, theta):
     """Rotate vector a about vector b by theta radians."""
     # Thanks user MNKY at http://math.stackexchange.com/a/1432182/81266
     proj = x_project_on_v(a, b)
@@ -531,10 +530,24 @@ def angle_two_vectors(u, v, norm_u, norm_v):
 # swath width in [m]
 # radius Earth in [m]
 # altitude satellite in [m]
-def solve_inc_angle_from_swath_width(swath_width, radius_earth, altitude):
-    def equation(alfa):
-        return asin((radius_earth+altitude)/radius_earth * sin(alfa)) - alfa - swath_width/radius_earth
-    sol = fsolve(equation, 1)
-    return sol[0]
+# return incidence angle in [rad]
+def incl_from_swath(swath_width, radius_earth, altitude):
+    solution = atan(sin(swath_width / radius_earth) /
+                    ((radius_earth + altitude) / radius_earth - cos(swath_width / radius_earth)))
+    return solution
 
+
+# Compute Earth radius at latitude
+# input lat [rad]
+# output radius R [m]
+def earth_radius_lat(lat):
+    r1 = 6378137  # radius at equator in [m]
+    r2 = 6356752  # radius at pole in [m]
+    radius = sqrt((r1*r1*r1*r1*pow(cos(lat),2) + r2*r2*r2*r2*pow(sin(lat),2)) /
+                  (r1*r1*pow(cos(lat),2) + r2*r2*pow(sin(lat),2)))
+    return radius
+
+# Convert string True/False to boolean
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1")
 

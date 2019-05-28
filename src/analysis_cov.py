@@ -47,7 +47,7 @@ class AnalysisCovDepthOfCoverage(AnalysisBase):
         m.drawcoastlines()
         plt.subplots_adjust(left=.12, right=.999, top=0.999, bottom=0.01)
         plt.text(50, 80, 'Red triangles: station locations')
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 
@@ -102,7 +102,7 @@ class AnalysisCovGroundTrack(AnalysisBase):
                 plt.plot(x, y, '+', label=str(satellite.sat_id))
             plt.legend(fontsize=8)
         plt.subplots_adjust(left=.08, right=.95, top=0.9, bottom=0.1)
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 
@@ -178,7 +178,7 @@ class AnalysisCovPassTime(AnalysisBase):
         cb = m.colorbar(im1, "right", size="2%", pad="2%")
         cb.set_label(self.statistic + ' Pass Time Interval [s]', fontsize=10)
         plt.subplots_adjust(left=.1, right=.9, top=0.9, bottom=0.1)
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 
@@ -235,7 +235,7 @@ class AnalysisCovSatelliteContour(AnalysisBase):
                          label='Satellite ID: '+str(sm.satellites[idx_sat].sat_id))
                 plt.legend()
         plt.subplots_adjust(left=.1, right=.9, top=0.9, bottom=0.1)
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 
@@ -293,7 +293,7 @@ class AnalysisCovSatelliteHighest(AnalysisBase):
         cb = m.colorbar(im1, "right", size="2%", pad="2%")
         cb.set_label(self.statistic + ' of Max Elevation satellites in view [deg]', fontsize=10)
         plt.subplots_adjust(left=.1, right=.9, top=0.9, bottom=0.1)
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 
@@ -311,29 +311,29 @@ class AnalysisCovSatellitePvt(AnalysisBase):
             self.satellite_id = int(node.find('SatelliteID').text)
 
     def before_loop(self, sm):
-        if os.path.exists('output/orbits.txt'):
-            os.remove('output/orbits.txt')
+        if os.path.exists('../output/orbits.txt'):
+            os.remove('../output/orbits.txt')
 
     def in_loop(self, sm):
         for idx_sat, satellite in enumerate(sm.satellites):
             if self.satellite_id > 0:  # Only one satellite
                 if satellite.constellation_id == self.constellation_id and \
                         satellite.sat_id == self.satellite_id:
-                    with open('output/orbits.txt', 'a') as f:
+                    with open('../output/orbits.txt', 'a') as f:
                         f.write("%13.6f,%d,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n" \
                                 % (sm.time_mjd, satellite.sat_id,
                                    satellite.posvel_eci[0], satellite.posvel_eci[1], satellite.posvel_eci[2],
                                    satellite.posvel_eci[3], satellite.posvel_eci[4], satellite.posvel_eci[5]))
             else:  # All satellites in constellation
                 if satellite.constellation_id == self.constellation_id:
-                    with open('output/orbits.txt', 'a') as f:
+                    with open('../output/orbits.txt', 'a') as f:
                         f.write("%13.6f,%d,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n" \
                                 % (sm.time_mjd, satellite.sat_id,
                                    satellite.posvel_eci[0], satellite.posvel_eci[1], satellite.posvel_eci[2],
                                    satellite.posvel_eci[3], satellite.posvel_eci[4], satellite.posvel_eci[5]))
 
     def after_loop(self, sm):
-        data = pd.read_csv('output/orbits.txt', sep=',', header=None,
+        data = pd.read_csv('../output/orbits.txt', sep=',', header=None,
                            names=['RunTime', 'ID', 'x', 'y', 'z', 'x_vel', 'y_vel', 'z_vel'])
         data2 = data[data.ID == 1]
         fig, ax1 = plt.subplots(figsize=(10, 6))
@@ -349,7 +349,7 @@ class AnalysisCovSatellitePvt(AnalysisBase):
         ax2.plot(self.times_f_doy, data2.z_vel, 'k+-', label='z_vel')
         ax1.legend(loc=2); ax2.legend(loc=0)
         plt.xlabel('DOY[-]'); fig.tight_layout()
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 
@@ -393,7 +393,7 @@ class AnalysisCovSatelliteSkyAngles(AnalysisBase):
         plt.xlabel('DOY[-]');
         plt.ylabel('Azimuth / Elevation [deg]')
         plt.legend(); plt.grid()
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 
@@ -422,7 +422,7 @@ class AnalysisCovSatelliteVisible(AnalysisBase):
                      label=f'User lat/lon {round(degrees(user.lla[0]),1)} {round(degrees(user.lla[1]),1)}')
         plt.xlabel('DOY[-]'); plt.ylabel('Number of satellites in view [-]')
         plt.grid(); plt.legend()
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 
@@ -471,7 +471,7 @@ class AnalysisCovSatelliteVisibleGrid(AnalysisBase):
         cb = m.colorbar(im1, "right", size="2%", pad="2%")
         cb.set_label(self.statistic + ' Number of satellites in view [-]', fontsize=10)
         plt.subplots_adjust(left=.1, right=.9, top=0.9, bottom=0.1)
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 
@@ -500,7 +500,7 @@ class AnalysisCovSatelliteVisibleId(AnalysisBase):
         plt.plot(self.times_f_doy, sm.users[0].metric, 'r+')
         plt.xlabel('DOY[-]'); plt.ylabel('IDs of satellites in view [-]')
         plt.grid()
-        plt.savefig('output/'+self.type+'.png')
+        plt.savefig('../output/'+self.type+'.png')
         plt.show()
 
 

@@ -8,11 +8,11 @@
         <NumOfPlanes>1</NumOfPlanes>
         <ConstellationName>METOPA</ConstellationName>
         <ReceiverConstellation>1111</ReceiverConstellation>
-        <TLEFileName>input/example_tle_files/metop_a.txt</TLEFileName>
-		<ObsSwathStart>250000.0</ObsSwathStart>
-		<ObsSwathStop>650000.0</ObsSwathStop>
-		<ObsInclinationAngleStart>20.0</ObsInclinationAngleStart>
-		<ObsInclinationAngleStop>52.0</ObsInclinationAngleStop>
+        <TLEFileName>../input/example_tle_files/metop_a.txt</TLEFileName>
+<!--		<ObsSwathStart>250000.0</ObsSwathStart>-->
+<!--		<ObsSwathStop>650000.0</ObsSwathStop>-->
+<!--		<ObsInclinationAngleStart>20.0</ObsInclinationAngleStart>-->
+		<ObsInclinationAngleStop>45.0</ObsInclinationAngleStop>
     </Constellation>
 
 	</SpaceSegment>
@@ -67,7 +67,7 @@
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
 	    <StartDate>2010-05-08 00:00:00</StartDate>
-	    <StopDate>2010-05-08 03:00:00</StopDate>
+	    <StopDate>2010-05-09 00:00:00</StopDate>
 	    <TimeStep>120</TimeStep>
 
 		<IncludeStation2SpaceLinks>False</IncludeStation2SpaceLinks>
@@ -77,16 +77,17 @@
         <OrbitsFromPreviousRun>False</OrbitsFromPreviousRun>
         <OrbitPropagator>SGP4</OrbitPropagator>
 
-<!--        <Analysis>-->
-<!--            <Type>obs_swath_conical</Type>-->
-<!--            <ObsInclinationAngle>44.8</ObsInclinationAngle>-->
+        <Analysis>
+            <Type>obs_swath_conical</Type>
 <!--            <OrthoViewLatitude>90</OrthoViewLatitude>-->
-<!--        </Analysis>-->
+            <Revisit>True</Revisit>
+	        <Statistic>Mean</Statistic>
+        </Analysis>
 
-			<Analysis>
-				<Type>obs_swath_push_broom</Type>
-<!--	            <OrthoViewLatitude>90</OrthoViewLatitude>-->
-			</Analysis>
+<!--			<Analysis>-->
+<!--				<Type>obs_swath_push_broom</Type>-->
+<!--&lt;!&ndash;	            <OrthoViewLatitude>90</OrthoViewLatitude>&ndash;&gt;-->
+<!--			</Analysis>-->
 
 
 <!--		<Analysis>-->

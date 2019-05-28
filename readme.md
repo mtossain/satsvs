@@ -30,9 +30,6 @@ parameters and analysis are defined. Analysis can be added as wished, the baseli
 
 _To be implemented at a later stage:_
 
-Earth observation
-- __obs_swath_revisit__: Revisit time between satellite swath passes
-
 Communication
 - __com_sp2sp_budget__: for satellite-satellite received power, bitrate and C/N0
 - __com_sp2gr_budget__: for satellite-groundstation received power, bitrate and C/N0
@@ -333,9 +330,14 @@ This is not to be confused with the user observation zenith angle.
 
 Optional in the analysis part are:
 ```
-    <OrthoViewLatitude>90</OrthoViewLatitude>
+<OrthoViewLatitude>90</OrthoViewLatitude>
+<Revisit>True</Revisit>
+<Statistic>Mean</Statistic>
 ```
-This parameter can be given to see one part of the globe in an orthometric view, eg.  for the polar region.
+- OrthoViewLatitude angle: This parameter can be given to see one part of the globe in an orthometric view, eg.  for the polar region.
+- Revisit flag: This flag will enable additional revisit computation after the swath coverage. The statistic will determine
+what kind of statistic is displayed per user location.
+
 <img src="/docs/obs_swath_conical.png" alt="obs_swath_conical"/>
 
 ### obs_swath_push_broom
@@ -364,9 +366,14 @@ This is not to be confused with the user observation zenith angle.
 
 Optional in the analysis part are:
 ```
-    <OrthoViewLatitude>90</OrthoViewLatitude>
+<OrthoViewLatitude>90</OrthoViewLatitude>
+<Revisit>True</Revisit>
+<Statistic>Mean</Statistic>
 ```
-This parameter can be given to see one part of the globe in an orthometric view, eg.  for the polar region.
+- OrthoViewLatitude angle: This parameter can be given to see one part of the globe in an orthometric view, eg.  for the polar region.
+- Revisit flag: This flag will enable additional revisit computation after the swath coverage. The statistic will determine
+what kind of statistic is displayed per user location.
+
 <img src="/docs/obs_swath_push_broom.png" alt="cov_satellite_push_broom"/>
 
 

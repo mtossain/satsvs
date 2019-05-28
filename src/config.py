@@ -7,11 +7,7 @@ from src.analysis_cov import *
 from src.analysis_obs import *
 from src.segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
 from src import logging_svs as ls
-
-
-def str2bool(v):
-    return v.lower() in ("yes", "true", "t", "1")
-
+import misc_fn
 
 class AppConfig:
     
@@ -309,12 +305,13 @@ class AppConfig:
             self.start_time = Time(sim.find('StartDate').text, scale='utc').mjd
             self.time_mjd = self.start_time  # initiate the time loop
             self.stop_time = Time(sim.find('StopDate').text, scale='utc').mjd
-            self.time_step = int(sim.find('TimeStep').text)
+            self.time_step = float(sim.find('TimeStep').text)
+            self.num_epoch = ceil(86400.0 * (self.stop_time - self.start_time) / self.time_step)
 
-            self.include_gr2sp = str2bool(sim.find('IncludeStation2SpaceLinks').text)
-            self.include_usr2sp = str2bool(sim.find('IncludeUser2SpaceLinks').text)
-            self.include_sp2sp = str2bool(sim.find('IncludeSpace2SpaceLinks').text)
-            self.orbits_from_previous_run = str2bool(sim.find('OrbitsFromPreviousRun').text)
+            self.include_gr2sp = misc_fn.str2bool(sim.find('IncludeStation2SpaceLinks').text)
+            self.include_usr2sp = misc_fn.str2bool(sim.find('IncludeUser2SpaceLinks').text)
+            self.include_sp2sp = misc_fn.str2bool(sim.find('IncludeSpace2SpaceLinks').text)
+            self.orbits_from_previous_run = misc_fn.str2bool(sim.find('OrbitsFromPreviousRun').text)
             self.orbit_propagator = sim.find('OrbitPropagator').text
 
             ls.logger.info(f'Loaded simulation, start MJD: {self.start_time}, stop MJD: {self.stop_time},' +
@@ -347,4 +344,3 @@ class AppConfig:
                 self.analysis.type = analysis_node.find('Type').text
                 self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 
-        self.num_epoch = ceil(86400 * (self.stop_time - self.start_time) / self.time_step)  # TODO fix when multiple of timesteps...

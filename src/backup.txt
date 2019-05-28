@@ -21,3 +21,43 @@ if sm.cnt_epoch == 1:
     ax.scatter3D(planes[3].n[0] * 4e3, planes[3].n[1] * 4e3, planes[3].n[2] * 4e3, color='cyan')
     plt.show()
 
+# Old way for conical scanner
+
+    def read_config(self, node):
+        if node.find('OrthoViewLatitude') is not None:
+            self.ortho_view_latitude = float(node.find('OrthoViewLatitude').text)
+
+    def before_loop(self, sm):
+        for satellite in sm.satellites:
+            for idx, constellation in enumerate(sm.constellations):
+                if satellite.constellation_id == constellation.constellation_id:
+                    idx_found = idx
+            const = sm.constellations[idx_found]
+            sat_altitude = satellite.kepler.semi_major_axis - R_EARTH
+            if const.obs_swath_stop is not None:  # if swath defined by swath length rather than incidence
+                satellite.obs_incl_angle_stop = misc_fn.incl_from_swath(
+                    const.obs_swath_stop, R_EARTH, sat_altitude)
+            else:
+                satellite.obs_incl_angle_stop = const.obs_incl_angle_stop
+            alfa_critical = asin(R_EARTH / (R_EARTH + sat_altitude))  # If incidence angle shooting off Earth -> error
+            if satellite.obs_incl_angle_stop > alfa_critical:
+                ls.logger.error(f'Inclination angle stop: {degrees(satellite.obs_incl_angle_stop)} ' +
+                                f'larger than critical angle {round(degrees(alfa_critical),1)}')
+                exit()
+        for user in sm.users:
+            user.metric = np.zeros(sm.num_epoch)
+            user.norm_ecf = norm(user.posvel_ecf[0:3])
+
+    def in_loop(self, sm):
+        for satellite in sm.satellites:
+            norm_sat = norm(satellite.posvel_ecf[0:3])
+            satellite.det_lla()
+            sat_altitude = norm_sat - misc_fn.earth_radius_lat(satellite.lla[0])
+            radius = misc_fn.det_swath_radius(sat_altitude, satellite.obs_incl_angle_stop)
+            earth_angle_swath = radians(misc_fn.earth_angle_beta_deg(radius))
+            for user in sm.users:
+                angle_user_zenith = misc_fn.angle_two_vectors(user.posvel_ecf[0:3], satellite.posvel_ecf[0:3],
+                                                              user.norm_ecf, norm_sat)
+                if angle_user_zenith < earth_angle_swath:
+                    user.metric[sm.cnt_epoch] = 1  # Within swath
+
