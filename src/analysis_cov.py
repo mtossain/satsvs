@@ -8,9 +8,9 @@ from matplotlib import pyplot as plt
 os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/lib/python3.6/site-packages/pyproj/data'
 from mpl_toolkits.basemap import Basemap
 # Import project modules
-import misc_fn
-from constants import PI
-from analysis import AnalysisBase
+from src import misc_fn
+from src.constants import PI
+from src.analysis import AnalysisBase
 
 
 class AnalysisCovDepthOfCoverage(AnalysisBase):

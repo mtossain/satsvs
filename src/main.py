@@ -6,10 +6,8 @@ if os.path.exists('output/main.log'):
 import datetime
 import numpy as np
 # Import project modules
-import config
-import misc_fn
+from src import config, logging_svs as ls, misc_fn
 from astropy.time import Time
-import logging_svs as ls
 
 
 def load_configuration():
@@ -144,8 +142,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# TODO analysis OBS
 
 # TODO analysis COM
 # TODO analysis NAV

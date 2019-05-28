@@ -1,12 +1,12 @@
 import xml.etree.ElementTree as ET
-from math import floor, radians, degrees, ceil
+from math import ceil
 from astropy.time import Time
 # Project modules
-from constants import *
-from analysis_cov import *
-from analysis_obs import *
-from segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
-import logging_svs as ls
+from src.constants import *
+from src.analysis_cov import *
+from src.analysis_obs import *
+from src.segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
+from src import logging_svs as ls
 
 
 def str2bool(v):

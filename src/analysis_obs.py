@@ -1,7 +1,5 @@
 import os
 import numpy as np
-import pandas as pd
-from math import degrees, radians
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
@@ -9,11 +7,10 @@ os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/lib/python3.
 from mpl_toolkits.basemap import Basemap
 from numpy.linalg import norm
 # Project modules
-import misc_fn
-from constants import R_EARTH
-from math import tan, sqrt, asin, degrees, radians
-from analysis import AnalysisBase
-import logging_svs as ls
+from src.constants import R_EARTH
+from math import asin, degrees, radians
+from src.analysis import AnalysisBase
+from src import logging_svs as ls, misc_fn
 
 
 class AnalysisObsSwathConical(AnalysisBase):  # TODO Speed up by just checking distance...
@@ -131,11 +128,11 @@ class AnalysisObsSwathPushBroom(AnalysisBase):
         for satellite in sm.satellites:
             sat_pos = np.array(satellite.posvel_ecf[0:3])  # Need np array for easy manipulation
             pointing_vec1 = misc_fn.rotate_vec_about_vec(-sat_pos, np.array(satellite.posvel_ecf[3:6]),
-                                                 -satellite.obs_incl_angle_start)  # minus for right looking, plus for left
+                                                         -satellite.obs_incl_angle_start)  # minus for right looking, plus for left
             pointing_vec2 = misc_fn.rotate_vec_about_vec(-sat_pos, np.array(satellite.posvel_ecf[3:6]),
-                                                 -satellite.obs_incl_angle_stop)  # minus for right looking, plus for left
-            intersect, p1b, self.p1 = misc_fn.line_sphere_intersect(sat_pos, sat_pos+pointing_vec1, R_EARTH, [0, 0, 0])
-            intersect, p2b, self.p2 = misc_fn.line_sphere_intersect(sat_pos, sat_pos+pointing_vec2, R_EARTH, [0, 0, 0])
+                                                         -satellite.obs_incl_angle_stop)  # minus for right looking, plus for left
+            intersect, p1b, self.p1 = misc_fn.line_sphere_intersect(sat_pos, sat_pos + pointing_vec1, R_EARTH, [0, 0, 0])
+            intersect, p2b, self.p2 = misc_fn.line_sphere_intersect(sat_pos, sat_pos + pointing_vec2, R_EARTH, [0, 0, 0])
             # 4 Planes of pyramid need to be carefully chosen with normal outwards of pyramid
             planes.append(misc_fn.Plane(np.array([0, 0, 0]), np.array(self.p1), np.array(self.p2)))
             planes.append(misc_fn.Plane(np.array([0, 0, 0]), np.array(self.p4), np.array(self.p3)))

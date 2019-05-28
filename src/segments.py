@@ -6,8 +6,8 @@ from astropy.time import Time
 from sgp4.earth_gravity import wgs84
 from sgp4.io import twoline2rv
 # Modules from the project
-from constants import PI, R_EARTH, OMEGA_EARTH
-import misc_fn
+from src.constants import PI, R_EARTH, OMEGA_EARTH
+from src import misc_fn
 
 
 class KeplerSet:
@@ -298,7 +298,7 @@ class Space2SpaceLink:
                 in_view_elevation = True
 
         # Also check whether the link is not passing through the Earth
-        intersect_earth, i_x1, i_x2 = misc_fn.line_sphere_intersect(sat_1.posvel_eci, sat_2.posvel_eci, R_EARTH, [0,0,0])
+        intersect_earth, i_x1, i_x2 = misc_fn.line_sphere_intersect(sat_1.posvel_eci, sat_2.posvel_eci, R_EARTH, [0, 0, 0])
 
         if not intersect_earth and in_view_elevation:
             return True

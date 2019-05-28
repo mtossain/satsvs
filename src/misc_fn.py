@@ -1,5 +1,5 @@
 import math
-from math import sin, cos, tan, atan2, atan, sqrt, fabs, asin, acos, radians, degrees
+from math import sin, cos, atan2, atan, fabs, acos
 import numpy as np
 from astropy.coordinates import EarthLocation
 from math import tan, sqrt, asin, degrees, radians
@@ -7,7 +7,7 @@ from numpy import dot, arccos, clip, cross, sin, cos
 from numpy.linalg import norm
 from scipy.optimize import fsolve
 # Modules from project
-from constants import R_EARTH, PI, GM_EARTH
+from src.constants import R_EARTH, PI, GM_EARTH
 
 
 class Plane:  # Definition of a plane class to be used in OBS analysis
