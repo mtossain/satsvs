@@ -6,6 +6,7 @@ os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/lib/python3.
 from mpl_toolkits.basemap import Basemap
 from math import sin, cos, asin, degrees, radians
 import numpy as np
+from numba import jit
 # Modules from project
 import logging_svs as ls
 
@@ -35,25 +36,22 @@ class AnalysisBase:
 class AnalysisObs:   # Common methods needed for some OBS analysis
 
     def plot_swath_coverage(self, sm, user_metric, ortho_view_latitude):
-        plot_points = []
+        plot_points = np.zeros((len(sm.users),3))
         for idx_user,user in enumerate(sm.users):
             if idx_user % 1000 == 0:
                 ls.logger.info(f'User swath coverage {user.user_id} of {len(sm.users)}')
             if user_metric[idx_user,:].any():  # Any value bigger than 0
-                num_swaths = list(np.diff(user_metric[idx_user,:])).count(1)
-                plot_points.append([degrees(user.lla[1]), degrees(user.lla[0]), num_swaths])
-        x = [row[0] for row in plot_points]
-        y = [row[1] for row in plot_points]
-        z = [row[2] for row in plot_points]
+                num_swaths = len(np.flatnonzero(np.diff(user_metric[idx_user,:])))/2
+                plot_points[idx_user,:] = [degrees(user.lla[1]), degrees(user.lla[0]), num_swaths]
         if ortho_view_latitude is not None:
             fig = plt.figure(figsize=(7, 7))
             m = Basemap(projection='npstere', lon_0=0, boundinglat=ortho_view_latitude, resolution='l')
-            x, y = m(x, y)
-            sc = m.scatter(x, y, s=3, marker='o', cmap=plt.cm.jet, c=z, alpha=.3)
+            x, y = m(plot_points[:,0], plot_points[:,1])
+            sc = m.scatter(x, y, s=3, marker='o', cmap=plt.cm.jet, c=plot_points[:,2], alpha=.3)
         else:
             fig = plt.figure(figsize=(10, 5))
             m = Basemap(projection='cyl', lon_0=0)
-            sc = m.scatter(x, y, s=3, marker='o', cmap=plt.cm.jet, c=z, alpha=.3)
+            sc = m.scatter(plot_points[:,0], plot_points[:,1], s=3, marker='o', cmap=plt.cm.jet, c=plot_points[:,2], alpha=.3)
         cb = m.colorbar(sc, shrink=0.85)
         cb.set_label('Number of passes [-]', fontsize=10)
         m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])

@@ -551,7 +551,6 @@ def earth_radius_lat(lat):
     return radius
 
 
-
 @jit(nopython=True)
 def check_users_in_plane(user_metric, user_pos, planes, cnt_epoch):
     n_users = len(user_metric)
@@ -559,6 +558,7 @@ def check_users_in_plane(user_metric, user_pos, planes, cnt_epoch):
         if test_point_within_pyramid(user_pos[idx_user, :], planes):
             user_metric[idx_user,cnt_epoch] = 1  # Within swath
     return user_metric[:,cnt_epoch]
+
 
 @jit(nopython=True)
 def check_users_from_nadir(user_metric, user_pos, sat_pos, norm_sat, earth_angle_swath, cnt_epoch):
@@ -569,6 +569,7 @@ def check_users_from_nadir(user_metric, user_pos, sat_pos, norm_sat, earth_angle
         if angle_user_zenith < earth_angle_swath:
             user_metric[idx_user,cnt_epoch] = 1  # Within swath
     return user_metric[:,cnt_epoch]
+
 
 # Convert string True/False to boolean
 def str2bool(v):

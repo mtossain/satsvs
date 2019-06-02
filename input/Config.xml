@@ -65,33 +65,9 @@
 	</GroundSegment>
   <!--Defines the users that should be simulated-->
 	<UserSegment>
-<!--        <User>-->
-<!--            <Type>Grid</Type>-->
-<!--            <LatMin>-90</LatMin>-->
-<!--            <LatMax>90</LatMax>-->
-<!--            <LonMin>-180</LonMin>-->
-<!--            <LonMax>180</LonMax>-->
-<!--            <LatStep>1</LatStep>-->
-<!--            <LonStep>1</LonStep>-->
-<!--            <Height>0.0</Height>-->
-<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
-<!--            <ElevationMask>5.0</ElevationMask>-->
-<!--        </User>-->
         <User>
             <Type>Grid</Type>
             <LatMin>-90</LatMin>
-            <LatMax>-60</LatMax>
-            <LonMin>-180</LonMin>
-            <LonMax>180</LonMax>
-            <LatStep>1</LatStep>
-            <LonStep>1</LonStep>
-            <Height>0.0</Height>
-            <ReceiverConstellation>1111</ReceiverConstellation>
-            <ElevationMask>5.0</ElevationMask>
-        </User>
-        <User>
-            <Type>Grid</Type>
-            <LatMin>60</LatMin>
             <LatMax>90</LatMax>
             <LonMin>-180</LonMin>
             <LonMax>180</LonMax>
@@ -101,6 +77,30 @@
             <ReceiverConstellation>1111</ReceiverConstellation>
             <ElevationMask>5.0</ElevationMask>
         </User>
+<!--        <User>-->
+<!--            <Type>Grid</Type>-->
+<!--            <LatMin>-90</LatMin>-->
+<!--            <LatMax>-60</LatMax>-->
+<!--            <LonMin>-180</LonMin>-->
+<!--            <LonMax>180</LonMax>-->
+<!--            <LatStep>1</LatStep>-->
+<!--            <LonStep>1</LonStep>-->
+<!--            <Height>0.0</Height>-->
+<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--            <ElevationMask>5.0</ElevationMask>-->
+<!--        </User>-->
+<!--        <User>-->
+<!--            <Type>Grid</Type>-->
+<!--            <LatMin>60</LatMin>-->
+<!--            <LatMax>90</LatMax>-->
+<!--            <LonMin>-180</LonMin>-->
+<!--            <LonMax>180</LonMax>-->
+<!--            <LatStep>1</LatStep>-->
+<!--            <LonStep>1</LonStep>-->
+<!--            <Height>0.0</Height>-->
+<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--            <ElevationMask>5.0</ElevationMask>-->
+<!--        </User>-->
 <!--        <User>-->
 <!--            <Type>Static</Type>-->
 <!--            <Latitude>50</Latitude>-->
@@ -122,7 +122,7 @@
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
 	    <StartDate>2010-05-08 00:00:00</StartDate>
-	    <StopDate>2010-05-10 12:00:00</StopDate>
+	    <StopDate>2010-05-08 12:00:00</StopDate>
 	    <TimeStep>120</TimeStep>
 
 		<IncludeStation2SpaceLinks>False</IncludeStation2SpaceLinks>
@@ -132,19 +132,19 @@
         <OrbitsFromPreviousRun>False</OrbitsFromPreviousRun>
         <OrbitPropagator>Keplerian</OrbitPropagator>
 
-        <Analysis>
-            <Type>obs_swath_conical</Type>
-            <OrthoViewLatitude>60</OrthoViewLatitude>
-            <Revisit>True</Revisit>
-	        <Statistic>Mean</Statistic>
-        </Analysis>
+<!--        <Analysis>-->
+<!--            <Type>obs_swath_conical</Type>-->
+<!--            <OrthoViewLatitude>60</OrthoViewLatitude>-->
+<!--            <Revisit>True</Revisit>-->
+<!--	        <Statistic>Mean</Statistic>-->
+<!--        </Analysis>-->
 
-<!--			<Analysis>-->
-<!--				<Type>obs_swath_push_broom</Type>-->
+			<Analysis>
+				<Type>obs_swath_push_broom</Type>
 <!--	            <OrthoViewLatitude>60</OrthoViewLatitude>-->
-<!--				<Revisit>True</Revisit>-->
-<!--				<Statistic>Mean</Statistic>-->
-<!--			</Analysis>-->
+				<Revisit>True</Revisit>
+				<Statistic>Mean</Statistic>
+			</Analysis>
 
 
 <!--		<Analysis>-->
