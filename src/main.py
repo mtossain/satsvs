@@ -1,4 +1,3 @@
-
 # Import python modules
 import os
 if os.path.exists('../output/main.log'):
@@ -126,8 +125,8 @@ def main():
 
     for sm.cnt_epoch in range(sm.num_epoch):  # Loop over simulation time window
 
-        ls.logger.info(f'Simulation time: {sm.time_str}, time step: {sm.cnt_epoch}')
         convert_times(sm)  # Convert times from mjd to gmst, fdoy and string format
+        ls.logger.info(f'Simulation time: {sm.time_str}, time step: {sm.cnt_epoch}')
 
         update_satellites(sm)  # Update pvt on satellites and links
         update_stations(sm)  # Update pvt on ground stations and links
@@ -137,14 +136,14 @@ def main():
 
         sm.time_mjd += sm.time_step / 86400.0  # Update time
 
-    sm.analysis.after_loop(sm)  # Run analysis after time loop
     ls.logger.info(f'Plotting analysis {sm.analysis.type}')
+    sm.analysis.after_loop(sm)  # Run analysis after time loop
 
 
 if __name__ == '__main__':
     main()
 
-# TODO analysis OBS special revisit
+# TODO SGP4 for Keplerian
 # TODO analysis COM
 # TODO analysis NAV
 

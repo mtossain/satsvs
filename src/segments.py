@@ -13,7 +13,7 @@ from src import misc_fn
 class KeplerSet:
 
     def __init__(self):
-        self.epoch_mjd = 0.0
+        self.epoch_mjd = 0.0  # Epoch of orbit in MJD
         self.semi_major_axis = 0.0
         self.eccentricity = 0.0
         self.inclination = 0.0
@@ -42,33 +42,38 @@ class Satellite:
 
     def __init__(self):
 
-        self.constellation_id = 0
-        self.constellation_name = ''
-        self.sat_id = 0
-        self.plane = 0
-        self.name = ''
-        self.rx_constellation = ''
+        self.constellation_id = 0  # Refers to a constellation
+        self.constellation_name = ''  # Refers to a constellation
+        self.sat_id = 0  # Satellite ID
+        self.plane = 0  # Plane the satellite is in
+        self.name = ''  # Name of the satellite
+        self.rx_constellation = ''  # Which constellations can this satellite receive (for SP2SP)
 
         self.antenna_mask = []  # Could be varying over azimuth...
         self.antenna_mask_max = []  # Could be varying over azimuth...
 
-        self.kepler = KeplerSet()
-        self.tle_line1 = ''
-        self.tle_line2 = ''
+        self.kepler = KeplerSet()  # Containing Kepler set for orbit
+        self.tle_line1 = ''  # If TLE file, then contains the TLE first line
+        self.tle_line2 = ''  # If TLE file, then contains the TLE second line
 
-        self.posvel_eci = 6*[0.0]
-        self.posvel_ecf = 6*[0.0]
+        self.posvel_eci = 6*[0.0]  # Satellite position and velocity in ECI
+        self.posvel_ecf = 6*[0.0]  # Satellite position and velocity in ECF
         self.lla = 3*[0.0]  # For ground track
 
         self.idx_stat_in_view = []  # Indices of station which are in view
-        self.idx_sat_in_view = []
+        self.idx_sat_in_view = []  # Indices of other satellites which are in view
 
         self.metric = []  # For analysis purposes
 
         self.obs_incl_angle_start = None  # If satellite contains instrument
         self.obs_incl_angle_stop = None
-        self.obs_swath_start = None
+        self.obs_swath_start = None  # Alternatively swath width instrument
         self.obs_swath_stop = None
+
+        self.p1 = np.zeros(3) # four corners of the swath
+        self.p2 = np.zeros(3)  # four corners of the swath
+        self.p3 = np.zeros(3)  # four corners of the swath
+        self.p4 = np.zeros(3)  # four corners of the swath
 
     def det_posvel_eci_keplerian(self, mjd_requested):
         self.posvel_eci = misc_fn.kep2xyz(mjd_requested, self.kepler)
@@ -131,7 +136,7 @@ class User:
         self.elevation_mask = []  # Could be varying over azimuth...
         self.el_mask_max = []  # Could be varying over azimuth...
 
-        self.posvel_eci = 6*[0.0]
+        self.posvel_eci = 6*[0.0]  # TODO Change all list in np array and separate pos vel
         self.posvel_ecf = 6*[0.0]
         self.norm_ecf = 0  # For speeding up processes
         self.lla = 3*[0.0]

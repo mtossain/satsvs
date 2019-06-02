@@ -339,6 +339,7 @@ Optional in the analysis part are:
 what kind of statistic is displayed per user location.
 
 <img src="/docs/obs_swath_conical.png" alt="obs_swath_conical"/>
+<img src="/docs/obs_swath_conical_revisit.png" alt="obs_swath_conical_revisit"/>
 
 ### obs_swath_push_broom
 Plots the swath coverage for a push broom scanner on one or more satellites defined in the space segment. 
@@ -371,7 +372,7 @@ Optional in the analysis part are:
 <Statistic>Mean</Statistic>
 ```
 - OrthoViewLatitude angle: This parameter can be given to see one part of the globe in an orthometric view, eg.  for the polar region.
-- Revisit flag: This flag will enable additional revisit computation after the swath coverage. The statistic will determine
+- Revisit flag: This flag will enable revisit computation after the swath coverage. The statistic will determine
 what kind of statistic is displayed per user location.
 
 <img src="/docs/obs_swath_push_broom.png" alt="cov_satellite_push_broom"/>

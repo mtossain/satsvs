@@ -49,6 +49,8 @@ if sm.cnt_epoch == 1:
             user.norm_ecf = norm(user.posvel_ecf[0:3])
 
     def in_loop(self, sm):
+        # Computed by angle distance point and satellite ground point
+        # Just 10% faster if done by checking normal euclidean distance
         for satellite in sm.satellites:
             norm_sat = norm(satellite.posvel_ecf[0:3])
             satellite.det_lla()
@@ -61,3 +63,5 @@ if sm.cnt_epoch == 1:
                 if angle_user_zenith < earth_angle_swath:
                     user.metric[sm.cnt_epoch] = 1  # Within swath
 
+
+                    np.diff(np.where(np.diff(user.metric)!=0))

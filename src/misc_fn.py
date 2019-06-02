@@ -3,19 +3,18 @@ from math import sin, cos, atan2, atan, fabs, acos
 import numpy as np
 from astropy.coordinates import EarthLocation
 from math import tan, sqrt, asin, degrees, radians
-from numpy import dot, arccos, clip, cross, sin, cos
+from numpy import dot, arccos, cross, sin, cos
 from numpy.linalg import norm
+from numba import jit, float64
 # Modules from project
 from constants import R_EARTH, PI, GM_EARTH
 
 
-class Plane:  # Definition of a plane class to be used in OBS analysis
-    def __init__(self, a, b, c):
-        # self.n = normalize(cross(b - a, c - a))  # n is plane normal. Point X on the plane satisfies Dot(n, X) = d
-        # n is plane normal. Point X on the plane satisfies Dot(n, X) = d. Do not need to normalize here.
-        self.n = cross(b - a, c - a)
-        # self.d = dot(self.n, a)  # d = dot(n, p)  # distance plane to origin, in this case always 0
-
+def plane_normal(a,b):  # assume here point c is [0,0,0]
+    c = [a[1]*b[2] - a[2]*b[1],
+         a[2]*b[0] - a[0]*b[2],
+         a[0]*b[1] - a[1]*b[0]]
+    return c
 
 # Compute Modified Julian Date from YYYY and Day Of Year pair
 # Time functions from SP3 library B.Remondi.
@@ -84,7 +83,7 @@ def mjd2gmst(mjd_requested):
 # @param XYZ ECEF XYZ coordinates in m
 def lla2xyz(lla):
 
-    xyz = 3*[0.0]
+    xyz = np.zeros(3)
     
     a = 6378137.0000
     b = 6356752.3142
@@ -242,6 +241,7 @@ def kep2xyz(mjd_requested, kepler):
 # @param MeanAnomaly mean anomaly (radians)
 # @param Eccentricity eccentricity (-)
 # @return  Eccentric anomaly (radians)
+
 def newton_raphson (mean_anomaly, eccentricity):
     k = 0
     big_e = 50*[0.0]
@@ -263,11 +263,11 @@ def newton_raphson (mean_anomaly, eccentricity):
 # @param Out Rotated position vector (1:6) (meters/double)
 def spin_vector(angle, vector):
 
-    out = 6*[0.0]
+    out = np.zeros(6)
     
     # Compute angles to save time
-    cosst = cos(angle)
-    sinst = sin(angle)
+    cosst = np.cos(angle)
+    sinst = np.sin(angle)
     
     out[0] = cosst * vector[0] - sinst * vector[1]
     out[1] = sinst * vector[0] + cosst * vector[1]
@@ -287,10 +287,10 @@ def spin_vector(angle, vector):
 # @param AzEl Azimuth [0] and Elevation [1] (radians/double)
 def calc_az_el(xs, xu):
 
-    az_el = 2*[0.0]
+    az_el = np.zeros(2)
 
-    e3by3 = [[0,0,0],[0,0,0],[0,0,0]]
-    d = 3*[0.0]
+    e3by3 = np.zeros((3,3))
+    d = np.zeros(3)
 
     x = xu[0]
     y = xu[1]
@@ -350,8 +350,8 @@ def line_sphere_intersect(x1, x2, sphere_radius, sphere_center):
 
     intersect = True
 
-    i_x1 = 3*[0.0]
-    i_x2 = 3*[0.0]
+    i_x1 = np.zeros(3)
+    i_x2 = np.zeros(3)
 
     a = (x2[0] - x1[0]) * (x2[0] - x1[0]) + (x2[1] - x1[1]) * (x2[1] - x1[1]) + (x2[2] - x1[2]) * (x2[2] - x1[2])
 
@@ -441,14 +441,14 @@ def sat_contour(lla, elevation_mask):
 
     return contour
 
+@jit(nopython=True)  # paralellism did not work, only for loops...
+def dist_point_plane(point_q, plane_normal):  # not really distance but if point is more than 90 deg away from normal
+    return np.dot(point_q, plane_normal)
 
-def dist_point_plane(point_q, plane_p):  # not really distance but if point is more than 90 deg away from normal
-    return dot(point_q, plane_p.n)  # - plane_p.d
-
-
+@jit(nopython=True)  # paralellism did not work, only for loops...
 def test_point_within_pyramid(point_q, planes_h):
     for i in range(4):
-        if dist_point_plane(point_q, planes_h[i]) > 0.0:  # on bad side of plane, faster implementation
+        if dist_point_plane(point_q, planes_h[i,:]) > 0.0:  # on bad side of plane, faster implementation
             return False
     return True
 
@@ -489,7 +489,6 @@ def rot_vec_vec(a, b, theta):
     w = cross(b, proj['perp'])
     return proj['par'] + proj['perp'] * cos(theta) + norm(proj['perp']) * make_unit(w) * sin(theta)
 
-
 def det_swath_radius(H, inc_angle): # altitude in [m], incidence angle alfa in [radians]
     A = (1 / tan(inc_angle) / tan(inc_angle) + 1)
     B = -2*(H+R_EARTH)
@@ -499,7 +498,6 @@ def det_swath_radius(H, inc_angle): # altitude in [m], incidence angle alfa in [
     x = sqrt(R_EARTH*R_EARTH - y1*y1)
     return x # in [m]
 
-
 def det_oza(H, inc_angle):  # altitude in [m], incidence angle  in [radians]
     x = det_swath_radius(H, inc_angle)
     beta = degrees(asin(x / R_EARTH))
@@ -507,23 +505,28 @@ def det_oza(H, inc_angle):  # altitude in [m], incidence angle  in [radians]
     oza = 90 - ia
     return oza  # in [deg]
 
-
 def det_oza_fast(H, R_EARTH, inc_angle):  # altitude and R_EARTH in [m], incidence angle  in [radians]
     oza = asin((R_EARTH+H)/R_EARTH*sin(inc_angle))
     return oza
-
 
 def earth_angle_beta_deg(x):
     # Returns the Earth beta angle in degrees
     beta = degrees(asin(x / R_EARTH))
     return beta
 
-
+@jit(nopython=True)  # paralellism did not work, only for loops...
 def angle_two_vectors(u, v, norm_u, norm_v):
     # Returns angle in [radians]
     # Pre computed the norm of the second vector
-    c = dot(u, v) / norm_u / norm_v
-    return arccos(clip(c, -1, 1))
+    # c = np.dot(u, v) / norm_u / norm_v
+    c = (u[0]*v[0]+u[1]*v[1]+u[2]*v[2])/norm_u/norm_v
+    if c>1:
+        c=1
+    if c<-1:
+        c=-1
+    #result = np.arccos(np.clip(c, -1, 1))
+    result = np.arccos(c)
+    return result
 
 
 # Compute numerically the solution to the incidence angle alfa from a swath width from nadir
@@ -546,6 +549,26 @@ def earth_radius_lat(lat):
     radius = sqrt((r1*r1*r1*r1*pow(cos(lat),2) + r2*r2*r2*r2*pow(sin(lat),2)) /
                   (r1*r1*pow(cos(lat),2) + r2*r2*pow(sin(lat),2)))
     return radius
+
+
+
+@jit(nopython=True)
+def check_users_in_plane(user_metric, user_pos, planes, cnt_epoch):
+    n_users = len(user_metric)
+    for idx_user in range(n_users):
+        if test_point_within_pyramid(user_pos[idx_user, :], planes):
+            user_metric[idx_user,cnt_epoch] = 1  # Within swath
+    return user_metric[:,cnt_epoch]
+
+@jit(nopython=True)
+def check_users_from_nadir(user_metric, user_pos, sat_pos, norm_sat, earth_angle_swath, cnt_epoch):
+    n_users = len(user_metric)
+    for idx_user in range(n_users):
+        norm_user = norm(user_pos[idx_user,:])
+        angle_user_zenith = angle_two_vectors(user_pos[idx_user, 0:3], sat_pos, user_pos[idx_user,3], norm_sat)
+        if angle_user_zenith < earth_angle_swath:
+            user_metric[idx_user,cnt_epoch] = 1  # Within swath
+    return user_metric[:,cnt_epoch]
 
 # Convert string True/False to boolean
 def str2bool(v):
