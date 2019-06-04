@@ -145,7 +145,7 @@ or as a spacecraft user through a TLE file:
 ```
 <UserSegment>
     <Type>Spacecraft</Type>
-    <TLEFileName>C:\Documents and Settings\Michel Tossaint\My Documents\Navigation Data\TLE\TLE_MetopA_2006_12_26.txt</TLEFileName>
+    <TLEFileName>../input/example_tle_files/TLE_MetopA_2006_12_26.txt</TLEFileName>
     <ElevationMask>20</ElevationMask>
     <ReceiverConstellation>1000</ReceiverConstellation>
 </UserSegment>
@@ -380,6 +380,7 @@ what kind of statistic is displayed per user location.
 - SaveOutput flag: This flag will enable saving user swath coverage for every timestep.
 
 <img src="/docs/obs_swath_push_broom.png" alt="cov_satellite_push_broom"/>
+<img src="/docs/obs_swath_push_broom_revisit.png" alt="cov_satellite_push_broom_revisit"/>
 
 
 
