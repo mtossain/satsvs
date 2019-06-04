@@ -37,7 +37,8 @@ def update_satellites(sm):
     # and remember which ones are in view
     if sm.orbits_from_previous_run:  # Read the ECI posvel from all satellites for one epoch from file
         for idx_sat, satellite in enumerate(sm.satellites):
-            satellite.posvel_eci = sm.data_orbits[sm.cnt_epoch * sm.num_sat + idx_sat, :]
+            satellite.pos_eci = sm.data_orbits[sm.cnt_epoch * sm.num_sat + idx_sat, 0:3]
+            satellite.vel_eci = sm.data_orbits[sm.cnt_epoch * sm.num_sat + idx_sat, 3:6]
             satellite.det_posvel_ecf(sm.time_gmst)
             satellite.idx_stat_in_view = []  # Reset before loop
     else:
@@ -103,8 +104,8 @@ def write_posvel_satellites(sm):  # Write the orbits from file
     for idx_sat, satellite in enumerate(sm.satellites):
         with open('../output/orbits_internal.txt', 'a') as f:
             f.write("%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n"
-                    % (satellite.posvel_eci[0], satellite.posvel_eci[1], satellite.posvel_eci[2],
-                       satellite.posvel_eci[3], satellite.posvel_eci[4], satellite.posvel_eci[5]))
+                    % (satellite.pos_eci[0], satellite.pos_eci[1], satellite.pos_eci[2],
+                       satellite.vel_eci[0], satellite.vel_eci[1], satellite.vel_eci[1]))
 
 
 def clear_load_orbit_file(sm):  # Clear or load previous orbit file

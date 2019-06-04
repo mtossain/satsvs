@@ -65,3 +65,34 @@ if sm.cnt_epoch == 1:
 
 
                     np.diff(np.where(np.diff(user.metric)!=0))
+
+# To find the common revisit of C and L
+# But way too slow
+num_users = len(lats)
+num_epochs = user_metric_a.shape[1]
+print(num_epochs)
+print('Computing revisit between a and b')
+plot_points = np.zeros((len(lats), 3))
+for idx_user in range(len(lats)):
+    if idx_user % 100 == 0:
+        print(f'User swath coverage {idx_user} of {num_users}')
+    if user_metric_a[idx_user, :].any():  # Any value bigger than 0
+        swaths_idx_end = np.asarray(np.where(np.diff(user_metric_a[idx_user, :])==-1.0)).flatten()
+        gaps = []
+        #print(swaths_idx_end)
+        for swath_idx_end in swaths_idx_end:
+            #print(swath_idx_end)
+            found_b = False
+            cnt = 0
+            while not found_b:
+                if swath_idx_end+cnt < num_epochs:
+                    if user_metric_b[idx_user, swath_idx_end+cnt] == 1:
+                        found_b == True
+                        gaps.append(cnt)
+                    cnt=cnt+1
+                else:
+                    found_b = True
+        metric = np.mean(gaps)
+        plot_points[idx_user, :] = [lons[idx_user], lats[idx_user], metric]
+plot_points = plot_points[~np.all(plot_points == 0, axis=1)]  # Clean up empty rows
+

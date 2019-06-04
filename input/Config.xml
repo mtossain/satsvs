@@ -2,49 +2,49 @@
 <!--Simulation Scenario-->
 <Scenario>
     <SpaceSegment>
-<!--	    <Constellation>-->
-<!--			<NumOfPlanes>1</NumOfPlanes>-->
-<!--			<NumOfSatellites>2</NumOfSatellites>-->
-<!--			<ConstellationID>1</ConstellationID>-->
-<!--			<ConstellationName>S1-NG</ConstellationName>-->
-<!--		    <ReceiverConstellation>1111</ReceiverConstellation>-->
-<!--			<ObsSwathStart>250000.0</ObsSwathStart>-->
-<!--			<ObsSwathStop>650000.0</ObsSwathStop>-->
-<!--			<Satellite>-->
-<!--				<SatelliteID>1</SatelliteID>-->
-<!--				<Plane>1</Plane>-->
-<!--				<EpochMJD>54465.0</EpochMJD>-->
-<!--				<SemiMajorAxis>7081289</SemiMajorAxis>-->
-<!--				<Eccentricity>0.00</Eccentricity>-->
-<!--				<Inclination>98.157</Inclination>-->
-<!--				<RAAN>188.934</RAAN>-->
-<!--				<ArgOfPerigee>0.00</ArgOfPerigee>-->
-<!--				<MeanAnomaly>0</MeanAnomaly>-->
-<!--			</Satellite>-->
-<!--			<Satellite>-->
-<!--				<SatelliteID>2</SatelliteID>-->
-<!--				<Plane>1</Plane>-->
-<!--				<EpochMJD>54465.0</EpochMJD>-->
-<!--				<SemiMajorAxis>7081289</SemiMajorAxis>-->
-<!--				<Eccentricity>0.00</Eccentricity>-->
-<!--				<Inclination>98.157</Inclination>-->
-<!--				<RAAN>188.934</RAAN>-->
-<!--				<ArgOfPerigee>0.00</ArgOfPerigee>-->
-<!--				<MeanAnomaly>180</MeanAnomaly>-->
-<!--			</Satellite>-->
-<!--        </Constellation>-->
-    <Constellation>
-        <ConstellationID>1</ConstellationID>
-        <NumOfSatellites>1</NumOfSatellites>
-        <NumOfPlanes>1</NumOfPlanes>
-        <ConstellationName>METOPA</ConstellationName>
-        <ReceiverConstellation>1111</ReceiverConstellation>
-        <TLEFileName>../input/example_tle_files/metop_a.txt</TLEFileName>
-<!--		<ObsSwathStart>250000.0</ObsSwathStart>-->
-<!--		<ObsSwathStop>650000.0</ObsSwathStop>-->
-		<ObsInclinationAngleStart>20.0</ObsInclinationAngleStart>
-		<ObsInclinationAngleStop>46.0</ObsInclinationAngleStop>
-    </Constellation>
+	    <Constellation>
+			<NumOfPlanes>1</NumOfPlanes>
+			<NumOfSatellites>2</NumOfSatellites>
+			<ConstellationID>1</ConstellationID>
+			<ConstellationName>S1-NG</ConstellationName>
+		    <ReceiverConstellation>1111</ReceiverConstellation>
+			<ObsSwathStart>255000.0</ObsSwathStart>
+			<ObsSwathStop>655000.0</ObsSwathStop>
+			<Satellite>
+				<SatelliteID>1</SatelliteID>
+				<Plane>1</Plane>
+				<EpochMJD>54465.0</EpochMJD>
+				<SemiMajorAxis>7081289</SemiMajorAxis>
+				<Eccentricity>0.00</Eccentricity>
+				<Inclination>98.157</Inclination>
+				<RAAN>188.934</RAAN>
+				<ArgOfPerigee>0.00</ArgOfPerigee>
+				<MeanAnomaly>0</MeanAnomaly>
+			</Satellite>
+			<Satellite>
+				<SatelliteID>2</SatelliteID>
+				<Plane>1</Plane>
+				<EpochMJD>54465.0</EpochMJD>
+				<SemiMajorAxis>7081289</SemiMajorAxis>
+				<Eccentricity>0.00</Eccentricity>
+				<Inclination>98.157</Inclination>
+				<RAAN>188.934</RAAN>
+				<ArgOfPerigee>0.00</ArgOfPerigee>
+				<MeanAnomaly>180</MeanAnomaly>
+			</Satellite>
+        </Constellation>
+<!--    <Constellation>-->
+<!--        <ConstellationID>1</ConstellationID>-->
+<!--        <NumOfSatellites>1</NumOfSatellites>-->
+<!--        <NumOfPlanes>1</NumOfPlanes>-->
+<!--        <ConstellationName>METOPA</ConstellationName>-->
+<!--        <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--        <TLEFileName>../input/example_tle_files/metop_a.txt</TLEFileName>-->
+<!--&lt;!&ndash;		<ObsSwathStart>250000.0</ObsSwathStart>&ndash;&gt;-->
+<!--&lt;!&ndash;		<ObsSwathStop>650000.0</ObsSwathStop>&ndash;&gt;-->
+<!--		<ObsInclinationAngleStart>20.0</ObsInclinationAngleStart>-->
+<!--		<ObsInclinationAngleStop>46.0</ObsInclinationAngleStop>-->
+<!--    </Constellation>-->
 
 	</SpaceSegment>
 	<!--Defines the ground stations that should be simulated-->
@@ -122,7 +122,7 @@
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
 	    <StartDate>2010-05-08 00:00:00</StartDate>
-	    <StopDate>2010-05-08 12:00:00</StopDate>
+	    <StopDate>2010-05-20 00:00:00</StopDate>
 	    <TimeStep>120</TimeStep>
 
 		<IncludeStation2SpaceLinks>False</IncludeStation2SpaceLinks>
@@ -134,16 +134,18 @@
 
 <!--        <Analysis>-->
 <!--            <Type>obs_swath_conical</Type>-->
-<!--            <OrthoViewLatitude>60</OrthoViewLatitude>-->
+<!--&lt;!&ndash;            <PolarView>60</PolarView>&ndash;&gt;-->
 <!--            <Revisit>True</Revisit>-->
 <!--	        <Statistic>Mean</Statistic>-->
+<!--	        <SaveOutput>False</SaveOutput>-->
 <!--        </Analysis>-->
 
 			<Analysis>
 				<Type>obs_swath_push_broom</Type>
-<!--	            <OrthoViewLatitude>60</OrthoViewLatitude>-->
+<!--	            <PolarView>60</PolarView>-->
 				<Revisit>True</Revisit>
 				<Statistic>Mean</Statistic>
+			    <SaveOutput>True</SaveOutput>
 			</Analysis>
 
 

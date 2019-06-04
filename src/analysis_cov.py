@@ -322,15 +322,15 @@ class AnalysisCovSatellitePvt(AnalysisBase):
                     with open('../output/orbits.txt', 'a') as f:
                         f.write("%13.6f,%d,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n" \
                                 % (sm.time_mjd, satellite.sat_id,
-                                   satellite.posvel_eci[0], satellite.posvel_eci[1], satellite.posvel_eci[2],
-                                   satellite.posvel_eci[3], satellite.posvel_eci[4], satellite.posvel_eci[5]))
+                                   satellite.pos_eci[0], satellite.pos_eci[1], satellite.pos_eci[2],
+                                   satellite.vel_eci[0], satellite.vel_eci[1], satellite.vel_eci[2]))
             else:  # All satellites in constellation
                 if satellite.constellation_id == self.constellation_id:
                     with open('../output/orbits.txt', 'a') as f:
                         f.write("%13.6f,%d,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n" \
                                 % (sm.time_mjd, satellite.sat_id,
-                                   satellite.posvel_eci[0], satellite.posvel_eci[1], satellite.posvel_eci[2],
-                                   satellite.posvel_eci[3], satellite.posvel_eci[4], satellite.posvel_eci[5]))
+                                   satellite.pos_eci[0], satellite.pos_eci[1], satellite.pos_eci[2],
+                                   satellite.vel_eci[0], satellite.vel_eci[1], satellite.vel_eci[2]))
 
     def after_loop(self, sm):
         data = pd.read_csv('../output/orbits.txt', sep=',', header=None,

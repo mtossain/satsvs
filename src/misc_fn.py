@@ -180,43 +180,58 @@ def xyz2lla(xyz):
 # double Arg_Of_Perigee
 # double Mean_Anomaly
 # @param Out POS_VEL_XYZ in m and m/s
-def kep2xyz(mjd_requested, kepler):
+@jit(nopython=True)
+def kep2xyz(mjd_requested,
+            kepler_epoch_mjd, kepler_semi_major_axis, kepler_eccentricity, kepler_inclination,
+            kepler_right_ascension, kepler_arg_perigee, kepler_mean_anomaly):
 
-    out = 6*[0.0]
+    pos = np.zeros(3)
+    vel = np.zeros(3)
 
     # Compute radius, corrected right ascension and mean anomaly
-    time_from_ref = (mjd_requested - kepler.epoch_mjd) * 86400
-    mean_motion = sqrt(GM_EARTH / (pow(kepler.semi_major_axis, 3)))  #radians/s
-    mean_anomaly = kepler.mean_anomaly + (mean_motion * time_from_ref)
+    time_from_ref = (mjd_requested - kepler_epoch_mjd) * 86400
+    mean_motion = sqrt(GM_EARTH / (pow(kepler_semi_major_axis, 3)))  #radians/s
+    mean_anomaly = kepler_mean_anomaly + (mean_motion * time_from_ref)
 
     # if eccentricity equals zero eccentric anomaly is equal mean anomaly
-    if kepler.eccentricity == 0:
+    if kepler_eccentricity == 0:
         eccentric_anomaly = mean_anomaly
-    else:
-        eccentric_anomaly = newton_raphson(mean_anomaly, kepler.eccentricity)
+    else:  # Newton Rhapson method
+        k = 0
+        big_e = np.zeros(50)
 
-    radius = kepler.semi_major_axis * (1 - kepler.eccentricity * cos(eccentric_anomaly))
+        big_e[1] = mean_anomaly
+        big_e[0] = mean_anomaly * 2
 
-    sin_nu_k = ((sqrt(1 - kepler.eccentricity * kepler.eccentricity)) * sin(eccentric_anomaly)) / (1 - kepler.eccentricity * cos(eccentric_anomaly))
-    cos_nu_k = (cos(eccentric_anomaly) - kepler.eccentricity) / (1 - kepler.eccentricity * cos(eccentric_anomaly))
+        while fabs(big_e[k + 1] / big_e[k] - 1) > 1e-15:
+            k += 1
+            big_e[k + 1] = big_e[k] - (
+                        (big_e[k] - kepler_eccentricity * sin(big_e[k]) - mean_anomaly) /
+                        (1 - kepler_eccentricity * cos(big_e[k])))
+        eccentric_anomaly = big_e[k + 1]
+
+    radius = kepler_semi_major_axis * (1 - kepler_eccentricity * cos(eccentric_anomaly))
+
+    sin_nu_k = ((sqrt(1 - kepler_eccentricity * kepler_eccentricity)) * sin(eccentric_anomaly)) / (1 - kepler_eccentricity * cos(eccentric_anomaly))
+    cos_nu_k = (cos(eccentric_anomaly) - kepler_eccentricity) / (1 - kepler_eccentricity * cos(eccentric_anomaly))
     true_anomaly = atan2(sin_nu_k, cos_nu_k)
-    arg_of_lat = kepler.arg_perigee + true_anomaly
+    arg_of_lat = kepler_arg_perigee + true_anomaly
 
     # Apply rotation from elements to xyz
     xyk1 = radius * cos(arg_of_lat)
     xyk2 = radius * sin(arg_of_lat)
-    out[0] = cos(kepler.right_ascension) * xyk1 + -cos(kepler.inclination) * sin(kepler.right_ascension) * xyk2
-    out[1] = sin(kepler.right_ascension) * xyk1 + cos(kepler.inclination) * cos(kepler.right_ascension) * xyk2
-    out[2] = sin(kepler.inclination) * xyk2
+    pos[0] = cos(kepler_right_ascension) * xyk1 + -cos(kepler_inclination) * sin(kepler_right_ascension) * xyk2
+    pos[1] = sin(kepler_right_ascension) * xyk1 + cos(kepler_inclination) * cos(kepler_right_ascension) * xyk2
+    pos[2] = sin(kepler_inclination) * xyk2
 
     # Compute velocity components
-    factor = sqrt(GM_EARTH / kepler.semi_major_axis / (1 - pow(kepler.eccentricity, 2)))
-    sin_w = sin(kepler.arg_perigee)
-    cos_w = cos(kepler.arg_perigee)
-    sin_o = sin(kepler.right_ascension)
-    cos_o = cos(kepler.right_ascension)
-    sin_i = sin(kepler.inclination)
-    cos_i = cos(kepler.inclination)
+    factor = sqrt(GM_EARTH / kepler_semi_major_axis / (1 - pow(kepler_eccentricity, 2)))
+    sin_w = sin(kepler_arg_perigee)
+    cos_w = cos(kepler_arg_perigee)
+    sin_o = sin(kepler_right_ascension)
+    cos_o = cos(kepler_right_ascension)
+    sin_i = sin(kepler_inclination)
+    cos_i = cos(kepler_inclination)
     sin_t = sin(true_anomaly)
     cos_t = cos(true_anomaly)
     l1 = cos_w * cos_o - sin_w * sin_o*cos_i
@@ -226,11 +241,11 @@ def kep2xyz(mjd_requested, kepler):
     m2 = -sin_w * sin_o + cos_w * cos_o*cos_i
     n2 = cos_w*sin_i
 
-    out[3] = factor * (-l1 * sin_t + l2 * (kepler.eccentricity + cos_t))
-    out[4] = factor * (-m1 * sin_t + m2 * (kepler.eccentricity + cos_t))
-    out[5] = factor * (-n1 * sin_t + n2 * (kepler.eccentricity + cos_t))
+    vel[0] = factor * (-l1 * sin_t + l2 * (kepler_eccentricity + cos_t))
+    vel[1] = factor * (-m1 * sin_t + m2 * (kepler_eccentricity + cos_t))
+    vel[2] = factor * (-n1 * sin_t + n2 * (kepler_eccentricity + cos_t))
 
-    return out
+    return pos, vel
 
 
 # Iterates to solution of eccentric_anomaly using numerical solution
@@ -261,23 +276,24 @@ def newton_raphson (mean_anomaly, eccentricity):
 # @param Angle Rotation angle (radians/double)
 # @param Vector Position input vector (1:6) (meters/double)
 # @param Out Rotated position vector (1:6) (meters/double)
-def spin_vector(angle, vector):
+def spin_vector(angle, pos_vec, vel_vec):
 
-    out = np.zeros(6)
-    
+    pos = np.zeros(3)
+    vel = np.zeros(3)
+
     # Compute angles to save time
     cosst = np.cos(angle)
     sinst = np.sin(angle)
     
-    out[0] = cosst * vector[0] - sinst * vector[1]
-    out[1] = sinst * vector[0] + cosst * vector[1]
-    out[2] = vector[2]
+    pos[0] = cosst * pos_vec[0] - sinst * pos_vec[1]
+    pos[1] = sinst * pos_vec[0] + cosst * pos_vec[1]
+    pos[2] = pos_vec[2]
     
-    out[3] = cosst * vector[3] - sinst * vector[4]
-    out[4] = sinst * vector[3] + cosst * vector[4]
-    out[5] = vector[5]
+    vel[0] = cosst * vel_vec[0] - sinst * vel_vec[1]
+    vel[1] = sinst * vel_vec[0] + cosst * vel_vec[1]
+    vel[2] = vel_vec[2]
     
-    return out
+    return pos, vel
 
 
 # Compute Azimuth and Elevation from User to Satellite assuming the Earth is a perfect sphere
@@ -288,7 +304,6 @@ def spin_vector(angle, vector):
 def calc_az_el(xs, xu):
 
     az_el = np.zeros(2)
-
     e3by3 = np.zeros((3,3))
     d = np.zeros(3)
 
@@ -509,9 +524,9 @@ def det_oza_fast(H, R_EARTH, inc_angle):  # altitude and R_EARTH in [m], inciden
     oza = asin((R_EARTH+H)/R_EARTH*sin(inc_angle))
     return oza
 
-def earth_angle_beta_deg(x):
+def earth_angle_beta(x):
     # Returns the Earth beta angle in degrees
-    beta = degrees(asin(x / R_EARTH))
+    beta = asin(x / R_EARTH)
     return beta
 
 @jit(nopython=True)  # paralellism did not work, only for loops...
@@ -561,7 +576,8 @@ def check_users_in_plane(user_metric, user_pos, planes, cnt_epoch):
 
 
 @jit(nopython=True)
-def check_users_from_nadir(user_metric, user_pos, sat_pos, norm_sat, earth_angle_swath, cnt_epoch):
+def check_users_from_nadir(user_metric, user_pos, sat_pos, earth_angle_swath, cnt_epoch):
+    norm_sat = norm(sat_pos)
     n_users = len(user_metric)
     for idx_user in range(n_users):
         norm_user = norm(user_pos[idx_user,:])
