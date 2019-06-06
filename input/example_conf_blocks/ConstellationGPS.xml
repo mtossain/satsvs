@@ -6,6 +6,7 @@
       <NumOfSatellites>24</NumOfSatellites>
       <ConstellationID>1</ConstellationID>
       <ConstellationName>GPS</ConstellationName>
+      <ReceiverConstellation>1111</ReceiverConstellation>
       <Satellite>
         <SatelliteID>1</SatelliteID>
         <Plane>1</Plane>

@@ -2,4 +2,5 @@
   <ConstellationID>1</ConstellationID>
   <ConstellationName>Iridium</ConstellationName>
   <TLEFileName>C:\Users\Michel Tossaint\My Software\Visual Studio 2005\Microsoft Visual C++\GAIA\TLE Files\iridium_20100505.txt</TLEFileName>
+  <ReceiverConstellation>1111</ReceiverConstellation>
 </Constellation>

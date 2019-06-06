@@ -3,6 +3,7 @@
     <ConstellationName>PCW_Molniya</ConstellationName>
     <NumOfPlanes>1</NumOfPlanes>
     <NumOfSatellites>2</NumOfSatellites>
+    <ReceiverConstellation>1111</ReceiverConstellation>
     <Satellite>
         <SatelliteID>1</SatelliteID>
         <Plane>1</Plane>

@@ -1,8 +1,9 @@
 ﻿<Constellation>
   <NumOfPlanes>3</NumOfPlanes>
   <NumOfSatellites>27</NumOfSatellites>
-  <ConstellationID>2</ConstellationID>
+  <ConstellationID>1</ConstellationID>
   <ConstellationName>COMPASS</ConstellationName>
+  <ReceiverConstellation>1111</ReceiverConstellation>
   <Satellite>
     <SatelliteID>1</SatelliteID>
     <Plane>1</Plane>

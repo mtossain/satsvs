@@ -5,6 +5,7 @@ from astropy.time import Time
 from constants import *
 from analysis_cov import *
 from analysis_obs import *
+from analysis_com import *
 from segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
 import logging_svs as ls
 import misc_fn
@@ -341,6 +342,8 @@ class AppConfig:
                     self.analysis = AnalysisObsSwathConical()
                 if analysis_node.find('Type').text == 'obs_swath_push_broom':
                     self.analysis = AnalysisObsSwathPushBroom()
+                if analysis_node.find('Type').text == 'com_gr2sp_budget':
+                    self.analysis = AnalysisComGr2SpBudget()
                 self.analysis.type = analysis_node.find('Type').text
                 self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 

@@ -28,10 +28,12 @@ parameters and analysis are defined. Analysis can be added as wished, the baseli
 - __obs_swath_conical__: Swath coverage for satellite(s) with conical scanners
 - __obs_swath_pushbroom__: Swath coverage for satellite(s)
 
+### Communication
+- __com_sp2sp_budget__: for satellite-satellite received power and C/N0
+
 _To be implemented at a later stage:_
 
 Communication
-- __com_sp2sp_budget__: for satellite-satellite received power, bitrate and C/N0
 - __com_sp2gr_budget__: for satellite-groundstation received power, bitrate and C/N0
 - __com_sp2sp_worst_link__: Multiple ISL geometry between satellites and identifies the worst case communication link
 

@@ -1,8 +1,9 @@
 <Constellation>
-    <ConstellationID>3</ConstellationID>
+    <ConstellationID>1</ConstellationID>
     <ConstellationName>PCW_TAP</ConstellationName>
     <NumOfPlanes>1</NumOfPlanes>
     <NumOfSatellites>1</NumOfSatellites>
+    <ReceiverConstellation>111</ReceiverConstellation>
     <Satellite>
         <SatelliteID>1</SatelliteID>
         <Plane>1</Plane>

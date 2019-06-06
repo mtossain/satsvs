@@ -3,10 +3,12 @@
     <ConstellationID>1</ConstellationID>
     <ConstellationName>GPS</ConstellationName>
     <TLEFileName>C:\Documents and Settings\Michel Tossaint\My Documents\Navigation Data\TLE\gps-ops_20081107.txt</TLEFileName>
+    <ReceiverConstellation>111</ReceiverConstellation>
   </Constellation>
   <Constellation>
-    <ConstellationID>4</ConstellationID>
+    <ConstellationID>2</ConstellationID>
     <ConstellationName>GIOVE</ConstellationName>
     <TLEFileName>C:\Documents and Settings\Michel Tossaint\My Documents\Navigation Data\TLE\galileo_20081107.txt</TLEFileName>
+    <ReceiverConstellation>111</ReceiverConstellation>
   </Constellation>
 </SpaceSegment>

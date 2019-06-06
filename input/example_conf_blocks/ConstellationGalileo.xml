@@ -3,6 +3,7 @@
   <NumOfSatellites>30</NumOfSatellites>
   <ConstellationID>1</ConstellationID>
   <ConstellationName>Galileo</ConstellationName>
+  <ReceiverConstellation>1111</ReceiverConstellation>
   <Satellite>
     <SatelliteID>1</SatelliteID>
     <Plane>1</Plane>

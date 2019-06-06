@@ -3,6 +3,7 @@
     <ConstellationName>PCW_Tundra</ConstellationName>
     <NumOfPlanes>1</NumOfPlanes>
     <NumOfSatellites>1</NumOfSatellites>
+    <ReceiverConstellation>111111</ReceiverConstellation>
     <Satellite>
         <SatelliteID>1</SatelliteID>
         <Plane>1</Plane>

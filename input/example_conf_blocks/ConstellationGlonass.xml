@@ -4,6 +4,7 @@
       <NumOfPlanes>3</NumOfPlanes>
       <NumOfSatellites>24</NumOfSatellites>
       <ConstellationName>GLONASS</ConstellationName>
+      <ReceiverConstellation>1111</ReceiverConstellation>
       <Satellite>
         <SatelliteID>1</SatelliteID>
         <Plane>1</Plane>
@@ -269,4 +270,3 @@
         <MeanAnomaly>345</MeanAnomaly>
       </Satellite>
     </Constellation>
-

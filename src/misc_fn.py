@@ -6,6 +6,7 @@ from math import tan, sqrt, asin, degrees, radians
 from numpy import dot, arccos, cross, sin, cos
 from numpy.linalg import norm
 from numba import jit, float64
+from scipy import interpolate
 # Modules from project
 from constants import R_EARTH, PI, GM_EARTH
 
@@ -81,27 +82,28 @@ def mjd2gmst(mjd_requested):
 #
 # @param LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
 # @param XYZ ECEF XYZ coordinates in m
+@jit(nopython=True)
 def lla2xyz(lla):
 
     xyz = np.zeros(3)
     
     a = 6378137.0000
     b = 6356752.3142
-    e = sqrt(1 - pow((b / a), 2))
+    e = np.sqrt(1 - np.power((b / a), 2))
     
-    sin_phi = sin(lla[0])
-    cos_phi = cos(lla[0])
-    cos_lam = cos(lla[1])
-    sin_lam = sin(lla[1])
-    tan2phi = pow((tan(lla[0])), 2.0)
+    sin_phi = np.sin(lla[0])
+    cos_phi = np.cos(lla[0])
+    cos_lam = np.cos(lla[1])
+    sin_lam = np.sin(lla[1])
+    tan2phi = np.power((tan(lla[0])), 2.0)
     tmp = 1.0 - e*e
-    tmp_den = sqrt(1.0 + tmp * tan2phi)
+    tmp_den = np.sqrt(1.0 + tmp * tan2phi)
     
     xyz[0] = (a * cos_lam) / tmp_den + lla[2] * cos_lam*cos_phi
     
     xyz[1] = (a * sin_lam) / tmp_den + lla[2] * sin_lam*cos_phi
     
-    tmp2 = sqrt(1 - e * e * sin_phi * sin_phi)
+    tmp2 = np.sqrt(1 - e * e * sin_phi * sin_phi)
     xyz[2] = (a * tmp * sin_phi) / tmp2 + lla[2] * sin_phi
     
     return xyz
@@ -123,6 +125,7 @@ def lla2xyz_astropy(lla):
 #
 # @param XYZ ECEF XYZ coordinates in m
 # @param LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
+@jit(nopython=True)
 def xyz2lla(xyz):
 
     x2 = xyz[0] * xyz[0]
@@ -132,31 +135,31 @@ def xyz2lla(xyz):
     sma = 6378137.0000  # earth radius in meters
     smb = 6356752.3142  # earth semi minor in meters
     
-    e = sqrt(1.0 - (smb / sma)*(smb / sma))
+    e = np.sqrt(1.0 - (smb / sma)*(smb / sma))
     b2 = smb*smb
     e2 = e*e
     ep = e * (sma / smb)
-    r = sqrt(x2 + y2)
+    r = np.sqrt(x2 + y2)
     r2 = r*r
     E2 = sma * sma - smb*smb
     big_f = 54.0 * b2*z2
     G = r2 + (1.0 - e * e) * z2 - e * e*E2
     small_c = (e * e * e * e * big_f * r2) / (G * G * G)
-    s = pow(1.0 + small_c + sqrt(small_c * small_c + 2.0 * small_c), 1.0 / 3.0)
+    s = np.power(1.0 + small_c + np.sqrt(small_c * small_c + 2.0 * small_c), 1.0 / 3.0)
     P = big_f / (3.0 * (s + 1.0 / s + 1.0)*(s + 1.0 / s + 1.0) * G * G)
-    Q = sqrt(1 + 2 * e2 * e2 * P)
-    ro = -(P * e * e * r) / (1.0 + Q) + sqrt((sma * sma / 2.0)*(1.0 + 1.0 / Q) -
+    Q = np.sqrt(1 + 2 * e2 * e2 * P)
+    ro = -(P * e * e * r) / (1.0 + Q) + np.sqrt((sma * sma / 2.0)*(1.0 + 1.0 / Q) -
                                              (P * (1 - e * e) * z2) / (Q * (1.0 + Q)) - P * r2 / 2.0)
     tmp = (r - e * e * ro)*(r - e * e * ro)
-    U = sqrt(tmp + z2)
-    V = sqrt(tmp + (1 - e * e) * z2)
+    U = np.sqrt(tmp + z2)
+    V = np.sqrt(tmp + (1 - e * e) * z2)
     zo = (b2 * xyz[2]) / (sma * V)
     
     height = U * (1 - b2 / (sma * V))
     
-    lat = atan((xyz[2] + ep * ep * zo) / r)
+    lat = np.arctan((xyz[2] + ep * ep * zo) / r)
     
-    temp = atan(xyz[1] / xyz[0])
+    temp = np.arctan(xyz[1] / xyz[0])
     
     if xyz[0] >= 0:
         lon = temp
@@ -190,7 +193,7 @@ def kep2xyz(mjd_requested,
 
     # Compute radius, corrected right ascension and mean anomaly
     time_from_ref = (mjd_requested - kepler_epoch_mjd) * 86400
-    mean_motion = sqrt(GM_EARTH / (pow(kepler_semi_major_axis, 3)))  #radians/s
+    mean_motion = np.sqrt(GM_EARTH / (np.power(kepler_semi_major_axis, 3)))  #radians/s
     mean_anomaly = kepler_mean_anomaly + (mean_motion * time_from_ref)
 
     # if eccentricity equals zero eccentric anomaly is equal mean anomaly
@@ -203,37 +206,39 @@ def kep2xyz(mjd_requested,
         big_e[1] = mean_anomaly
         big_e[0] = mean_anomaly * 2
 
-        while fabs(big_e[k + 1] / big_e[k] - 1) > 1e-15:
+        while fabs(big_e[k + 1] / big_e[k] - 1) > 1e-15:  # Newton Rhapson
             k += 1
             big_e[k + 1] = big_e[k] - (
-                        (big_e[k] - kepler_eccentricity * sin(big_e[k]) - mean_anomaly) /
-                        (1 - kepler_eccentricity * cos(big_e[k])))
+                        (big_e[k] - kepler_eccentricity * np.sin(big_e[k]) - mean_anomaly) /
+                        (1 - kepler_eccentricity * np.cos(big_e[k])))
         eccentric_anomaly = big_e[k + 1]
 
-    radius = kepler_semi_major_axis * (1 - kepler_eccentricity * cos(eccentric_anomaly))
+    radius = kepler_semi_major_axis * (1 - kepler_eccentricity * np.cos(eccentric_anomaly))
 
-    sin_nu_k = ((sqrt(1 - kepler_eccentricity * kepler_eccentricity)) * sin(eccentric_anomaly)) / (1 - kepler_eccentricity * cos(eccentric_anomaly))
-    cos_nu_k = (cos(eccentric_anomaly) - kepler_eccentricity) / (1 - kepler_eccentricity * cos(eccentric_anomaly))
-    true_anomaly = atan2(sin_nu_k, cos_nu_k)
+    sin_nu_k = ((np.sqrt(1 - kepler_eccentricity * kepler_eccentricity)) * np.sin(eccentric_anomaly)) / \
+               (1 - kepler_eccentricity * np.cos(eccentric_anomaly))
+    cos_nu_k = (np.cos(eccentric_anomaly) - kepler_eccentricity) / (1 - kepler_eccentricity * np.cos(eccentric_anomaly))
+    true_anomaly = np.arctan2(sin_nu_k, cos_nu_k)
     arg_of_lat = kepler_arg_perigee + true_anomaly
 
     # Apply rotation from elements to xyz
-    xyk1 = radius * cos(arg_of_lat)
-    xyk2 = radius * sin(arg_of_lat)
-    pos[0] = cos(kepler_right_ascension) * xyk1 + -cos(kepler_inclination) * sin(kepler_right_ascension) * xyk2
-    pos[1] = sin(kepler_right_ascension) * xyk1 + cos(kepler_inclination) * cos(kepler_right_ascension) * xyk2
-    pos[2] = sin(kepler_inclination) * xyk2
+    xyk1 = radius * np.cos(arg_of_lat)
+    xyk2 = radius * np.sin(arg_of_lat)
+    pos[0] = np.cos(kepler_right_ascension) * xyk1 + -np.cos(kepler_inclination) * np.sin(kepler_right_ascension) * xyk2
+    pos[1] = np.sin(kepler_right_ascension) * xyk1 + np.cos(kepler_inclination) * np.cos(kepler_right_ascension) * xyk2
+    pos[2] = np.sin(kepler_inclination) * xyk2
 
     # Compute velocity components
-    factor = sqrt(GM_EARTH / kepler_semi_major_axis / (1 - pow(kepler_eccentricity, 2)))
-    sin_w = sin(kepler_arg_perigee)
-    cos_w = cos(kepler_arg_perigee)
-    sin_o = sin(kepler_right_ascension)
-    cos_o = cos(kepler_right_ascension)
-    sin_i = sin(kepler_inclination)
-    cos_i = cos(kepler_inclination)
-    sin_t = sin(true_anomaly)
-    cos_t = cos(true_anomaly)
+    factor = np.sqrt(GM_EARTH / kepler_semi_major_axis / (1 - np.power(kepler_eccentricity, 2)))
+    sin_w = np.sin(kepler_arg_perigee)
+    cos_w = np.cos(kepler_arg_perigee)
+    sin_o = np.sin(kepler_right_ascension)
+    cos_o = np.cos(kepler_right_ascension)
+    sin_i = np.sin(kepler_inclination)
+    cos_i = np.cos(kepler_inclination)
+    sin_t = np.sin(true_anomaly)
+    cos_t = np.cos(true_anomaly)
+
     l1 = cos_w * cos_o - sin_w * sin_o*cos_i
     m1 = cos_w * sin_o + sin_w * cos_o*cos_i
     n1 = sin_w*sin_i
@@ -251,15 +256,14 @@ def kep2xyz(mjd_requested,
 # Iterates to solution of eccentric_anomaly using numerical solution
 # Only necessary if eccentricity is unequal to 0
 # 
-# Ref. http://en.wikipedia.org/wiki/Newton's_method
+# Ref. http:en.wikipedia.org/wiki/Newton's_method
 # 
 # @param MeanAnomaly mean anomaly (radians)
 # @param Eccentricity eccentricity (-)
 # @return  Eccentric anomaly (radians)
-
 def newton_raphson (mean_anomaly, eccentricity):
     k = 0
-    big_e = 50*[0.0]
+    big_e = np.zeros(50)
 
     big_e[1] = mean_anomaly
     big_e[0] = mean_anomaly * 2
@@ -276,6 +280,7 @@ def newton_raphson (mean_anomaly, eccentricity):
 # @param Angle Rotation angle (radians/double)
 # @param Vector Position input vector (1:6) (meters/double)
 # @param Out Rotated position vector (1:6) (meters/double)
+@jit(nopython=True)
 def spin_vector(angle, pos_vec, vel_vec):
 
     pos = np.zeros(3)
@@ -301,6 +306,7 @@ def spin_vector(angle, pos_vec, vel_vec):
 # @param Xs Satellite position in ECEF (m/double)
 # @param Xu User position in ECEF (m/double)
 # @param AzEl Azimuth [0] and Elevation [1] (radians/double)
+@jit(nopython=True)
 def calc_az_el(xs, xu):
 
     az_el = np.zeros(2)
@@ -361,6 +367,7 @@ def calc_az_el(xs, xu):
 # @param iX1 Intersection point one
 # @param iX2 Intersection point two
 # @return Returns false if the line does not intersect the sphere
+@jit(nopython=True)
 def line_sphere_intersect(x1, x2, sphere_radius, sphere_center):
 
     intersect = True
@@ -499,35 +506,30 @@ def x_project_on_v(x, v):
 
 def rot_vec_vec(a, b, theta):
     """Rotate vector a about vector b by theta radians."""
-    # Thanks user MNKY at http://math.stackexchange.com/a/1432182/81266
+    # Thanks user MNKY at http: #math.stackexchange.com/a/1432182/81266
     proj = x_project_on_v(a, b)
     w = cross(b, proj['perp'])
     return proj['par'] + proj['perp'] * cos(theta) + norm(proj['perp']) * make_unit(w) * sin(theta)
 
-def det_swath_radius(H, inc_angle): # altitude in [m], incidence angle alfa in [radians]
-    A = (1 / tan(inc_angle) / tan(inc_angle) + 1)
-    B = -2*(H+R_EARTH)
-    C = (H+R_EARTH) * (H+R_EARTH) - R_EARTH * R_EARTH / tan(inc_angle) / tan(inc_angle)
-    det = sqrt(B*B-4*A*C)
-    y1 = (-B + det)/2/A
-    x = sqrt(R_EARTH*R_EARTH - y1*y1)
-    return x # in [m]
 
-def det_oza(H, inc_angle):  # altitude in [m], incidence angle  in [radians]
-    x = det_swath_radius(H, inc_angle)
-    beta = degrees(asin(x / R_EARTH))
-    ia = 90 - degrees(inc_angle) - beta
-    oza = 90 - ia
-    return oza  # in [deg]
+@jit(nopython=True)
+def det_swath_radius(alt, inc_angle, r_earth): # altitude in [m], incidence angle alfa in [radians]
+    oza = det_oza_fast(alt, r_earth, inc_angle)
+    return (oza - inc_angle)*r_earth # in [m]
 
-def det_oza_fast(H, R_EARTH, inc_angle):  # altitude and R_EARTH in [m], incidence angle  in [radians]
-    oza = asin((R_EARTH+H)/R_EARTH*sin(inc_angle))
+
+@jit(nopython=True)
+def det_oza_fast(alt, r_earth, inc_angle):  # altitude and R_EARTH in [m], incidence angle  in [radians]
+    oza = asin((r_earth + alt) / r_earth * sin(inc_angle))
     return oza
 
-def earth_angle_beta(x):
-    # Returns the Earth beta angle in degrees
-    beta = asin(x / R_EARTH)
+
+@jit(nopython=True)
+def earth_angle_beta(swath_radius, r_earth):
+    # Returns the Earth beta angle in [radians], from swath radius in [m]
+    beta = asin(swath_radius / r_earth)
     return beta
+
 
 @jit(nopython=True)  # paralellism did not work, only for loops...
 def angle_two_vectors(u, v, norm_u, norm_v):
@@ -549,9 +551,9 @@ def angle_two_vectors(u, v, norm_u, norm_v):
 # radius Earth in [m]
 # altitude satellite in [m]
 # return incidence angle in [rad]
-def incl_from_swath(swath_width, radius_earth, altitude):
-    solution = atan(sin(swath_width / radius_earth) /
-                    ((radius_earth + altitude) / radius_earth - cos(swath_width / radius_earth)))
+@jit(nopython=True)
+def incl_from_swath(swath_w, r_earth, alt):
+    solution = atan(sin(swath_w/r_earth) / ((r_earth + alt)/r_earth - cos(swath_w/r_earth)))
     return solution
 
 
@@ -591,3 +593,155 @@ def check_users_from_nadir(user_metric, user_pos, sat_pos, earth_angle_swath, cn
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
 
+
+# Compute gas attenuation
+# Gas attenuation models are given in ITU-R P676-8.
+# The model provided is computationally intensive and requires a lot of tabulated data.
+# In order to implement this with a low computational burden in a short time, a simplified-statistical model has been derived.
+# The elevation dependences have been mapped for each frequency with an exponential fit.
+# The result is a coefficients table:
+# Input: frequency [Hz]
+# Input: elevation [rad]
+# Output: attenuation [dB]
+def comp_gas_attenuation(frequency, elevation):
+    frequency = frequency / 1e9  # assume freq GHz, elevation deg
+    elevation = degrees(elevation)  # assume freq GHz, elevation deg
+
+    x = [1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70]
+    y = [1.145, 1.4216, 1.5098, 1.5701, 1.6304, 1.779, 2.1214, 3.4171, 10.679, 13.972, 9.9376, 11.858, 16.777, 65.193,
+         6527, 71.106]
+    tck = interpolate.splrep(x, y, s=0)
+    a = interpolate.splev(frequency, tck, der=0)  # compute attenuation
+
+    if elevation > 0:  # model unreliable less than 5 deg
+        gas_attenuation = a * np.power(elevation, -0.8622)
+    else:
+        gas_attenuation = 10  # safe clause upper limit (ITUR P372-10 plots)
+
+    return gas_attenuation
+
+
+# Taken from Gérard Maral, Michel Bousquet. Satellite Communications Systems. John Wiley & Sons. 4th Edition, 2002.
+# Input:    Frequency   Hz
+# Input:    Elevation   rad
+# Input:    p_exceed    %
+# Input:    Latitude    rad
+# Input:    Height      m
+# Input:    Rainfall Rate   mm/hr
+# Output:   Rain attenuation    dB
+def comp_rain_attenuation(frequency, elevation, p_exceed, latitude, height, rainfall_rate):
+
+    frequency = frequency/1e9  # Convert to GHz
+    height = height / 1000 # Convert to m
+    latitude = degrees(latitude) # Convert to deg
+
+    kh_ref = [0.0000259,0.0000847,0.0001071,0.0007056,0.001915,0.004115,0.01217,0.02386,0.04481,0.09164,0.1571,
+              0.2403,0.3374,0.4431]
+    alphah_ref = [0.9691,1.06664,1.6009,1.59,1.481,1.3905,1.2571,1.1825,1.1233,1.0568,0.9991,0.9485,0.9047,0.8673]
+    kv_ref = [0.0000308,0.0000998,0.0002461,0.0004878,0.001425,0.00345,0.01129,0.02455,0.05008,0.09611,0.1533,
+              0.2291,0.3224,0.4274]
+    alphav_ref = [0.8592,0.949,1.2476,1.5728,1.4745,1.3797,1.2156,1.1216,1.044,0.9847,0.9491,0.9129,0.8761,0.8421]
+
+    freq_values = [1,2,4,6,7,8,10,12,15,20,25,30,35,40]
+
+    # calculate RAIN HEIGHT by latitude [Charlesworth model/ ITUR P.839]
+    hrain=0  #some regions have no rain, these  are not be affected by the clauses/
+    if 23 < latitude < 89:
+        hrain=5-0.075*(latitude-23)
+    elif 0 < latitude <= 23:
+        hrain=3.2-0.075*(latitude-35)
+    elif -21 < latitude <= 0:
+        hrain=5
+    elif -71 < latitude <= -21:
+        hrain=5+0.1*(latitude+21)
+
+    Ls=(hrain-(height))/(sin(elevation))   #in km
+    Lg=Ls*cos(elevation)  #calculate SLANT distance and horizontal projection
+
+    tck = interpolate.splrep(freq_values, kh_ref, s=0)  # interpolate k horizontal
+    kh = interpolate.splev(frequency, tck, der=0)
+
+    tck = interpolate.splrep(freq_values, alphah_ref, s=0)  # interpolate alpha horizontal
+    alphah = interpolate.splev(frequency, tck, der=0)
+
+    tck = interpolate.splrep(freq_values, kv_ref, s=0)  # interpolate k vertical
+    kv = interpolate.splev(frequency, tck, der=0)
+
+    tck = interpolate.splrep(freq_values, alphav_ref, s=0)  # interpolate alpha vertical
+    alphav = interpolate.splev(frequency, tck, der=0)
+
+    # Calculate Specific attenuation, horizontal, vertical and circular (reference)
+    specific_att_h = kh * np.power(rainfall_rate,alphah)
+    specific_att_v = kv * np.power(rainfall_rate,alphav)
+    specific_att = 0.5 * (specific_att_v+specific_att_h)  # circular polarization has to be averaged
+
+    # calculate reduction factor r
+    aux1 = Lg * specific_att/frequency
+    aux2 = np.power(aux1,0.5)
+    aux3 = np.exp(-2*Lg)
+    r = 1/(1+0.78*aux2-0.38*(1-aux3))
+
+    # calculate zheta
+    zeta = atan(hrain-(height)/(Lg*r))
+
+    # select LR
+    if zeta>elevation:
+        Lr = Lg * r / cos(elevation)
+    else:
+        Lr=(hrain-(height))/(sin(elevation))
+
+    # select Chi
+    if -36 < latitude < 36:
+        Chi = 36 - latitude
+    else:
+        Chi = 0
+
+    # calculate vertical adjustment factor
+    aux1=1-np.exp(-(elevation*180/(PI*(1+Chi))))   #the expression needed degs
+    aux2=Lr*specific_att
+    aux3=np.power(aux2,0.5)/(frequency*frequency)
+    v=1/(1+np.power(sin(elevation),0.5)*(31*aux1*aux3-0.45))
+
+    # compute effective path length
+    Le=Lr*v
+
+    # compute attenuation for the 0.01 exceed
+    att_001=Le*specific_att
+
+    # compute beta
+    if np.abs(latitude)>=36 or p_exceed>=1:
+        beta = 0
+    elif p_exceed<1 and abs(latitude)<36 and elevation>0.436:
+        beta = (abs(latitude)-36)*(-0.005)
+    else:
+        beta = (abs(latitude)-36)*(-0.005)+1.8-4.25*sin(elevation)
+
+    # compute attenuation correspondent to p
+    aux1 = 0.655+0.033*np.log(p_exceed)-0.045*np.log(att_001)-beta*(1-p_exceed)*sin(elevation)
+    aux2 = np.power(p_exceed/0.01,-aux1)
+    rain_attenuation = att_001*aux2
+
+    return rain_attenuation
+
+
+def temp_brightness(frequency, elevation):
+
+    frequency = frequency/1e9  # Convert to GHz
+    elevation = degrees(elevation)  # Convert to degrees
+
+    freq_values_ref = [2,5,10,15,20,25,30,35,40,45,50,55,60]
+    c_parameter_ref = [72.178,79.19,108.81,198.17,464.43,483.02,394.63,444.76,589.25,619.48,644.86,290,290]
+    d_parameter_ref = [-0.8434,-0.8239,-0.814,-0.814,-0.7704,-0.7573,-0.7599,-0.7101,-0.7501,-0.633,-0.4576,0,0]
+
+    tck = interpolate.splrep(freq_values_ref, c_parameter_ref, s=0)  # for c value interpolation
+    c = interpolate.splev(frequency, tck, der=0)
+
+    tck = interpolate.splrep(freq_values_ref, d_parameter_ref, s=0)  # for d value interpolation
+    d = interpolate.splev(frequency, tck, der=0)
+
+    if elevation>3:  #arbitrary limit, model unreliable less than 5 deg and singular at 0.
+        temperature = c * np.power(elevation,d)
+    else:
+        temperature = 290  # safe upper limit (ITUR P372-10 plots)
+
+    return temperature

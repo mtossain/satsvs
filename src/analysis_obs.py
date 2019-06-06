@@ -79,8 +79,8 @@ class AnalysisObsSwathConical(AnalysisBase, AnalysisObs):
         sat_altitude = norm(satellite.pos_ecf) - r_earth
         if satellite.obs_swath_stop is not None:  # if swath defined by swath length rather than incidence
             satellite.obs_incl_angle_stop = misc_fn.incl_from_swath(satellite.obs_swath_stop, r_earth, sat_altitude)
-        radius = misc_fn.det_swath_radius(sat_altitude, satellite.obs_incl_angle_stop)
-        self.earth_angle_swath = misc_fn.earth_angle_beta(radius)
+        radius = misc_fn.det_swath_radius(sat_altitude, satellite.obs_incl_angle_stop, r_earth)
+        self.earth_angle_swath = misc_fn.earth_angle_beta(radius, r_earth)
 
     def after_loop(self, sm):
 

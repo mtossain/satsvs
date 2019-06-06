@@ -11,6 +11,31 @@ import misc_fn
 from astropy.time import Time
 
 
+def main():
+
+    sm = load_configuration()  # Load config into sm status machine holds status of sat, station, user and links
+    sm.analysis.before_loop(sm)  # Run analysis which is needed before time loop
+    ls.logger.info('Finished reading configuration file')
+
+    clear_load_orbit_file(sm)  # Clear or load previous orbit file
+
+    for sm.cnt_epoch in range(sm.num_epoch):  # Loop over simulation time window
+
+        convert_times(sm)  # Convert times from mjd to gmst, fdoy and string format
+        ls.logger.info(f'Simulation time: {sm.time_str}, time step: {sm.cnt_epoch}')
+
+        update_satellites(sm)  # Update pvt on satellites and links
+        update_stations(sm)  # Update pvt on ground stations and links
+        update_users(sm)  # Update pvt on users and links
+
+        sm.analysis.in_loop(sm)  # Run analyses which are needed in time loop
+
+        sm.time_mjd += sm.time_step / 86400.0  # Update time
+
+    ls.logger.info(f'Plotting analysis {sm.analysis.type}')
+    sm.analysis.after_loop(sm)  # Run analysis after time loop
+
+
 def load_configuration():
     sm = config.AppConfig('../input/Config.xml')
     sm.load_satellites()
@@ -101,6 +126,7 @@ def update_users(sm):
 
 
 def write_posvel_satellites(sm):  # Write the orbits from file
+    pass
     for idx_sat, satellite in enumerate(sm.satellites):
         with open('../output/orbits_internal.txt', 'a') as f:
             f.write("%13.6f,%13.6f,%13.6f,%13.6f,%13.6f,%13.6f\n"
@@ -114,31 +140,6 @@ def clear_load_orbit_file(sm):  # Clear or load previous orbit file
     else:
         if os.path.exists('../output/orbits_internal.txt'):
             os.remove('../output/orbits_internal.txt')
-
-
-def main():
-
-    sm = load_configuration()  # Load config into sm status machine holds status of sat, station, user and links
-    sm.analysis.before_loop(sm)  # Run analysis which is needed before time loop
-    ls.logger.info('Finished reading configuration file')
-
-    clear_load_orbit_file(sm)  # Clear or load previous orbit file
-
-    for sm.cnt_epoch in range(sm.num_epoch):  # Loop over simulation time window
-
-        convert_times(sm)  # Convert times from mjd to gmst, fdoy and string format
-        ls.logger.info(f'Simulation time: {sm.time_str}, time step: {sm.cnt_epoch}')
-
-        update_satellites(sm)  # Update pvt on satellites and links
-        update_stations(sm)  # Update pvt on ground stations and links
-        update_users(sm)  # Update pvt on users and links
-
-        sm.analysis.in_loop(sm)  # Run analyses which are needed in time loop
-
-        sm.time_mjd += sm.time_step / 86400.0  # Update time
-
-    ls.logger.info(f'Plotting analysis {sm.analysis.type}')
-    sm.analysis.after_loop(sm)  # Run analysis after time loop
 
 
 if __name__ == '__main__':
