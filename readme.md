@@ -401,7 +401,7 @@ The models used are coming from ITU-R python package itur, which implements:
 - ITU-R P.840-7: Attenuation due to clouds and fog
 - ITU-R P.1144-7: Interpolation methods for the geophysical properties used to compute propagation effects 
 - ITU-R P.1511-1: Topography for Earth-to-space propagation modelling 
--  ITU-R P.1853-1: Tropospheric attenuation time series synthesis
+- ITU-R P.1853-1: Tropospheric attenuation time series synthesis
 
 The following parameters are needed:
 ```
@@ -413,6 +413,7 @@ The following parameters are needed:
     <TransmitPowerW>10</TransmitPowerW>
     <TransmitLossesdB>2</TransmitLossesdB>
     <TransmitGaindB>20</TransmitGaindB>
+    <PExceedPerc>0.01</PExceedPerc>
 </Analysis>
 ```
 Parameters are:
@@ -422,10 +423,11 @@ Parameters are:
 - TransmitPowerW: Transmit power of transmitter in W
 - TransmitLossesdB: All transmit losses in dB
 - TransmitGaindB: Transmit gain of antenna in dB
+- PExceedPerc: Probability to exceed attenuation values in %.
 
 Optional in the analysis part are:
 ```
-    <RainPExceedPerc>0.01</RainPExceedPerc>
+
     <RainfallRate>20</RainfallRate>
     <RainHeight>3</RainHeight>
 
@@ -433,7 +435,6 @@ Optional in the analysis part are:
     <BitErrorRate>1e-5</BitErrorRate>
     <DataRateBitPerSec>1e6</DataRateBitPerSec>
 ```
-- RainPExceedPerc: Probability to exceed rain_rate in %.
 - RainfallRate: Rainfall rate in mm/hr.
 - RainHeight: Rain height of rainfall in m.
 
