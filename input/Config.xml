@@ -479,9 +479,9 @@
 	        <TransmitPowerW>10</TransmitPowerW>
 	        <TransmitLossesdB>2</TransmitLossesdB>
 	        <TransmitGaindB>20</TransmitGaindB>
-	        <RainPExceedPerc>1</RainPExceedPerc>
-	        <RainfallRate>20</RainfallRate>
-	        <RainHeight>3</RainHeight>
+	        <PExceedPerc>1</PExceedPerc>
+<!--	        <RainfallRate>20</RainfallRate>-->
+<!--	        <RainHeight>3</RainHeight>-->
 	        <ReceiveGaindB>20</ReceiveGaindB>
 	        <ReceiveLossesdB>2</ReceiveLossesdB>
 	        <ReceiveTempK>290</ReceiveTempK>

@@ -7,6 +7,8 @@ os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/lib/python3.
 from mpl_toolkits.basemap import Basemap
 from numpy.linalg import norm
 from math import sin, cos, asin, degrees, radians, log10
+import itur
+import astropy.units as u
 # Project modules
 from constants import K_BOLTZMANN
 from analysis import AnalysisBase
@@ -24,7 +26,7 @@ class AnalysisComGr2SpBudget(AnalysisBase):
         self.transmit_power = None
         self.transmit_losses = None
         self.transmit_gain = None
-        self.rain_p_exceed = None
+        self.p_exceed = None
         self.rain_height = None
         self.rain_rate = None
         self.receive_gain = None
@@ -55,8 +57,8 @@ class AnalysisComGr2SpBudget(AnalysisBase):
         if node.find('TransmitGaindB') is not None:
             self.transmit_gain = float(node.find('TransmitGaindB').text)
 
-        if node.find('RainPExceedPerc') is not None:
-            self.rain_p_exceed = float(node.find('RainPExceedPerc').text)
+        if node.find('PExceedPerc') is not None:
+            self.p_exceed = float(node.find('PExceedPerc').text)
         if node.find('RainHeight') is not None:
             self.rain_height = float(node.find('RainHeight').text)
         if node.find('RainfallRate') is not None:
@@ -93,22 +95,41 @@ class AnalysisComGr2SpBudget(AnalysisBase):
             elevation = sm.gr2sp[idx_station][idx_sat].elevation
             distance = sm.gr2sp[idx_station][idx_sat].distance
             fsl = 20*log10(distance/1000) + 20*log10(self.carrier_frequency/1e9) + 92.45
-            att_gas = misc_fn.comp_gas_attenuation(self.carrier_frequency, elevation)
-            if self.rain_p_exceed is not None:
-                att_rain = misc_fn.comp_rain_attenuation(self.carrier_frequency, elevation,
-                                                         sm.stations[idx_station].lla[0], sm.stations[idx_station].lla[2],
-                                                         self.rain_p_exceed, self.rain_rate, self.rain_height)
+            # a_g = misc_fn.comp_gas_attenuation(self.carrier_frequency, elevation)  # Fast method but unaccurate <5 deg
+            if self.rain_rate is not None:
+                # fast method of the rain model
+                # a_r = misc_fn.comp_rain_attenuation(self.carrier_frequency, elevation,
+                #                                          sm.stations[idx_station].lla[0], sm.stations[idx_station].lla[2],
+                #                                          self.rain_p_exceed, self.rain_rate, self.rain_height)
+                a_g, a_c, a_r, a_s, a_t = itur.atmospheric_attenuation_slant_path(
+                    degrees(sm.stations[idx_station].lla[0]),
+                    degrees(sm.stations[idx_station].lla[1]),
+                    self.carrier_frequency / 1e9 * itur.u.GHz,
+                    degrees(elevation), self.p_exceed,
+                    D=1.0 * itur.u.m,
+                    include_scintillation=False,
+                    include_clouds=False,
+                    return_contributions=True)
             else:
-                att_rain = 0
+                a_g, a_c, a_r, a_s, a_t = itur.atmospheric_attenuation_slant_path(
+                    degrees(sm.stations[idx_station].lla[0]),
+                    degrees(sm.stations[idx_station].lla[1]),
+                    self.carrier_frequency / 1e9 * itur.u.GHz,
+                    degrees(elevation), self.p_exceed,
+                    D=1.0 * itur.u.m,
+                    include_rain=False,
+                    include_scintillation=False,
+                    include_clouds=False,
+                    return_contributions=True)
             if self.transmitter_object == 'satellite':
                 ant_temp = 10 + misc_fn.temp_brightness(self.carrier_frequency, elevation)
             else:  # station is the transmitter
                 ant_temp = 290
             temp_sys = self.receive_temp + ant_temp
-            cn0 = self.eirp - fsl - att_gas - att_rain +self.receive_gain - self.receive_losses -\
+            cn0 = self.eirp - fsl - a_g.value - a_r.value +self.receive_gain - self.receive_losses - \
                   K_BOLTZMANN - 10*np.log10(temp_sys)
             self.metric[sm.cnt_epoch,:] = [self.times_f_doy[sm.cnt_epoch], degrees(elevation),
-                                           cn0, att_gas, att_rain, fsl, self.cn0_required]
+                                           cn0, a_g.value, a_r.value, fsl, self.cn0_required]
 
     def after_loop(self, sm):
         self.metric = self.metric[~np.all(self.metric == 0, axis=1)]  # Clean up empty rows
@@ -117,13 +138,12 @@ class AnalysisComGr2SpBudget(AnalysisBase):
         plt.plot(self.metric[:, 0], self.metric[:, 1], 'k.', label='Elevation')
         plt.plot(self.metric[:, 0], self.metric[:, 2], 'b.', label='CN0 Computed')
         plt.plot(self.metric[:, 0], self.metric[:, 3], 'g.', label='Gas Attenuation')
-        if self.rain_p_exceed is not None:
+        if self.rain_rate is not None:
             plt.plot(self.metric[:, 0], self.metric[:, 4], 'm.', label='Rain Attenuation')
         plt.plot(self.metric[:, 0], self.metric[:, 5]-100, 'y.', label='Free space loss - 100dB')
         if self.modulation_type is not None:
             plt.plot(self.metric[:, 0], self.metric[:, 6], 'r.', label='CN0 Required')
-        plt.xlabel('DOY[-]');
-        plt.ylabel('Elevation [deg], Power values [dB]')
+        plt.xlabel('DOY[-]'); plt.ylabel('Elevation [deg], Power values [dB]')
         plt.legend(); plt.grid()
         plt.savefig('../output/'+self.type+'.png')
         plt.show()

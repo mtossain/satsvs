@@ -388,7 +388,20 @@ what kind of statistic is displayed per user location.
 - __com_sp2sp_budget__: for satellite-satellite received power and C/N0
 
 ### com_gr2sp_budget
-Plots the link budget parameters for a certain ground station to all satellites. The models used are coming from ITU-R.
+Plots the link budget parameters for a certain ground station to all satellites. 
+The models used are coming from ITU-R python package itur, which implements:
+- ITU-R P.453-13: The radio refractive index: its formula and refractivity data
+- ITU-R P.618-13: Propagation data and prediction methods required for the design of Earth-space telecommunication systems
+- ITU-R P.676-11: Attenuation by atmospheric gases 
+- ITU-R P.835-6: Reference Standard Atmospheres 
+- ITU-R P.836-6: Water vapour: surface density and total columnar content 
+- ITU-R P.837-7: Characteristics of precipitation for propagation modelling 
+- ITU-R P.838-3: Specific attenuation model for rain for use in prediction methods 
+- ITU-R P.839-4: Rain height model for prediction methods. 
+- ITU-R P.840-7: Attenuation due to clouds and fog
+- ITU-R P.1144-7: Interpolation methods for the geophysical properties used to compute propagation effects 
+- ITU-R P.1511-1: Topography for Earth-to-space propagation modelling 
+-  ITU-R P.1853-1: Tropospheric attenuation time series synthesis
 
 The following parameters are needed:
 ```
