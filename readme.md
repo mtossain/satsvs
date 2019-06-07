@@ -385,6 +385,53 @@ what kind of statistic is displayed per user location.
 <img src="/docs/obs_swath_push_broom_revisit.png" alt="cov_satellite_push_broom_revisit"/>
 
 
+- __com_sp2sp_budget__: for satellite-satellite received power and C/N0
+
+### com_gr2sp_budget
+Plots the link budget parameters for a certain ground station to all satellites. The models used are coming from ITU-R.
+
+The following parameters are needed:
+```
+<Analysis>
+    <Type>com_gr2sp_budget</Type>
+    <GroundStationID>1</GroundStationID>
+    <TransmitterObject>Satellite</TransmitterObject>
+    <CarrierFrequency>10e9</CarrierFrequency>
+    <TransmitPowerW>10</TransmitPowerW>
+    <TransmitLossesdB>2</TransmitLossesdB>
+    <TransmitGaindB>20</TransmitGaindB>
+</Analysis>
+```
+Parameters are:
+- GroundStationID: Station to be used, refer to the ground segment part.
+- TransmitterObject: Satellite or Ground Station, which one is transmitting
+- CarrierFrequency: Carrier frequency of signal in Hz
+- TransmitPowerW: Transmit power of transmitter in W
+- TransmitLossesdB: All transmit losses in dB
+- TransmitGaindB: Transmit gain of antenna in dB
+
+Optional in the analysis part are:
+```
+    <RainPExceedPerc>0.01</RainPExceedPerc>
+    <RainfallRate>20</RainfallRate>
+    <RainHeight>3</RainHeight>
+
+    <ModulationType>BPSK</ModulationType>
+    <BitErrorRate>1e-5</BitErrorRate>
+    <DataRateBitPerSec>1e6</DataRateBitPerSec>
+```
+- RainPExceedPerc: Probability to exceed rain_rate in %.
+- RainfallRate: Rainfall rate in mm/hr.
+- RainHeight: Rain height of rainfall in m.
+
+Some parameters can be entered to get the required CN0:
+- ModulationType: 'BPSK' or 'QPSK'
+- BitErrorRate: bit error rate required
+- DataRateBitPerSec: datarate required
+
+<img src="/docs/com_gr2sp_budget.png" alt="com_gr2sp_budget"/>
+
+
 
 
 

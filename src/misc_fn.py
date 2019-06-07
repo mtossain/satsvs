@@ -595,7 +595,7 @@ def str2bool(v):
 
 
 # Compute gas attenuation
-# Gas attenuation models are given in ITU-R P676-8.
+# Gas attenuation models are given in ITU-R P676-11.
 # The model provided is computationally intensive and requires a lot of tabulated data.
 # In order to implement this with a low computational burden in a short time, a simplified-statistical model has been derived.
 # The elevation dependences have been mapped for each frequency with an exponential fit.
@@ -603,7 +603,8 @@ def str2bool(v):
 # Input: frequency [Hz]
 # Input: elevation [rad]
 # Output: attenuation [dB]
-def comp_gas_attenuation(frequency, elevation):
+def comp_gas_attenuation(frequency, elevation):  # TODO use ITUR py package...
+
     frequency = frequency / 1e9  # assume freq GHz, elevation deg
     elevation = degrees(elevation)  # assume freq GHz, elevation deg
 
@@ -613,7 +614,7 @@ def comp_gas_attenuation(frequency, elevation):
     tck = interpolate.splrep(x, y, s=0)
     a = interpolate.splev(frequency, tck, der=0)  # compute attenuation
 
-    if elevation > 0:  # model unreliable less than 5 deg
+    if elevation > 0.1:  # model unreliable less than 0.1 deg
         gas_attenuation = a * np.power(elevation, -0.8622)
     else:
         gas_attenuation = 10  # safe clause upper limit (ITUR P372-10 plots)
@@ -629,7 +630,7 @@ def comp_gas_attenuation(frequency, elevation):
 # Input:    Height      m
 # Input:    Rainfall Rate   mm/hr
 # Output:   Rain attenuation    dB
-def comp_rain_attenuation(frequency, elevation, p_exceed, latitude, height, rainfall_rate):
+def comp_rain_attenuation(frequency, elevation, latitude, height, rain_p_exceed, rainfall_rate, rain_height):
 
     frequency = frequency/1e9  # Convert to GHz
     height = height / 1000 # Convert to m
@@ -645,15 +646,18 @@ def comp_rain_attenuation(frequency, elevation, p_exceed, latitude, height, rain
     freq_values = [1,2,4,6,7,8,10,12,15,20,25,30,35,40]
 
     # calculate RAIN HEIGHT by latitude [Charlesworth model/ ITUR P.839]
-    hrain=0  #some regions have no rain, these  are not be affected by the clauses/
-    if 23 < latitude < 89:
-        hrain=5-0.075*(latitude-23)
-    elif 0 < latitude <= 23:
-        hrain=3.2-0.075*(latitude-35)
-    elif -21 < latitude <= 0:
-        hrain=5
-    elif -71 < latitude <= -21:
-        hrain=5+0.1*(latitude+21)
+    if rain_height == None:
+        hrain=0  #some regions have no rain, these  are not be affected by the clauses/
+        if 23 < latitude < 89:
+            hrain=5-0.075*(latitude-23)
+        elif 0 < latitude <= 23:
+            hrain=3.2-0.075*(latitude-35)
+        elif -21 < latitude <= 0:
+            hrain=5
+        elif -71 < latitude <= -21:
+            hrain=5+0.1*(latitude+21)
+    else:  # Get it from the configuration file
+        hrain = rain_height
 
     Ls=(hrain-(height))/(sin(elevation))   #in km
     Lg=Ls*cos(elevation)  #calculate SLANT distance and horizontal projection
@@ -709,21 +713,24 @@ def comp_rain_attenuation(frequency, elevation, p_exceed, latitude, height, rain
     att_001=Le*specific_att
 
     # compute beta
-    if np.abs(latitude)>=36 or p_exceed>=1:
+    if np.abs(latitude)>=36 or rain_p_exceed>=1:
         beta = 0
-    elif p_exceed<1 and abs(latitude)<36 and elevation>0.436:
+    elif rain_p_exceed<1 and abs(latitude)<36 and elevation>0.436:
         beta = (abs(latitude)-36)*(-0.005)
     else:
         beta = (abs(latitude)-36)*(-0.005)+1.8-4.25*sin(elevation)
 
     # compute attenuation correspondent to p
-    aux1 = 0.655+0.033*np.log(p_exceed)-0.045*np.log(att_001)-beta*(1-p_exceed)*sin(elevation)
-    aux2 = np.power(p_exceed/0.01,-aux1)
+    aux1 = 0.655+0.033*np.log(rain_p_exceed)-0.045*np.log(att_001)-beta*(1-rain_p_exceed)*sin(elevation)
+    aux2 = np.power(rain_p_exceed/0.01,-aux1)
     rain_attenuation = att_001*aux2
 
     return rain_attenuation
 
 
+# Input frequency Hz
+# Input elevation rad
+# Output brightness temp sky K
 def temp_brightness(frequency, elevation):
 
     frequency = frequency/1e9  # Convert to GHz
@@ -745,3 +752,28 @@ def temp_brightness(frequency, elevation):
         temperature = 290  # safe upper limit (ITUR P372-10 plots)
 
     return temperature
+
+
+# Input Modulation type BPSK/QPSK
+# Input BER in multiples of 10
+# Input datarate in bps
+# Output CN0 required in dB
+def comp_cn0_required(modulation, ber, datarate):
+
+    ber = np.log10(ber)
+    # Valid for BPSK and QPSK
+    if modulation == 'BPSK' or modulation == 'QPSK':
+        dict = {-3:6.8,
+                -4:8.4,
+                -5:9.6,
+                -6:10.5,
+                -7:11.3,
+                -8:12.0,
+                -9:12.6}
+        cn0_req = dict[ber]+10*np.log10(datarate)
+        return cn0_req
+    else:
+        return 100
+
+
+
