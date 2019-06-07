@@ -413,6 +413,10 @@ The following parameters are needed:
     <TransmitLossesdB>2</TransmitLossesdB>
     <TransmitGaindB>20</TransmitGaindB>
     <PExceedPerc>0.01</PExceedPerc>
+    <IncludeGas>True</IncludeGas>
+    <IncludeRain>True</IncludeRain>
+    <IncludeScintillation>False</IncludeScintillation>
+    <IncludeClouds>False</IncludeClouds>
 </Analysis>
 ```
 Parameters are:
@@ -426,16 +430,10 @@ Parameters are:
 
 Optional in the analysis part are:
 ```
-
-    <RainfallRate>20</RainfallRate>
-    <RainHeight>3</RainHeight>
-
     <ModulationType>BPSK</ModulationType>
     <BitErrorRate>1e-5</BitErrorRate>
     <DataRateBitPerSec>1e6</DataRateBitPerSec>
 ```
-- RainfallRate: Rainfall rate in mm/hr.
-- RainHeight: Rain height of rainfall in m.
 
 Some parameters can be entered to get the required CN0:
 - ModulationType: 'BPSK' or 'QPSK'

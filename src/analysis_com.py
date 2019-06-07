@@ -27,8 +27,10 @@ class AnalysisComGr2SpBudget(AnalysisBase):
         self.transmit_losses = None
         self.transmit_gain = None
         self.p_exceed = None
-        self.rain_height = None
-        self.rain_rate = None
+        self.include_rain = None
+        self.include_gas = None
+        self.include_scintillation = None
+        self.include_clouds = None
         self.receive_gain = None
         self.receive_losses = None
         self.receive_temp = None
@@ -59,10 +61,14 @@ class AnalysisComGr2SpBudget(AnalysisBase):
 
         if node.find('PExceedPerc') is not None:
             self.p_exceed = float(node.find('PExceedPerc').text)
-        if node.find('RainHeight') is not None:
-            self.rain_height = float(node.find('RainHeight').text)
-        if node.find('RainfallRate') is not None:
-            self.rain_rate = float(node.find('RainfallRate').text)
+        if node.find('IncludeRain') is not None:
+            self.include_rain = misc_fn.str2bool(node.find('IncludeRain').text)
+        if node.find('IncludeGas') is not None:
+            self.include_gas = misc_fn.str2bool(node.find('IncludeGas').text)
+        if node.find('IncludeScintillation') is not None:
+            self.include_scintillation = misc_fn.str2bool(node.find('IncludeScintillation').text)
+        if node.find('IncludeClouds') is not None:
+            self.include_clouds = misc_fn.str2bool(node.find('IncludeClouds').text)
 
         if node.find('ReceiveGaindB') is not None:
             self.receive_gain = float(node.find('ReceiveGaindB').text)
@@ -96,31 +102,21 @@ class AnalysisComGr2SpBudget(AnalysisBase):
             distance = sm.gr2sp[idx_station][idx_sat].distance
             fsl = 20*log10(distance/1000) + 20*log10(self.carrier_frequency/1e9) + 92.45
             # a_g = misc_fn.comp_gas_attenuation(self.carrier_frequency, elevation)  # Fast method but unaccurate <5 deg
-            if self.rain_rate is not None:
-                # fast method of the rain model
-                # a_r = misc_fn.comp_rain_attenuation(self.carrier_frequency, elevation,
-                #                                          sm.stations[idx_station].lla[0], sm.stations[idx_station].lla[2],
-                #                                          self.rain_p_exceed, self.rain_rate, self.rain_height)
-                a_g, a_c, a_r, a_s, a_t = itur.atmospheric_attenuation_slant_path(
-                    degrees(sm.stations[idx_station].lla[0]),
-                    degrees(sm.stations[idx_station].lla[1]),
-                    self.carrier_frequency / 1e9 * itur.u.GHz,
-                    degrees(elevation), self.p_exceed,
-                    D=1.0 * itur.u.m,
-                    include_scintillation=False,
-                    include_clouds=False,
-                    return_contributions=True)
-            else:
-                a_g, a_c, a_r, a_s, a_t = itur.atmospheric_attenuation_slant_path(
-                    degrees(sm.stations[idx_station].lla[0]),
-                    degrees(sm.stations[idx_station].lla[1]),
-                    self.carrier_frequency / 1e9 * itur.u.GHz,
-                    degrees(elevation), self.p_exceed,
-                    D=1.0 * itur.u.m,
-                    include_rain=False,
-                    include_scintillation=False,
-                    include_clouds=False,
-                    return_contributions=True)
+            # fast method of the rain model
+            # a_r = misc_fn.comp_rain_attenuation(self.carrier_frequency, elevation,
+            #                                          sm.stations[idx_station].lla[0], sm.stations[idx_station].lla[2],
+            #                                          self.rain_p_exceed, self.rain_rate, self.rain_height)
+            a_g, a_c, a_r, a_s, a_t = itur.atmospheric_attenuation_slant_path(
+                degrees(sm.stations[idx_station].lla[0]),
+                degrees(sm.stations[idx_station].lla[1]),
+                self.carrier_frequency / 1e9 * itur.u.GHz,
+                degrees(elevation), self.p_exceed,
+                D=1.0 * itur.u.m,
+                include_gas=self.include_gas,
+                include_rain=self.include_rain,
+                include_scintillation=self.include_scintillation,
+                include_clouds=self.include_clouds,
+                return_contributions=True)
             if self.transmitter_object == 'satellite':
                 ant_temp = 10 + misc_fn.temp_brightness(self.carrier_frequency, elevation)
             else:  # station is the transmitter
@@ -137,8 +133,9 @@ class AnalysisComGr2SpBudget(AnalysisBase):
         plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
         plt.plot(self.metric[:, 0], self.metric[:, 1], 'k.', label='Elevation')
         plt.plot(self.metric[:, 0], self.metric[:, 2], 'b.', label='CN0 Computed')
-        plt.plot(self.metric[:, 0], self.metric[:, 3], 'g.', label='Gas Attenuation')
-        if self.rain_rate is not None:
+        if self.include_gas:
+            plt.plot(self.metric[:, 0], self.metric[:, 3], 'g.', label='Gas Attenuation')
+        if self.include_rain:
             plt.plot(self.metric[:, 0], self.metric[:, 4], 'm.', label='Rain Attenuation')
         plt.plot(self.metric[:, 0], self.metric[:, 5]-100, 'y.', label='Free space loss - 100dB')
         if self.modulation_type is not None:
