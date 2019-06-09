@@ -30,15 +30,12 @@ parameters and analysis are defined. Analysis can be added as wished, the baseli
 
 ### Communication
 - __com_sp2sp_budget__: for satellite-satellite received power and C/N0
+- __com_sp2sp_budget__: Multiple ISL geometry between satellites and identifies the worst case communication link
 
 _To be implemented at a later stage:_
 
-Communication
-- __com_sp2sp_budget__: Multiple ISL geometry between satellites and identifies the worst case communication link
-
 Navigation
 - __nav_dillution_of_precision__: DOP values for user(s) (also spacecraft user)
-
 
 
 ## Configuration file
@@ -443,6 +440,45 @@ Some parameters can be entered to get the required CN0:
 <img src="/docs/com_gr2sp_budget.png" alt="com_gr2sp_budget"/>
 
 
+### com_sp2sp_budget
+Plots the link budget parameters for a certain satellite to another satellite. 
+
+The following parameters are needed:
+```
+<Analysis>
+    <Type>com_sp2sp_budget</Type>
+    <SatelliteID1>1</SatelliteID1>
+    <SatelliteID2>2</SatelliteID2>
+    <CarrierFrequency>10e9</CarrierFrequency>
+    <TransmitPowerW>10</TransmitPowerW>
+    <TransmitLossesdB>2</TransmitLossesdB>
+    <TransmitGaindB>20</TransmitGaindB>
+    <ReceiveGaindB>20</ReceiveGaindB>
+    <ReceiveLossesdB>2</ReceiveLossesdB>
+    <ReceiveTempK>290</ReceiveTempK>
+</Analysis>
+```
+Parameters are:
+- SatelliteID1: Satellite to be used as transmitter.
+- SatelliteID2: Satellite to be used as receiver.
+- CarrierFrequency: Carrier frequency of signal in Hz
+- TransmitPowerW: Transmit power of transmitter in W
+- TransmitLossesdB: All transmit losses in dB
+- TransmitGaindB: Transmit gain of antenna in dB
+
+Optional in the analysis part are:
+```
+    <ModulationType>BPSK</ModulationType>
+    <BitErrorRate>1e-5</BitErrorRate>
+    <DataRateBitPerSec>1e6</DataRateBitPerSec>
+```
+
+Some parameters can be entered to get the required CN0:
+- ModulationType: 'BPSK' or 'QPSK'
+- BitErrorRate: bit error rate required
+- DataRateBitPerSec: datarate required
+
+<img src="/docs/com_sp2sp_budget.png" alt="com_sp2sp_budget"/>
 
 
 

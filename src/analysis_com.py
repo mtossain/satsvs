@@ -86,8 +86,7 @@ class AnalysisComGr2SpBudget(AnalysisBase):
 
     def before_loop(self, sm):
         for idx_station, station in enumerate(sm.stations):
-            if station.constellation_id == self.station_id and \
-                    station.constellation_id == self.station_id:
+            if station.constellation_id == self.station_id:
                 self.idx_found_station = idx_station
                 break
         self.eirp = 10*log10(self.transmit_power) + self.transmit_gain - self.transmit_losses
@@ -122,7 +121,9 @@ class AnalysisComGr2SpBudget(AnalysisBase):
             else:  # station is the transmitter
                 ant_temp = 290
             temp_sys = self.receive_temp + ant_temp
-            cn0 = self.eirp - fsl - a_g.value - a_r.value +self.receive_gain - self.receive_losses - \
+            cn0 = self.eirp - fsl \
+                  - a_g.value - a_r.value - a_c.value - a_s.value \
+                  +self.receive_gain - self.receive_losses - \
                   K_BOLTZMANN - 10*np.log10(temp_sys)
             self.metric[sm.cnt_epoch,:] = [self.times_f_doy[sm.cnt_epoch], degrees(elevation),
                                            cn0, a_g.value, a_r.value, fsl, self.cn0_required]
@@ -140,6 +141,97 @@ class AnalysisComGr2SpBudget(AnalysisBase):
         plt.plot(self.metric[:, 0], self.metric[:, 5]-100, 'y.', label='Free space loss - 100dB')
         if self.modulation_type is not None:
             plt.plot(self.metric[:, 0], self.metric[:, 6], 'r.', label='CN0 Required')
+        plt.xlabel('DOY[-]'); plt.ylabel('Elevation [deg], Power values [dB]')
+        plt.legend(); plt.grid()
+        plt.savefig('../output/'+self.type+'.png')
+        plt.show()
+
+
+class AnalysisComSp2SpBudget(AnalysisBase):
+
+    def __init__(self):
+        super().__init__()
+        self.sat_id1 = None
+        self.sat_id1 = None
+
+        self.carrier_frequency = None
+        self.transmit_power = None
+        self.transmit_losses = None
+        self.transmit_gain = None
+        self.receive_losses = None
+        self.receive_temp = None
+        self.modulation_type = None
+        self.ber = None
+        self.data_rate = None
+
+        self.idx_found_sat1 = None
+        self.idx_found_sat2 = None
+
+        self.eirp = None
+        self.metric = None
+        self.cn0_required = 0
+
+    def read_config(self, node):
+        if node.find('SatelliteID1') is not None:
+            self.sat_id1 = int(node.find('SatelliteID1').text)
+        if node.find('SatelliteID2') is not None:
+            self.sat_id2 = int(node.find('SatelliteID2').text)
+
+        if node.find('CarrierFrequency') is not None:
+            self.carrier_frequency = float(node.find('CarrierFrequency').text)
+        if node.find('TransmitPowerW') is not None:
+            self.transmit_power = float(node.find('TransmitPowerW').text)
+        if node.find('TransmitLossesdB') is not None:
+            self.transmit_losses = float(node.find('TransmitLossesdB').text)
+        if node.find('TransmitGaindB') is not None:
+            self.transmit_gain = float(node.find('TransmitGaindB').text)
+
+        if node.find('ReceiveGaindB') is not None:
+            self.receive_gain = float(node.find('ReceiveGaindB').text)
+        if node.find('ReceiveLossesdB') is not None:
+            self.receive_losses = float(node.find('ReceiveLossesdB').text)
+        if node.find('ReceiveTempK') is not None:
+            self.receive_temp = float(node.find('ReceiveTempK').text)
+
+        if node.find('ModulationType') is not None:
+            self.modulation_type = node.find('ModulationType').text
+        if node.find('BitErrorRate') is not None:
+            self.ber = float(node.find('BitErrorRate').text)
+        if node.find('DataRateBitPerSec') is not None:
+            self.data_rate = float(node.find('DataRateBitPerSec').text)
+
+    def before_loop(self, sm):
+        for idx_sat, satellite in enumerate(sm.satellites):
+            if satellite.sat_id == self.sat_id1:
+                self.idx_found_sat1 = idx_sat
+            if satellite.sat_id == self.sat_id2:
+                self.idx_found_sat2 = idx_sat
+        self.eirp = 10*log10(self.transmit_power) + self.transmit_gain - self.transmit_losses
+        self.metric = np.zeros((sm.num_epoch, 5))
+        if self.modulation_type is not None:
+            self.cn0_required = misc_fn.comp_cn0_required(self.modulation_type, self.ber, self.data_rate)
+
+    def in_loop(self, sm):
+        if self.idx_found_sat2 in sm.satellites[self.idx_found_sat1].idx_sat_in_view:
+            elevation = sm.sp2sp[self.idx_found_sat1][self.idx_found_sat2].elevation
+            distance = sm.sp2sp[self.idx_found_sat1][self.idx_found_sat2].distance
+            fsl = 20*log10(distance/1000) + 20*log10(self.carrier_frequency/1e9) + 92.45
+            temp_sys = self.receive_temp + 20
+            cn0 = self.eirp - fsl \
+                  +self.receive_gain - self.receive_losses - \
+                  K_BOLTZMANN - 10*np.log10(temp_sys)
+            self.metric[sm.cnt_epoch,:] = [self.times_f_doy[sm.cnt_epoch], degrees(elevation),
+                                           cn0, fsl, self.cn0_required]
+
+    def after_loop(self, sm):
+        self.metric = self.metric[~np.all(self.metric == 0, axis=1)]  # Clean up empty rows
+        fig = plt.figure(figsize=(10, 6))
+        plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
+        plt.plot(self.metric[:, 0], self.metric[:, 1], 'k.', label='Elevation')
+        plt.plot(self.metric[:, 0], self.metric[:, 2], 'b.', label='CN0 Computed')
+        plt.plot(self.metric[:, 0], self.metric[:, 3]-100, 'y.', label='Free space loss - 100dB')
+        if self.modulation_type is not None:
+            plt.plot(self.metric[:, 0], self.metric[:, 4], 'r.', label='CN0 Required')
         plt.xlabel('DOY[-]'); plt.ylabel('Elevation [deg], Power values [dB]')
         plt.legend(); plt.grid()
         plt.savefig('../output/'+self.type+'.png')

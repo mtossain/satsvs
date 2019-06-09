@@ -30,6 +30,8 @@ class Constellation:
         self.num_sat = 0
         self.num_planes = 0
         self.rx_constellation = ''
+        self.elevation_mask = []  # Could be varying over azimuth...
+        self.el_mask_max = []  # Could be varying over azimuth...
 
         self.tle_file_name = None
         self.obs_incl_angle_start = None
@@ -49,8 +51,8 @@ class Satellite:
         self.name = ''  # Name of the satellite
         self.rx_constellation = ''  # Which constellations can this satellite receive (for SP2SP)
 
-        self.antenna_mask = []  # Could be varying over azimuth...
-        self.antenna_mask_max = []  # Could be varying over azimuth...
+        self.elevation_mask = []  # Could be varying over azimuth...
+        self.el_mask_max = []  # Could be varying over azimuth...
 
         self.kepler = KeplerSet()  # Containing Kepler set for orbit
         self.tle_line1 = ''  # If TLE file, then contains the TLE first line
@@ -265,7 +267,7 @@ class Space2SpaceLink:
 
     def __init__(self):
 
-        self.link_in_use = True  # Defines whether ground asset is using this satellite (from ReceiverConstellation)
+        self.link_in_use = True  # Defines whether space asset is using this satellite (from ReceiverConstellation)
 
         self.idx_sat_tx = 0  # Pointer to transmitting sat
         self.idx_sat_rx = 0  # Pointer to receiving sat
@@ -298,17 +300,17 @@ class Space2SpaceLink:
 
         in_view_elevation = False
 
-        num_masks = len(sat_1.antenna_mask)  # If only one value
+        num_masks = len(sat_1.elevation_mask)  # If only one value
         if num_masks == 0:  # omnidirectional antenna
             in_view_elevation = True
         if num_masks == 1:
             # checking for mask of satellite 1
-            if sat_1.antenna_mask[0] < self.elevation < sat_1.antenna_mask_max[0]:
+            if sat_1.elevation_mask[0] < self.elevation < sat_1.el_mask_max[0]:
                 in_view_elevation = True
         if num_masks > 1:  # More than one mask
             az_cake_piece_angle = 2 * PI / num_masks
             idx_az = int(floor(self.azimuth / az_cake_piece_angle))
-            if sat_1.antenna_mask[idx_az] < self.elevation < sat_1.antenna_mask_max[idx_az]:
+            if sat_1.elevation_mask[idx_az] < self.elevation < sat_1.el_mask_max[idx_az]:
                 in_view_elevation = True
 
         # Also check whether the link is not passing through the Earth

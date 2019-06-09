@@ -306,7 +306,6 @@ def spin_vector(angle, pos_vec, vel_vec):
 # @param Xs Satellite position in ECEF (m/double)
 # @param Xu User position in ECEF (m/double)
 # @param AzEl Azimuth [0] and Elevation [1] (radians/double)
-@jit(nopython=True)
 def calc_az_el(xs, xu):
 
     az_el = np.zeros(2)
@@ -367,7 +366,6 @@ def calc_az_el(xs, xu):
 # @param iX1 Intersection point one
 # @param iX2 Intersection point two
 # @return Returns false if the line does not intersect the sphere
-@jit(nopython=True)
 def line_sphere_intersect(x1, x2, sphere_radius, sphere_center):
 
     intersect = True

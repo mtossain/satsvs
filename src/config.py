@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from math import ceil
+from math import ceil, radians
 from astropy.time import Time
 # Project modules
 from constants import *
@@ -72,6 +72,16 @@ class AppConfig:
                 const.obs_swath_start = float(constellation.find('ObsSwathStart').text)
             if constellation.find('ObsSwathStop') is not None:
                 const.obs_swath_stop = float(constellation.find('ObsSwathStop').text)
+            if constellation.find('ElevationMask') is not None:
+                mask_values = constellation.find('ElevationMask').text.split(',')
+                for mask_value in mask_values:
+                    const.elevation_mask.append(radians(float(mask_value)))
+                if constellation.find('ElevationMaskMaximum') is not None: # Optional
+                    mask_max_values = constellation.find('ElevationMaskMaximum').text.split(',')
+                    for mask_max_value in mask_max_values:
+                        const.el_mask_max.append(radians(mask_max_value))
+                else:  # If no maximum set to 90 degrees
+                    const.el_mask_max = len(mask_values)*[radians(90.0)]
             ls.logger.info(const.__dict__)
             self.constellations.append(const)
 
@@ -82,6 +92,8 @@ class AppConfig:
                 sat.constellation_id = const.constellation_id
                 sat.constellation_name = const.constellation_name
                 sat.rx_constellation = const.rx_constellation
+                sat.elevation_mask = const.elevation_mask
+                sat.el_mask_max = const.el_mask_max
                 sat.kepler.epoch_mjd = float(satellite.find('EpochMJD').text)
                 sat.kepler.semi_major_axis = float(satellite.find('SemiMajorAxis').text)
                 sat.kepler.eccentricity = float(satellite.find('Eccentricity').text)
@@ -119,6 +131,8 @@ class AppConfig:
                             sat.kepler.mean_anomaly = radians(float(line[43:50]))
                             ls.logger.info(['Found satellite:', str(sat.sat_id), 'Kepler Elements', str(sat.kepler.__dict__)])
                             sat.rx_constellation = const.rx_constellation
+                            sat.elevation_mask = const.elevation_mask
+                            sat.el_mask_mask = const.el_mask_max
                             self.satellites.append(sat)
                             cnt = -1  # reset so that next tle set starts at cnt=0
                         cnt += 1
@@ -344,6 +358,8 @@ class AppConfig:
                     self.analysis = AnalysisObsSwathPushBroom()
                 if analysis_node.find('Type').text == 'com_gr2sp_budget':
                     self.analysis = AnalysisComGr2SpBudget()
+                if analysis_node.find('Type').text == 'com_sp2sp_budget':
+                    self.analysis = AnalysisComSp2SpBudget()
                 self.analysis.type = analysis_node.find('Type').text
                 self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 

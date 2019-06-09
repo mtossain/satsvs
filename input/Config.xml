@@ -349,6 +349,7 @@
 		    <ReceiverConstellation>1111</ReceiverConstellation>
 			<ObsSwathStart>255000.0</ObsSwathStart>
 			<ObsSwathStop>655000.0</ObsSwathStop>
+		    <ElevationMask>-20.0</ElevationMask>
 			<Satellite>
 				<SatelliteID>1</SatelliteID>
 				<Plane>1</Plane>
@@ -369,7 +370,7 @@
 				<Inclination>98.157</Inclination>
 				<RAAN>188.934</RAAN>
 				<ArgOfPerigee>0.00</ArgOfPerigee>
-				<MeanAnomaly>180</MeanAnomaly>
+				<MeanAnomaly>30</MeanAnomaly>
 			</Satellite>
         </Constellation>
 <!--    <Constellation>-->
@@ -466,24 +467,39 @@
 
 		<IncludeStation2SpaceLinks>True</IncludeStation2SpaceLinks>
 		<IncludeUser2SpaceLinks>False</IncludeUser2SpaceLinks>
-		<IncludeSpace2SpaceLinks>False</IncludeSpace2SpaceLinks>
+		<IncludeSpace2SpaceLinks>True</IncludeSpace2SpaceLinks>
 
         <OrbitsFromPreviousRun>False</OrbitsFromPreviousRun>
         <OrbitPropagator>Keplerian</OrbitPropagator>
 
+<!--        <Analysis>-->
+<!--			<Type>com_gr2sp_budget</Type>-->
+<!--	        <GroundStationID>1</GroundStationID>-->
+<!--	        <TransmitterObject>Satellite</TransmitterObject>-->
+<!--	        <CarrierFrequency>10e9</CarrierFrequency>-->
+<!--	        <TransmitPowerW>10</TransmitPowerW>-->
+<!--	        <TransmitLossesdB>2</TransmitLossesdB>-->
+<!--	        <TransmitGaindB>20</TransmitGaindB>-->
+<!--	        <PExceedPerc>0.1</PExceedPerc>-->
+<!--	        <IncludeGas>True</IncludeGas>-->
+<!--	        <IncludeRain>True</IncludeRain>-->
+<!--	        <IncludeScintillation>False</IncludeScintillation>-->
+<!--	        <IncludeClouds>False</IncludeClouds>-->
+<!--	        <ReceiveGaindB>20</ReceiveGaindB>-->
+<!--	        <ReceiveLossesdB>2</ReceiveLossesdB>-->
+<!--	        <ReceiveTempK>290</ReceiveTempK>-->
+<!--	        <ModulationType>BPSK</ModulationType>-->
+<!--	        <BitErrorRate>1e-5</BitErrorRate>-->
+<!--	        <DataRateBitPerSec>1e6</DataRateBitPerSec>-->
+<!--        </Analysis>-->
         <Analysis>
-			<Type>com_gr2sp_budget</Type>
-	        <GroundStationID>1</GroundStationID>
-	        <TransmitterObject>Satellite</TransmitterObject>
+			<Type>com_sp2sp_budget</Type>
+	        <SatelliteID1>1</SatelliteID1>
+	        <SatelliteID2>2</SatelliteID2>
 	        <CarrierFrequency>10e9</CarrierFrequency>
 	        <TransmitPowerW>10</TransmitPowerW>
 	        <TransmitLossesdB>2</TransmitLossesdB>
 	        <TransmitGaindB>20</TransmitGaindB>
-	        <PExceedPerc>0.1</PExceedPerc>
-	        <IncludeGas>True</IncludeGas>
-	        <IncludeRain>True</IncludeRain>
-	        <IncludeScintillation>False</IncludeScintillation>
-	        <IncludeClouds>False</IncludeClouds>
 	        <ReceiveGaindB>20</ReceiveGaindB>
 	        <ReceiveLossesdB>2</ReceiveLossesdB>
 	        <ReceiveTempK>290</ReceiveTempK>
