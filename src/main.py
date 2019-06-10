@@ -146,6 +146,5 @@ if __name__ == '__main__':
     main()
 
 # TODO SGP4 for Keplerian
-# TODO analysis COM
 # TODO analysis NAV
 

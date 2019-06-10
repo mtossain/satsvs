@@ -601,7 +601,7 @@ def str2bool(v):
 # Input: frequency [Hz]
 # Input: elevation [rad]
 # Output: attenuation [dB]
-def comp_gas_attenuation(frequency, elevation):  # TODO use ITUR py package...
+def comp_gas_attenuation(frequency, elevation):
 
     frequency = frequency / 1e9  # assume freq GHz, elevation deg
     elevation = degrees(elevation)  # assume freq GHz, elevation deg
