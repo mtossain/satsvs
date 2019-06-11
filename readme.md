@@ -29,14 +29,20 @@ parameters and analysis are defined. Analysis can be added as wished, the baseli
 - __obs_swath_pushbroom__: Swath coverage for satellite(s)
 
 ### Communication
-- __com_sp2sp_budget__: for satellite-satellite received power and C/N0
-- __com_sp2sp_budget__: Multiple ISL geometry between satellites and identifies the worst case communication link
+- __com_gr2sp_budget__: For station-satellite received power, losses and C/N0
+- __com_sp2sp_budget__: For satellite-satellite received power, losses and C/N0
+- __com_doppler__: For satellite-station elevation and doppler
 
 _To be implemented at a later stage:_
 
 Navigation
 - __nav_dillution_of_precision__: DOP values for user(s) (also spacecraft user)
 
+Satellite
+- __sat_power_subsystem__: Power over orbit including eclipse analysis
+- __sat_data_handling__: Data storage and downlink over orbit
+- __sat_thermal__: Thermal conditions over orbit
+- __sat_attitude_control__: Satellite attitude control over orbit
 
 ## Configuration file
 The configuration file is found in the input directory under the name __config.xml__. 
@@ -479,6 +485,24 @@ Some parameters can be entered to get the required CN0:
 - DataRateBitPerSec: datarate required
 
 <img src="/docs/com_sp2sp_budget.png" alt="com_sp2sp_budget"/>
+
+
+### com_doppler
+Plots the doppler shift in Hz for the station to satellites. 
+
+The following parameters are needed:
+```
+<Analysis>
+    <Type>com_doppler</Type>
+    <StationID>1</StationID>
+    <CarrierFrequency>10e9</CarrierFrequency>
+</Analysis>
+```
+Parameters are:
+- StationID: station to be selected.
+- CarrierFrequency: Carrier frequency of signal in Hz
+
+<img src="/docs/com_doppler.png" alt="com_doppler"/>
 
 
 

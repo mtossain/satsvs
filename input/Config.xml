@@ -493,20 +493,25 @@
 <!--	        <DataRateBitPerSec>1e6</DataRateBitPerSec>-->
 <!--        </Analysis>-->
         <Analysis>
-			<Type>com_sp2sp_budget</Type>
-	        <SatelliteID1>1</SatelliteID1>
-	        <SatelliteID2>2</SatelliteID2>
+			<Type>com_doppler</Type>
+	        <StationID>1</StationID>
 	        <CarrierFrequency>10e9</CarrierFrequency>
-	        <TransmitPowerW>10</TransmitPowerW>
-	        <TransmitLossesdB>2</TransmitLossesdB>
-	        <TransmitGaindB>20</TransmitGaindB>
-	        <ReceiveGaindB>20</ReceiveGaindB>
-	        <ReceiveLossesdB>2</ReceiveLossesdB>
-	        <ReceiveTempK>290</ReceiveTempK>
-	        <ModulationType>BPSK</ModulationType>
-	        <BitErrorRate>1e-5</BitErrorRate>
-	        <DataRateBitPerSec>1e6</DataRateBitPerSec>
         </Analysis>
+<!--        <Analysis>-->
+<!--			<Type>com_sp2sp_budget</Type>-->
+<!--	        <SatelliteID1>1</SatelliteID1>-->
+<!--	        <SatelliteID2>2</SatelliteID2>-->
+<!--	        <CarrierFrequency>10e9</CarrierFrequency>-->
+<!--	        <TransmitPowerW>10</TransmitPowerW>-->
+<!--	        <TransmitLossesdB>2</TransmitLossesdB>-->
+<!--	        <TransmitGaindB>20</TransmitGaindB>-->
+<!--	        <ReceiveGaindB>20</ReceiveGaindB>-->
+<!--	        <ReceiveLossesdB>2</ReceiveLossesdB>-->
+<!--	        <ReceiveTempK>290</ReceiveTempK>-->
+<!--	        <ModulationType>BPSK</ModulationType>-->
+<!--	        <BitErrorRate>1e-5</BitErrorRate>-->
+<!--	        <DataRateBitPerSec>1e6</DataRateBitPerSec>-->
+<!--        </Analysis>-->
 
 <!--        <Analysis>-->
 <!--				<Type>com_gr2sp_data</Type>-->

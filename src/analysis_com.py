@@ -10,7 +10,7 @@ from math import sin, cos, asin, degrees, radians, log10
 import itur
 import astropy.units as u
 # Project modules
-from constants import K_BOLTZMANN
+from constants import K_BOLTZMANN, C_LIGHT
 from analysis import AnalysisBase
 import misc_fn
 import logging_svs as ls
@@ -86,7 +86,7 @@ class AnalysisComGr2SpBudget(AnalysisBase):
 
     def before_loop(self, sm):
         for idx_station, station in enumerate(sm.stations):
-            if station.constellation_id == self.station_id:
+            if station.station_id == self.station_id:
                 self.idx_found_station = idx_station
                 break
         self.eirp = 10*log10(self.transmit_power) + self.transmit_gain - self.transmit_losses
@@ -234,6 +234,57 @@ class AnalysisComSp2SpBudget(AnalysisBase):
             plt.plot(self.metric[:, 0], self.metric[:, 4], 'r.', label='CN0 Required')
         plt.xlabel('DOY[-]'); plt.ylabel('Elevation [deg], Power values [dB]')
         plt.legend(); plt.grid()
+        plt.savefig('../output/'+self.type+'.png')
+        plt.show()
+
+
+class AnalysisComDoppler(AnalysisBase):
+
+    def __init__(self):
+        super().__init__()
+        self.station_id = None
+        self.carrier_frequency = None
+        self.metric = None
+
+    def read_config(self, node):
+        if node.find('StationID') is not None:
+            self.station_id = int(node.find('StationID').text)
+        if node.find('CarrierFrequency') is not None:
+            self.carrier_frequency = float(node.find('CarrierFrequency').text)
+
+    def before_loop(self, sm):
+        for idx_station, station in enumerate(sm.stations):
+            if station.station_id == self.station_id:
+                self.idx_found_station = idx_station
+                break
+        self.metric = np.zeros((sm.num_epoch, 3))
+
+    def in_loop(self, sm):
+        idx_station = self.idx_found_station
+        for idx_sat in sm.stations[idx_station].idx_sat_in_view:
+            velocity = sm.satellites[idx_sat].vel_ecf
+            range = sm.gr2sp[idx_station][idx_sat].gr2sp_ecf
+            range_rate = np.dot(velocity,range)/norm(range)
+            doppler = self.carrier_frequency*range_rate/C_LIGHT
+            elevation = sm.gr2sp[idx_station][idx_sat].elevation
+            self.metric[sm.cnt_epoch,:] = [self.times_f_doy[sm.cnt_epoch], degrees(elevation), doppler]
+
+    def after_loop(self, sm):
+        self.metric = self.metric[~np.all(self.metric == 0, axis=1)]  # Clean up empty rows
+        fig, ax1 = plt.subplots(figsize=(10, 6))
+        plt.grid()
+        ax1.set_ylabel('Doppler [kHz]')
+        ax1.yaxis.label.set_color('red')
+        ax1.tick_params(axis='y', colors='red')
+        ax1.plot(self.metric[:, 0], self.metric[:, 2]/1000, 'r.', label='doppler')
+        ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+        ax2.set_ylabel('Elevation [deg]')
+        ax2.yaxis.label.set_color('blue')
+        ax2.tick_params(axis='y', colors='blue')
+        ax2.plot(self.metric[:, 0], self.metric[:, 1], 'b.', label='elevation')
+        ax1.legend(loc=2); ax2.legend(loc=0)
+        plt.xlabel('DOY[-]');
+        plt.legend();
         plt.savefig('../output/'+self.type+'.png')
         plt.show()
 

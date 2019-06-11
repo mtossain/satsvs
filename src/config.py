@@ -360,6 +360,8 @@ class AppConfig:
                     self.analysis = AnalysisComGr2SpBudget()
                 if analysis_node.find('Type').text == 'com_sp2sp_budget':
                     self.analysis = AnalysisComSp2SpBudget()
+                if analysis_node.find('Type').text == 'com_doppler':
+                    self.analysis = AnalysisComDoppler()
                 self.analysis.type = analysis_node.find('Type').text
                 self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 
