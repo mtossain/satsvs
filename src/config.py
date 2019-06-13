@@ -6,6 +6,7 @@ from constants import *
 from analysis_cov import *
 from analysis_obs import *
 from analysis_com import *
+from analysis_nav import *
 from segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
 import logging_svs as ls
 import misc_fn
@@ -82,6 +83,10 @@ class AppConfig:
                         const.el_mask_max.append(radians(mask_max_value))
                 else:  # If no maximum set to 90 degrees
                     const.el_mask_max = len(mask_values)*[radians(90.0)]
+            if constellation.find('UERE') is not None:
+                uere_values = constellation.find('UERE').text.split(',')
+                for uere_value in uere_values:
+                    const.uere_list.append(float(uere_value))
             ls.logger.info(const.__dict__)
             self.constellations.append(const)
 
@@ -94,6 +99,7 @@ class AppConfig:
                 sat.rx_constellation = const.rx_constellation
                 sat.elevation_mask = const.elevation_mask
                 sat.el_mask_max = const.el_mask_max
+                sat.uere_list = const.uere_list
                 sat.kepler.epoch_mjd = float(satellite.find('EpochMJD').text)
                 sat.kepler.semi_major_axis = float(satellite.find('SemiMajorAxis').text)
                 sat.kepler.eccentricity = float(satellite.find('Eccentricity').text)
@@ -362,6 +368,10 @@ class AppConfig:
                     self.analysis = AnalysisComSp2SpBudget()
                 if analysis_node.find('Type').text == 'com_doppler':
                     self.analysis = AnalysisComDoppler()
+                if analysis_node.find('Type').text == 'nav_dilution_of_precision':
+                    self.analysis = AnalysisNavDOP()
+                if analysis_node.find('Type').text == 'nav_accuracy':
+                    self.analysis = AnalysisNavAccuracy()
                 self.analysis.type = analysis_node.find('Type').text
                 self.analysis.read_config(analysis_node)  # Read the configuration for the specific analysis
 

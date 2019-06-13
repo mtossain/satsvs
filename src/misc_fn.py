@@ -773,5 +773,146 @@ def comp_cn0_required(modulation, ber, datarate):
     else:
         return 100
 
+@jit(nopython=True)
+def inverse4by4(a):
 
+    out = np.zeros((4,4))
+
+    tmp = np.zeros(12)
+    src = np.zeros(16)
+    dst = np.zeros(16)
+
+    # copy input matrix and transpose*/
+    src[0]=a[0, 0]
+    src[1]=a[1, 0]
+    src[2]=a[2, 0]
+    src[3]=a[3, 0]
+    src[4]=a[0, 1]
+    src[5]=a[1, 1]
+    src[6]=a[2, 1]
+    src[7]=a[3, 1]
+    src[8]=a[0, 2]
+    src[9]=a[1, 2]
+    src[10]=a[2, 2]
+    src[11]=a[3, 2]
+    src[12]=a[0, 3]
+    src[13]=a[1, 3]
+    src[14]=a[2, 3]
+    src[15]=a[3, 3]
+
+    # calculate pairs for first 8 elements (cofactors) */
+    tmp[0] = src[10] * src[15]
+    tmp[1] = src[11] * src[14]
+    tmp[2] = src[9] * src[15]
+    tmp[3] = src[11] * src[13]
+    tmp[4] = src[9] * src[14]
+    tmp[5] = src[10] * src[13]
+    tmp[6] = src[8] * src[15]
+    tmp[7] = src[11] * src[12]
+    tmp[8] = src[8] * src[14]
+    tmp[9] = src[10] * src[12]
+    tmp[10] = src[8] * src[13]
+    tmp[11] = src[9] * src[12]
+
+    # calculate first 8 elements (cofactors) */
+    dst[0] = tmp[0]*src[5] + tmp[3]*src[6] + tmp[4]*src[7]
+    dst[0] -= tmp[1]*src[5] + tmp[2]*src[6] + tmp[5]*src[7]
+    dst[1] = tmp[1]*src[4] + tmp[6]*src[6] + tmp[9]*src[7]
+    dst[1] -= tmp[0]*src[4] + tmp[7]*src[6] + tmp[8]*src[7]
+    dst[2] = tmp[2]*src[4] + tmp[7]*src[5] + tmp[10]*src[7]
+    dst[2] -= tmp[3]*src[4] + tmp[6]*src[5] + tmp[11]*src[7]
+    dst[3] = tmp[5]*src[4] + tmp[8]*src[5] + tmp[11]*src[6]
+    dst[3] -= tmp[4]*src[4] + tmp[9]*src[5] + tmp[10]*src[6]
+    dst[4] = tmp[1]*src[1] + tmp[2]*src[2] + tmp[5]*src[3]
+    dst[4] -= tmp[0]*src[1] + tmp[3]*src[2] + tmp[4]*src[3]
+    dst[5] = tmp[0]*src[0] + tmp[7]*src[2] + tmp[8]*src[3]
+    dst[5] -= tmp[1]*src[0] + tmp[6]*src[2] + tmp[9]*src[3]
+    dst[6] = tmp[3]*src[0] + tmp[6]*src[1] + tmp[11]*src[3]
+    dst[6] -= tmp[2]*src[0] + tmp[7]*src[1] + tmp[10]*src[3]
+    dst[7] = tmp[4]*src[0] + tmp[9]*src[1] + tmp[10]*src[2]
+    dst[7] -= tmp[5]*src[0] + tmp[8]*src[1] + tmp[11]*src[2]
+
+    # calculate pairs for second 8 elements (cofactors) */
+    tmp[0] = src[2]*src[7]
+    tmp[1] = src[3]*src[6]
+    tmp[2] = src[1]*src[7]
+    tmp[3] = src[3]*src[5]
+    tmp[4] = src[1]*src[6]
+    tmp[5] = src[2]*src[5]
+    tmp[6] = src[0]*src[7]
+    tmp[7] = src[3]*src[4]
+    tmp[8] = src[0]*src[6]
+    tmp[9] = src[2]*src[4]
+    tmp[10] = src[0]*src[5]
+    tmp[11] = src[1]*src[4]
+
+    # calculate second 8 elements (cofactors) */
+    dst[8] = tmp[0]*src[13] + tmp[3]*src[14] + tmp[4]*src[15]
+    dst[8] -= tmp[1]*src[13] + tmp[2]*src[14] + tmp[5]*src[15]
+    dst[9] = tmp[1]*src[12] + tmp[6]*src[14] + tmp[9]*src[15]
+    dst[9] -= tmp[0]*src[12] + tmp[7]*src[14] + tmp[8]*src[15]
+    dst[10] = tmp[2]*src[12] + tmp[7]*src[13] + tmp[10]*src[15]
+    dst[10]-= tmp[3]*src[12] + tmp[6]*src[13] + tmp[11]*src[15]
+    dst[11] = tmp[5]*src[12] + tmp[8]*src[13] + tmp[11]*src[14]
+    dst[11]-= tmp[4]*src[12] + tmp[9]*src[13] + tmp[10]*src[14]
+    dst[12] = tmp[2]*src[10] + tmp[5]*src[11] + tmp[1]*src[9]
+    dst[12]-= tmp[4]*src[11] + tmp[0]*src[9] + tmp[3]*src[10]
+    dst[13] = tmp[8]*src[11] + tmp[0]*src[8] + tmp[7]*src[10]
+    dst[13]-= tmp[6]*src[10] + tmp[9]*src[11] + tmp[1]*src[8]
+    dst[14] = tmp[6]*src[9] + tmp[11]*src[11] + tmp[3]*src[8]
+    dst[14]-= tmp[10]*src[11] + tmp[2]*src[8] + tmp[7]*src[9]
+    dst[15] = tmp[10]*src[10] + tmp[4]*src[8] + tmp[9]*src[9]
+    dst[15]-= tmp[8]*src[9] + tmp[11]*src[10] + tmp[5]*src[8]
+
+    # calculate determinant */
+    det=src[0]*dst[0]+src[1]*dst[1]+src[2]*dst[2]+src[3]*dst[3]
+
+    # calculate matrix inverse */
+    det = 1/det
+    for j in range(16):
+        dst[j] *= det
+
+    out[0,0]=dst[0]
+    out[0,1]=dst[1]
+    out[0,2]=dst[2]
+    out[0,3]=dst[3]
+    out[1,0]=dst[4]
+    out[1,1]=dst[5]
+    out[1,2]=dst[6]
+    out[1,3]=dst[7]
+    out[2,0]=dst[8]
+    out[2,1]=dst[9]
+    out[2,2]=dst[10]
+    out[2,3]=dst[11]
+    out[3,0]=dst[12]
+    out[3,1]=dst[13]
+    out[3,2]=dst[14]
+    out[3,3]=dst[15]
+
+    return out
+
+@jit(nopython=True)
+def ecef2enu(a, user_lat, user_lon):
+
+    r = np.zeros((3,4))
+
+    r[0, 0] = -np.sin(user_lon)
+    r[0, 1] = np.cos(user_lon)
+    r[0, 2] = 0
+    r[0, 3] = 0
+
+    r[1, 0] = -np.sin(user_lat)*np.cos(user_lon)
+    r[1, 1] = -np.sin(user_lat)*np.sin(user_lon)
+    r[1, 2] = np.cos(user_lat)
+    r[1, 3] = 0
+
+    r[2, 0] = np.cos(user_lat)*np.cos(user_lon)
+    r[2, 1] = np.cos(user_lat)*np.sin(user_lon)
+    r[2, 2] = np.sin(user_lat)
+    r[2, 3] = 0
+
+    q = np.dot(r,a)  # np.matmul not supported by numba
+    q = np.dot(q,np.transpose(r))  # np.matmul not supported by numba
+
+    return q
 

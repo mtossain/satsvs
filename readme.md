@@ -33,10 +33,11 @@ parameters and analysis are defined. Analysis can be added as wished, the baseli
 - __com_sp2sp_budget__: For satellite-satellite received power, losses and C/N0
 - __com_doppler__: For satellite-station elevation and doppler
 
-_To be implemented at a later stage:_
-
-Navigation
+### Navigation
 - __nav_dillution_of_precision__: DOP values for user(s) (also spacecraft user)
+- __nav_accuracy__: Navigation accuracy (UERE*DOP) values for user(s) (also spacecraft user)
+
+_To be implemented at a later stage:_
 
 Satellite
 - __sat_power_subsystem__: Power over orbit including eclipse analysis
@@ -505,6 +506,45 @@ Parameters are:
 <img src="/docs/com_doppler.png" alt="com_doppler"/>
 
 
+### nav_dilution_of_precision
+Plots navigation dilution of precision for a user grid. 
+
+The following parameters are needed:
+```
+<Analysis>
+    <Type>nav_dilution_of_precision</Type>
+    <Direction>Ver</Direction>
+    <Statistic>Max</Statistic>
+</Analysis>
+```
+Parameters are:
+- Direction: Hor/Ver/Pos direction of interest.
+- Statistic: Min/Mean/Max/Median/Std statistic of interest
+
+<img src="/docs/nav_dilution_of_precision.png" alt="nav_dilution_of_precision"/>
+
+
+### nav_accuracy
+Plots navigation accuracy for a user grid based on on sqrt(uere)*DOP computations. 
+
+The following parameters are needed:
+```
+<Analysis>
+    <Type>nav_dilution_of_precision</Type>
+    <Direction>Ver</Direction>
+    <Statistic>Max</Statistic>
+</Analysis>
+```
+Parameters are:
+- Direction: Hor/Ver/Pos direction of interest.
+- Statistic: Min/Mean/Max/Median/Std statistic of interest
+
+Additionally the constellation needs to be supplied with an elevation dependent list of uere values:
+```
+    <UERE>1.72,1.72,1.17,1.02,0.92,0.92,0.85,0.85,0.81,0.81,0.80,0.80,0.79,0.79,0.79,0.79,0.79,0.79</UERE>
+```
+
+<img src="/docs/nav_accuracy.png" alt="nav_accuracy"/>
 
 
 

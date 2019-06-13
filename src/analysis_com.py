@@ -282,7 +282,6 @@ class AnalysisComDoppler(AnalysisBase):
         ax2.yaxis.label.set_color('blue')
         ax2.tick_params(axis='y', colors='blue')
         ax2.plot(self.metric[:, 0], self.metric[:, 1], 'b.', label='elevation')
-        ax1.legend(loc=2); ax2.legend(loc=0)
         plt.xlabel('DOY[-]');
         plt.legend();
         plt.savefig('../output/'+self.type+'.png')

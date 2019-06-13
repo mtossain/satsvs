@@ -148,4 +148,5 @@ if __name__ == '__main__':
 # TODO SGP4 for Keplerian defined orbits
 # TODO analysis SAT
 # TODO analysis NAV
+# TODO include xarray functionallity
 

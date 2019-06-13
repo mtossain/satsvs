@@ -32,6 +32,7 @@ class Constellation:
         self.rx_constellation = ''
         self.elevation_mask = []  # Could be varying over azimuth...
         self.el_mask_max = []  # Could be varying over azimuth...
+        self.uere_list = []  # Varies over elevation
 
         self.tle_file_name = None
         self.obs_incl_angle_start = None
@@ -53,6 +54,7 @@ class Satellite:
 
         self.elevation_mask = []  # Could be varying over azimuth...
         self.el_mask_max = []  # Could be varying over azimuth...
+        self.uere_list = []  # Varies over elevation
 
         self.kepler = KeplerSet()  # Containing Kepler set for orbit
         self.tle_line1 = ''  # If TLE file, then contains the TLE first line
@@ -185,7 +187,7 @@ class Ground2SpaceLink:
         self.azimuth2 = 0.0  # Receiver as seen from satellite
         self.elevation2 = 0.0  # Receiver as seen from satellite (equivalent to off-nadir from satellite)
 
-        self.gr2sp_ecf = [0.0, 0.0, 0.0]  # m
+        self.gr2sp_ecf = np.zeros(3)  # m
         self.distance = 0.0  # m
 
         self.metric = []  # For analysis purposes
@@ -231,7 +233,7 @@ class User2SpaceLink:
         self.azimuth2 = 0.0  # Receiver as seen from satellite
         self.elevation2 = 0.0  # Receiver as seen from satellite (equivalent to off-nadir from satellite)
 
-        self.usr2sp_ecf = [0.0,0.0,0.0]  # m
+        self.usr2sp_ecf = np.zeros(3)  # m
         self.distance = 0.0  # m
 
         self.metric = []  # For analysis purposes
@@ -277,7 +279,7 @@ class Space2SpaceLink:
         self.azimuth2 = 0.0  # Radians
         self.elevation2 = 0.0  # Radians
 
-        self.sp2sp_ecf = 3*[0]
+        self.sp2sp_ecf = np.zeros(3)
         self.distance = 0  # m
 
         self.metric = []  # For analysis purposes
