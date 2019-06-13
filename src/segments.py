@@ -39,6 +39,8 @@ class Constellation:
         self.obs_incl_angle_stop = None
         self.obs_swath_start = None
         self.obs_swath_stop = None
+        self.frontal_area = None
+        self.mass = None
 
 
 class Satellite:
@@ -59,11 +61,14 @@ class Satellite:
         self.kepler = KeplerSet()  # Containing Kepler set for orbit
         self.tle_line1 = ''  # If TLE file, then contains the TLE first line
         self.tle_line2 = ''  # If TLE file, then contains the TLE second line
+        self.frontal_area = None
+        self.mass = None
+        self.satrec = None # Object needed for SGP4 propagation
 
-        self.pos_eci = np.zeros(3)  # Satellite position and velocity in ECI
-        self.vel_ecf = np.zeros(3)  # Satellite position and velocity in ECF
-        self.pos_eci = np.zeros(3)  # Satellite position and velocity in ECI
-        self.vel_ecf = np.zeros(3)  # Satellite position and velocity in ECF
+        self.pos_eci = np.zeros(3)  # Satellite position in ECI
+        self.vel_eci = np.zeros(3)  # Satellite velocity in ECI
+        self.pos_ecf = np.zeros(3)  # Satellite position in ECF
+        self.vel_ecf = np.zeros(3)  # Satellite velocity in ECF
         self.lla = np.zeros(3)  # For ground track
 
         self.idx_stat_in_view = []  # Indices of station which are in view
@@ -88,9 +93,10 @@ class Satellite:
                                                      self.kepler.arg_perigee, self.kepler.mean_anomaly)
 
     def det_posvel_eci_sgp4(self, time_req):
-        satellite = twoline2rv(self.tle_line1, self.tle_line2, wgs84)
-        self.pos_eci,self.vel_eci = satellite.propagate(time_req.year, time_req.month, time_req.day,
+        self.pos_eci,self.vel_eci = self.satrec.propagate(time_req.year, time_req.month, time_req.day,
                                       time_req.hour, time_req.minute, time_req.second)
+        self.pos_eci = np.array(self.pos_eci)*1000  # sgp4 outputs in km
+        self.vel_eci = np.array(self.vel_eci)*1000  # sgp4 outputs in km/s
 
     def det_posvel_ecf(self, gmst_requested):  # ECF
         self.pos_ecf, self.vel_ecf = misc_fn.spin_vector(-gmst_requested, self.pos_eci, self.vel_eci)  # assume ECI and GMST computed elsewhere

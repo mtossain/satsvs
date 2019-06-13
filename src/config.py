@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 from math import ceil, radians
 from astropy.time import Time
+import sgp4
 # Project modules
 from constants import *
 from analysis_cov import *
@@ -89,6 +90,17 @@ class AppConfig:
                 uere_values = constellation.find('UERE').text.split(',')
                 for uere_value in uere_values:
                     const.uere_list.append(float(uere_value))
+            if constellation.find('FrontalArea') is not None:
+                const.frontal_area = float(constellation.find('FrontalArea').text)
+            if constellation.find('Mass') is not None:
+                const.mass = float(constellation.find('Mass').text)
+                # B* = Cd*A/m*rho_0/2 , which is an SGP4-type drag coefficient, according to Celestrak
+                # if rho_0 is give as 0.1570kg/m2/earth_radii then B* has units of (earth radii)-1 as it should be in sgp4.
+                # typically Cd is between 2 and 2.5 for different shapes, boxes, plates, etc. lets say 2.2
+                # However the NASA website says that B* is more a radiation pressure coefficient
+                # It is better to set it to 0
+                # const.bstar = 2.2 * const.frontal_area/const.mass*0.1570/2
+                const.bstar = 0.0
 
             ls.logger.info(const.__dict__)
             self.constellations.append(const)
@@ -110,20 +122,45 @@ class AppConfig:
                 sat.kepler.right_ascension = radians(float(satellite.find('RAAN').text))
                 sat.kepler.arg_perigee = radians(float(satellite.find('ArgOfPerigee').text))
                 sat.kepler.mean_anomaly = radians(float(satellite.find('MeanAnomaly').text))
+                if const.frontal_area is not None:
+                    sat.satrec = sgp4.model.Satellite()
+                    sat.satrec.satnum = sat.sat_id
+                    sat.frontal_area = const.frontal_area
+                    sat.mass = const.mass
+                    sat.satrec.jdsatepoch = sat.kepler.epoch_mjd + 2400000.5
+                    sat.satrec.bstar = const.bstar
+                    sat.satrec.argpo = sat.kepler.arg_perigee
+                    sat.satrec.inclo = sat.kepler.inclination
+                    sat.satrec.mo = sat.kepler.mean_anomaly
+                    sat.satrec.no = np.sqrt(GM_EARTH/np.power(sat.kepler.semi_major_axis,3))*60.0   # in [rad/min]
+                    sat.satrec.ecco = sat.kepler.eccentricity
+                    sat.satrec.nodeo = sat.kepler.right_ascension
+                    sat.satrec.whichconst = sgp4.earth_gravity.wgs84
+                    sat.satrec.ndot = 0
+                    sat.satrec.nddot = 0
+                    sat.satrec.epoch = Time(sat.kepler.epoch_mjd, format='mjd').datetime
+                    sat.satrec.epochyr = sat.satrec.epoch.year
+                    sat.satrec.a = pow(sat.satrec.no * sgp4.earth_gravity.wgs84.tumin, (-2.0 / 3.0));
+                    sat.satrec.alta = sat.satrec.a*(1.0 + sat.satrec.ecco) - 1.0;
+                    sat.satrec.altp = sat.satrec.a * (1.0 - sat.satrec.ecco) - 1.0;
+                    sgp4.propagation.sgp4init(sgp4.earth_gravity.wgs84, 'i', sat.sat_id,
+                                              sat.satrec.jdsatepoch - 2433281.5,
+                                              sat.satrec.bstar, sat.satrec.ecco, sat.satrec.argpo, sat.satrec.inclo,
+                                              sat.satrec.mo, sat.satrec.no,sat.satrec.nodeo, sat.satrec)
                 ls.logger.info(sat.__dict__)
                 self.satellites.append(sat)
             for item in constellation.iter('TLEFileName'):
-                with open(item.text) as file:         
+                with open(item.text) as file:
                     cnt = 0
                     for line in file:
                         if cnt == 0:
                             sat = Satellite()
                             sat.Name = line
                         if cnt == 1:
+                            sat.tle_line1 = line
                             sat.sat_id = int(line[2:7])  # NORAD Catalog Number
                             sat.constellation_id = const.constellation_id
                             sat.constellation_name = const.constellation_name
-                            sat.tle_line1 = line
                             full_year = "20" + line[18:20]
                             epoch_yr = int(full_year)
                             epoch_doy = float(line[20:31])
@@ -142,6 +179,7 @@ class AppConfig:
                             sat.rx_constellation = const.rx_constellation
                             sat.elevation_mask = const.elevation_mask
                             sat.el_mask_mask = const.el_mask_max
+                            sat.satrec = sgp4.io.twoline2rv(sat.tle_line1, sat.tle_line2, sgp4.earth_gravity.wgs84)
                             self.satellites.append(sat)
                             cnt = -1  # reset so that next tle set starts at cnt=0
                         cnt += 1

@@ -145,7 +145,6 @@ def clear_load_orbit_file(sm):  # Clear or load previous orbit file
 if __name__ == '__main__':
     main()
 
-# TODO SGP4 for Keplerian defined orbits
 # TODO analysis SAT
 # TODO include xarray functionallity
 
