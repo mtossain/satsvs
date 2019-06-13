@@ -57,11 +57,13 @@ class AppConfig:
         root = tree.getroot()
         for constellation in root.iter('Constellation'):
             const = Constellation()
+            # Mandato
             const.constellation_id = int(constellation.find('ConstellationID').text)
             const.num_sat = int(constellation.find('NumOfSatellites').text)
             const.num_planes = int(constellation.find('NumOfPlanes').text)
             const.constellation_name = constellation.find('ConstellationName').text
             const.rx_constellation = constellation.find('ReceiverConstellation').text
+
             # Now some optional parameters
             if constellation.find('TLEFileName') is not None:
                 const.tle_file_name = constellation.find('TLEFileName').text
@@ -87,6 +89,7 @@ class AppConfig:
                 uere_values = constellation.find('UERE').text.split(',')
                 for uere_value in uere_values:
                     const.uere_list.append(float(uere_value))
+
             ls.logger.info(const.__dict__)
             self.constellations.append(const)
 

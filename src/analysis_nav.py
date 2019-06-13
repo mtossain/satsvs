@@ -37,7 +37,7 @@ class AnalysisNavDOP(AnalysisBase):
                 for i, idx_sat in enumerate(user.idx_sat_in_view):
                     h_mat[i,0:3] = sm.usr2sp[user_idx][idx_sat].usr2sp_ecf/sm.usr2sp[user_idx][idx_sat].distance
                 hth_inv = misc_fn.inverse4by4(np.matmul(np.transpose(h_mat),h_mat))  # Fast implementation
-                #hth_inv = np.linalg.inv(np.matmul(np.transpose(h_mat),h_mat))
+                #hth_inv2 = np.linalg.inv(np.matmul(np.transpose(h_mat),h_mat))
                 q = misc_fn.ecef2enu(hth_inv,user.lla[0],user.lla[1])
                 if self.direction == "Pos":
                     dop = np.sqrt(q[0, 0] + q[1, 1] + q[2, 2])
