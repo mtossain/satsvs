@@ -7,6 +7,7 @@ os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/lib/python3.
 from mpl_toolkits.basemap import Basemap
 from numpy.linalg import norm
 from math import sin, cos, asin, degrees, radians
+import xarray as xr
 # Project modules
 from constants import R_EARTH
 from analysis import AnalysisBase, AnalysisObs
@@ -82,6 +83,21 @@ class AnalysisObsSwathConical(AnalysisBase, AnalysisObs):
         radius = misc_fn.det_swath_radius(sat_altitude, satellite.obs_incl_angle_stop, r_earth)
         self.earth_angle_swath = misc_fn.earth_angle_beta(radius, r_earth)
 
+    def export2nc(self, sm, file_name):
+        user3d_data = np.zeros((len(sm.user_latitudes),len(sm.user_longitudes),sm.num_epoch), dtype=np.uint8)
+        for idx_usr, user in enumerate(sm.users):
+            idx_lat = np.searchsorted(sm.user_latitudes,degrees(user.lla[0])).flatten()
+            idx_lon = np.searchsorted(sm.user_longitudes,degrees(user.lla[1])).flatten()
+            user3d_data[int(idx_lat),int(idx_lon),:] = self.user_metric[idx_usr,:]
+        da = xr.DataArray(user3d_data,
+                          dims=('lat', 'lon', 'time_mjd'),
+                          coords={'lat': sm.user_latitudes,
+                                  'lon': sm.user_longitudes,
+                                  'time_mjd': sm.analysis.times_mjd},
+                          name='swath_coverage')
+        da.to_netcdf(file_name)
+
+
     def after_loop(self, sm):
 
         self.plot_swath_coverage(sm, self.user_metric, self.polar_view)
@@ -89,8 +105,10 @@ class AnalysisObsSwathConical(AnalysisBase, AnalysisObs):
         if self.revisit:
             self.plot_swath_revisit(sm, self.user_metric, self.statistic, self.polar_view)
 
-        if self.save_output:
-            np.save('../output/user_cov_swath', self.user_metric)
+        if self.save_output=='Numpy':
+            np.save('../output/user_cov_swath', self.user_metric)  # Save to numpy array
+        if self.save_output=='NetCDF':
+            self.export2nc(sm, '../output/user_cov_swath.nc')  # Save to netcdf file
 
 
 class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
@@ -187,6 +205,20 @@ class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
             satellite.obs_incl_angle_stop = misc_fn.incl_from_swath(satellite.obs_swath_stop, r_earth, sat_altitude)
         return r_earth
 
+    def export2nc(self, sm, file_name):
+        user3d_data = np.zeros((len(sm.user_latitudes),len(sm.user_longitudes),sm.num_epoch), dtype=np.uint8)
+        for idx_usr, user in enumerate(sm.users):
+            idx_lat = np.searchsorted(sm.user_latitudes,degrees(user.lla[0])).flatten()
+            idx_lon = np.searchsorted(sm.user_longitudes,degrees(user.lla[1])).flatten()
+            user3d_data[int(idx_lat),int(idx_lon),:] = self.user_metric[idx_usr,:]
+        da = xr.DataArray(user3d_data,
+                          dims=('lat', 'lon', 'time_mjd'),
+                          coords={'lat': sm.user_latitudes,
+                                  'lon': sm.user_longitudes,
+                                  'time_mjd': sm.analysis.times_mjd},
+                          name='swath_coverage')
+        da.to_netcdf(file_name)
+
     def after_loop(self, sm):
 
         self.plot_swath_coverage(sm, self.user_metric, self.polar_view)
@@ -194,5 +226,7 @@ class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
         if self.revisit:
             self.plot_swath_revisit(sm, self.user_metric, self.statistic, self.polar_view)
 
-        if self.save_output:
-            np.save('../output/user_cov_swath', self.user_metric)
+        if self.save_output=='Numpy':
+            np.save('../output/user_cov_swath', self.user_metric)  # Save to numpy array
+        if self.save_output=='NetCDF':
+            self.export2nc(sm, '../output/user_cov_swath.nc')  # Save to netcdf file

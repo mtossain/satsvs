@@ -50,6 +50,8 @@ class AppConfig:
         self.num_sp2sp = 0
         self.num_st2sp = 0
         self.num_usr2sp = 0
+        self.user_latitudes = None
+        self.user_longitudes = None
 
     def load_satellites(self):
 
@@ -249,6 +251,8 @@ class AppConfig:
                 lon_step = float(user_element.find('LonStep').text)
                 num_lat = int((lat_max - lat_min) / lat_step) + 1
                 num_lon = int((lon_max - lon_min) / lon_step) + 1
+                self.user_latitudes = np.linspace(lat_min,lat_max,num_lat)
+                self.user_longitudes = np.linspace(lon_min,lon_max,num_lon)
                 height = float(user_element.find('Height').text)
                 rx_constellation = user_element.find('ReceiverConstellation').text
                 mask_values = user_element.find('ElevationMask').text.split(',')

@@ -338,12 +338,12 @@ Optional in the analysis part are:
 <PolarView>90</PolarView>
 <Revisit>True</Revisit>
 <Statistic>Mean</Statistic>
-<SaveOutput>False</SaveOutput>
+<SaveOutput>Numpy</SaveOutput>
 ```
 - PolarView angle: This parameter can be given to see one part of the globe in an stereographic view, eg.  for the polar region.
 - Revisit flag: This flag will enable revisit computation after the swath coverage. The statistic will determine
 what kind of statistic is displayed per user location.
-- SaveOutput flag: This flag will enable saving user swath coverage for every timestep.
+- SaveOutput: NetCDF or Numpy This flag will enable saving user swath coverage for every timestep.
 
 <img src="/docs/obs_swath_conical.png" alt="obs_swath_conical"/>
 <img src="/docs/obs_swath_conical_revisit.png" alt="obs_swath_conical_revisit"/>
@@ -377,12 +377,12 @@ Optional in the analysis part are:
 <PolarView>90</PolarView>
 <Revisit>True</Revisit>
 <Statistic>Mean</Statistic>
-<SaveOutput>False</SaveOutput>
+<SaveOutput>NetCDF</SaveOutput>
 ```
 - PolarView angle: This parameter can be given to see one part of the globe in an stereographic view, eg.  for the polar region.
 - Revisit flag: This flag will enable revisit computation after the swath coverage. The statistic will determine
 what kind of statistic is displayed per user location.
-- SaveOutput flag: This flag will enable saving user swath coverage for every timestep.
+- SaveOutput: NetCDF or Numpy This flag will enable saving user swath coverage for every timestep.
 
 <img src="/docs/obs_swath_push_broom.png" alt="cov_satellite_push_broom"/>
 <img src="/docs/obs_swath_push_broom_revisit.png" alt="cov_satellite_push_broom_revisit"/>

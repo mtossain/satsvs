@@ -146,5 +146,4 @@ if __name__ == '__main__':
     main()
 
 # TODO analysis SAT
-# TODO include xarray functionallity
 

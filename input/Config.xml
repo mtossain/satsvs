@@ -738,15 +738,15 @@
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
 	    <StartDate>2008-01-01 00:00:00</StartDate>
-	    <StopDate>2008-01-01 02:00:00</StopDate>
-	    <TimeStep>30</TimeStep>
+	    <StopDate>2008-01-01 01:00:00</StopDate>
+	    <TimeStep>120</TimeStep>
 
 		<IncludeStation2SpaceLinks>False</IncludeStation2SpaceLinks>
-		<IncludeUser2SpaceLinks>False</IncludeUser2SpaceLinks>
+		<IncludeUser2SpaceLinks>True</IncludeUser2SpaceLinks>
 		<IncludeSpace2SpaceLinks>False</IncludeSpace2SpaceLinks>
 
         <OrbitsFromPreviousRun>False</OrbitsFromPreviousRun>
-        <OrbitPropagator>SGP4</OrbitPropagator>
+        <OrbitPropagator>Keplerian</OrbitPropagator>
 
 <!--        <Analysis>-->
 <!--			<Type>com_gr2sp_budget</Type>-->
@@ -810,28 +810,28 @@
 <!--				<DataRate>10e6</DataRate>-->
 <!--        </Analysis>-->
 
-<!--        <Analysis>-->
-<!--            <Type>obs_swath_conical</Type>-->
-<!--&lt;!&ndash;            <PolarView>60</PolarView>&ndash;&gt;-->
-<!--            <Revisit>True</Revisit>-->
-<!--	        <Statistic>Mean</Statistic>-->
-<!--	        <SaveOutput>False</SaveOutput>-->
-<!--        </Analysis>-->
+        <Analysis>
+            <Type>obs_swath_conical</Type>
+<!--            <PolarView>60</PolarView>-->
+            <Revisit>True</Revisit>
+	        <Statistic>Mean</Statistic>
+	        <SaveOutput>NetCDF</SaveOutput>
+        </Analysis>
 
 <!--			<Analysis>-->
 <!--				<Type>obs_swath_push_broom</Type>-->
 <!--&lt;!&ndash;	            <PolarView>60</PolarView>&ndash;&gt;-->
 <!--				<Revisit>True</Revisit>-->
 <!--				<Statistic>Mean</Statistic>-->
-<!--			    <SaveOutput>True</SaveOutput>-->
+<!--			    <SaveOutput>NetCDF</SaveOutput>-->
 <!--			</Analysis>-->
 
 
-		<Analysis>
-			<Type>cov_ground_track</Type>
-			<ConstellationID>1</ConstellationID>
-			<SatelliteID>1</SatelliteID>
-		</Analysis>
+<!--		<Analysis>-->
+<!--			<Type>cov_ground_track</Type>-->
+<!--			<ConstellationID>1</ConstellationID>-->
+<!--			<SatelliteID>1</SatelliteID>-->
+<!--		</Analysis>-->
 
 <!--        <Analysis>-->
 <!--			<Type>cov_satellite_visible</Type>-->
