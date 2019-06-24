@@ -42,11 +42,15 @@ class AnalysisObs:   # Common methods needed for some OBS analysis
                 ls.logger.info(f'User swath coverage {user.user_id} of {len(sm.users)}')
             if user_metric[idx_user, :].any():  # Any value bigger than 0
                 num_swaths = len(np.flatnonzero(np.diff(user_metric[idx_user, :]))) / 2
-                plot_points[idx_user, :] = [degrees(user.lla[1]), degrees(user.lla[0]), num_swaths]
+                if num_swaths >= 1:
+                    plot_points[idx_user, :] = [degrees(user.lla[1]), degrees(user.lla[0]), num_swaths]
         plot_points = plot_points[~np.all(plot_points == 0, axis=1)]  # Clean up empty rows
         if polar_view is not None:
-            fig = plt.figure(figsize=(6, 6))
-            m = Basemap(projection='npstere', lon_0=0, boundinglat=polar_view, resolution='l')
+            fig = plt.figure(figsize=(7, 6))
+            if polar_view > 0:
+                m = Basemap(projection='npstere', lon_0=0, boundinglat=polar_view, resolution='l')
+            else:
+                m = Basemap(projection='spstere', lon_0=0, boundinglat=polar_view, resolution='l')
             x, y = m(plot_points[:,0], plot_points[:,1])
             sc = m.scatter(x, y, s=3, marker='o', cmap=plt.cm.jet, c=plot_points[:,2], alpha=.3)
         else:
@@ -73,30 +77,37 @@ class AnalysisObs:   # Common methods needed for some OBS analysis
             if len(gaps) > 1:
                 gaps = np.delete(gaps, np.where(gaps == 1), axis=0) * sm.time_step / 3600.0
                 if statistic == "min":
-                    metric = (np.min(gaps))
+                    metric = (np.nanmin(gaps))
                 if statistic == "mean":
-                    metric = (np.mean(gaps))
+                    metric = (np.nanmean(gaps))
                 if statistic == "max":
-                    metric = (np.max(gaps))
+                    metric = (np.nanmax(gaps))
                 if statistic == "std":
-                    metric = (np.std(gaps))
+                    metric = (np.nanstd(gaps))
                 if statistic == "median":
-                    metric = (np.median(gaps))
-                plot_points[idx_user, :] = [degrees(sm.users[idx_user].lla[1]), degrees(sm.users[idx_user].lla[0]), metric]
+                    metric = (np.nanmedian(gaps))
+                if polar_view is not None:
+                    if np.abs(degrees(sm.users[idx_user].lla[0])) > np.abs(polar_view):
+                        plot_points[idx_user, :] = [degrees(sm.users[idx_user].lla[1]), degrees(sm.users[idx_user].lla[0]), metric]
+                else:
+                    plot_points[idx_user, :] = [degrees(sm.users[idx_user].lla[1]), degrees(sm.users[idx_user].lla[0]), metric]
         plot_points = plot_points[~np.all(plot_points == 0, axis=1)]  # Clean up empty rows
         if metric>0:  # Only plot if not empty
             if polar_view is not None:
-                fig = plt.figure(figsize=(6, 6))
-                m = Basemap(projection='npstere', lon_0=0, boundinglat=polar_view, resolution='l')
+                fig = plt.figure(figsize=(7, 6))
+                if polar_view > 0:
+                    m = Basemap(projection='npstere', lon_0=0, boundinglat=polar_view, resolution='l')
+                else:
+                    m = Basemap(projection='spstere', lon_0=0, boundinglat=polar_view, resolution='l')
                 x, y = m(plot_points[:,0], plot_points[:,1])
                 sc = m.scatter(x, y, s=5, cmap=plt.cm.jet, c=plot_points[:,2],
-                               vmin=np.min(plot_points[:,2]), vmax=np.max(plot_points[:,2]))
+                               vmin=np.nanmin(plot_points[:,2]), vmax=np.nanmax(plot_points[:,2]))
             else:
                 fig = plt.figure(figsize=(10, 5))
                 m = Basemap(projection='cyl', lon_0=0)
                 x, y = plot_points[:, 0], plot_points[:, 1]
                 sc = m.scatter(x, y, cmap=plt.cm.jet, s=3, c=plot_points[:,2],
-                               vmin=np.min(plot_points[:,2]), vmax=np.max(plot_points[:,2]))
+                               vmin=np.nanmin(plot_points[:,2]), vmax=np.nanmax(plot_points[:,2]))
             cb = m.colorbar(sc, shrink=0.85)
             cb.set_label(statistic.capitalize() + ' Revisit Interval [hours]', fontsize=10)
             m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])

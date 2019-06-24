@@ -366,11 +366,13 @@ In the constellation part of the space segment are defined the instrument charac
 ```
 as above in meters, at the edge, or in degrees incidence angle:
 ```
-<ObsInclinationAngleStart>20.0</ObsInclinationAngleStart>
-<ObsInclinationAngleStop>52.0</ObsInclinationAngleStop>
+<ObsIncidenceAngleStart>20.0</ObsIncidenceAngleStart>
+<ObsIncidenceAngleStop>52.0</ObsIncidenceAngleStop>
 ```
 The incidence angle is defined as the angle between the line-of-sight and the nadir vector from the satellite. 
 This is not to be confused with the user observation zenith angle.
+Positive values are for the right looking situation. 
+Start is left most point, Stop is right most point, looking in direction of velocity vector.
 
 Optional in the analysis part are:
 ```
@@ -380,6 +382,7 @@ Optional in the analysis part are:
 <SaveOutput>NetCDF</SaveOutput>
 ```
 - PolarView angle: This parameter can be given to see one part of the globe in an stereographic view, eg.  for the polar region.
+  When negative the area on the South Pole will be visible.
 - Revisit flag: This flag will enable revisit computation after the swath coverage. The statistic will determine
 what kind of statistic is displayed per user location.
 - SaveOutput: NetCDF or Numpy This flag will enable saving user swath coverage for every timestep.

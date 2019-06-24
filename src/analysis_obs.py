@@ -55,13 +55,13 @@ class AnalysisObsSwathConical(AnalysisBase, AnalysisObs):
             sat_altitude = satellite.kepler.semi_major_axis - R_EARTH
             if const.obs_swath_stop is not None:  # if swath defined by swath length rather than incidence
                 satellite.obs_swath_stop = const.obs_swath_stop  #
-                satellite.obs_incl_angle_stop = misc_fn.incl_from_swath(
+                satellite.obs_inci_angle_stop = misc_fn.incl_from_swath(
                     const.obs_swath_stop, R_EARTH, sat_altitude)
             else:
-                satellite.obs_incl_angle_stop = const.obs_incl_angle_stop
+                satellite.obs_inci_angle_stop = const.obs_inci_angle_stop
             alfa_critical = asin(R_EARTH / (R_EARTH + sat_altitude))  # If incidence angle shooting off Earth -> error
-            if satellite.obs_incl_angle_stop > alfa_critical:
-                ls.logger.error(f'Inclination angle stop: {degrees(satellite.obs_incl_angle_stop)} ' +
+            if satellite.obs_inci_angle_stop > alfa_critical:
+                ls.logger.error(f'Incidence angle stop: {degrees(satellite.obs_inci_angle_stop)} ' +
                                 f'larger than critical angle {round(degrees(alfa_critical),1)}')
                 exit()
 
@@ -79,8 +79,8 @@ class AnalysisObsSwathConical(AnalysisBase, AnalysisObs):
         r_earth = misc_fn.earth_radius_lat(satellite.lla[0])
         sat_altitude = norm(satellite.pos_ecf) - r_earth
         if satellite.obs_swath_stop is not None:  # if swath defined by swath length rather than incidence
-            satellite.obs_incl_angle_stop = misc_fn.incl_from_swath(satellite.obs_swath_stop, r_earth, sat_altitude)
-        radius = misc_fn.det_swath_radius(sat_altitude, satellite.obs_incl_angle_stop, r_earth)
+            satellite.obs_inci_angle_stop = misc_fn.incl_from_swath(satellite.obs_swath_stop, r_earth, sat_altitude)
+        radius = misc_fn.det_swath_radius(sat_altitude, satellite.obs_inci_angle_stop, r_earth)
         self.earth_angle_swath = misc_fn.earth_angle_beta(radius, r_earth)
 
     def export2nc(self, sm, file_name):
@@ -100,15 +100,16 @@ class AnalysisObsSwathConical(AnalysisBase, AnalysisObs):
 
     def after_loop(self, sm):
 
+        if self.save_output=='Numpy':
+            np.save('../output/user_cov_swath', self.user_metric)  # Save to numpy array
+        if self.save_output=='NetCDF':
+            self.export2nc(sm, '../output/user_cov_swath.nc')  # Save to netcdf file
+
         self.plot_swath_coverage(sm, self.user_metric, self.polar_view)
 
         if self.revisit:
             self.plot_swath_revisit(sm, self.user_metric, self.statistic, self.polar_view)
 
-        if self.save_output=='Numpy':
-            np.save('../output/user_cov_swath', self.user_metric)  # Save to numpy array
-        if self.save_output=='NetCDF':
-            self.export2nc(sm, '../output/user_cov_swath.nc')  # Save to netcdf file
 
 
 class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
@@ -151,23 +152,23 @@ class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
             sat_altitude = satellite.kepler.semi_major_axis - R_EARTH
             if const.obs_swath_start is not None:  # if swath defined by swath length rather than incidence
                 satellite.obs_swath_start = const.obs_swath_start  # Copy over from constellation
-                satellite.obs_incl_angle_start = misc_fn.incl_from_swath(
+                satellite.obs_inci_angle_start = misc_fn.incl_from_swath(
                     const.obs_swath_start, R_EARTH, sat_altitude)
             else:
-                satellite.obs_incl_angle_start = const.obs_incl_angle_start
+                satellite.obs_inci_angle_start = const.obs_inci_angle_start
             if const.obs_swath_stop is not None:  # if swath defined by swath length rather than incidence
                 satellite.obs_swath_stop = const.obs_swath_stop  # Copy over from constellation
-                satellite.obs_incl_angle_stop = misc_fn.incl_from_swath(
+                satellite.obs_inci_angle_stop = misc_fn.incl_from_swath(
                     const.obs_swath_stop, R_EARTH, sat_altitude)
             else:
-                satellite.obs_incl_angle_stop = const.obs_incl_angle_stop
+                satellite.obs_inci_angle_stop = const.obs_inci_angle_stop
             alfa_critical = asin(R_EARTH / (R_EARTH + sat_altitude))  # If incidence angle shooting off Earth -> error
-            if satellite.obs_incl_angle_start > alfa_critical:
-                ls.logger.error(f'Inclination angle start: {degrees(satellite.obs_incl_angle_start)} ' +
+            if np.abs(satellite.obs_inci_angle_start) > alfa_critical:
+                ls.logger.error(f'Incidence angle start: {degrees(satellite.obs_inci_angle_start)} ' +
                                 f'larger than critical angle {round(degrees(alfa_critical),1)}')
                 exit()
-            if satellite.obs_incl_angle_stop > alfa_critical:
-                ls.logger.error(f'Inclination angle stop: {degrees(satellite.obs_incl_angle_stop)} ' +
+            if np.abs(satellite.obs_inci_angle_stop) > alfa_critical:
+                ls.logger.error(f'Incidence angle stop: {degrees(satellite.obs_inci_angle_stop)} ' +
                                 f'larger than critical angle {round(degrees(alfa_critical),1)}')
                 exit()
 
@@ -176,9 +177,9 @@ class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
         for satellite in sm.satellites:
             r_earth = self.det_angles_from_swath_in_loop(satellite)
             point_vec1 = misc_fn.rot_vec_vec(-satellite.pos_ecf, np.array(satellite.vel_ecf),
-                                             -satellite.obs_incl_angle_start)  # minus for right looking, plus for left
+                                             -satellite.obs_inci_angle_start)  # minus for right looking, plus for left
             point_vec2 = misc_fn.rot_vec_vec(-satellite.pos_ecf, np.array(satellite.vel_ecf),
-                                             -satellite.obs_incl_angle_stop)  # minus for right looking, plus for left
+                                             -satellite.obs_inci_angle_stop)  # minus for right looking, plus for left
             intersect, p1b, satellite.p1 = misc_fn.line_sphere_intersect(
                 satellite.pos_ecf, satellite.pos_ecf + point_vec1, r_earth, np.zeros(3))
             intersect, p2b, satellite.p2 = misc_fn.line_sphere_intersect(
@@ -200,9 +201,9 @@ class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
         r_earth = misc_fn.earth_radius_lat(satellite.lla[0])
         sat_altitude = norm(satellite.pos_ecf) - r_earth
         if satellite.obs_swath_start is not None:  # if swath defined by swath length rather than incidence
-            satellite.obs_incl_angle_start = misc_fn.incl_from_swath(satellite.obs_swath_start, r_earth, sat_altitude)
+            satellite.obs_inci_angle_start = misc_fn.incl_from_swath(satellite.obs_swath_start, r_earth, sat_altitude)
         if satellite.obs_swath_stop is not None:  # if swath defined by swath length rather than incidence
-            satellite.obs_incl_angle_stop = misc_fn.incl_from_swath(satellite.obs_swath_stop, r_earth, sat_altitude)
+            satellite.obs_inci_angle_stop = misc_fn.incl_from_swath(satellite.obs_swath_stop, r_earth, sat_altitude)
         return r_earth
 
     def export2nc(self, sm, file_name):
@@ -221,12 +222,12 @@ class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
 
     def after_loop(self, sm):
 
-        self.plot_swath_coverage(sm, self.user_metric, self.polar_view)
-
-        if self.revisit:
-            self.plot_swath_revisit(sm, self.user_metric, self.statistic, self.polar_view)
-
         if self.save_output=='Numpy':
             np.save('../output/user_cov_swath', self.user_metric)  # Save to numpy array
         if self.save_output=='NetCDF':
             self.export2nc(sm, '../output/user_cov_swath.nc')  # Save to netcdf file
+
+        self.plot_swath_coverage(sm, self.user_metric, self.polar_view)
+
+        if self.revisit:
+            self.plot_swath_revisit(sm, self.user_metric, self.statistic, self.polar_view)

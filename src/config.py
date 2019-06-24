@@ -70,10 +70,10 @@ class AppConfig:
             # Now some optional parameters
             if constellation.find('TLEFileName') is not None:
                 const.tle_file_name = constellation.find('TLEFileName').text
-            if constellation.find('ObsInclinationAngleStart') is not None:
-                const.obs_incl_angle_start = radians(float(constellation.find('ObsInclinationAngleStart').text))
-            if constellation.find('ObsInclinationAngleStop') is not None:
-                const.obs_incl_angle_stop = radians(float(constellation.find('ObsInclinationAngleStop').text))
+            if constellation.find('ObsIncidenceAngleStart') is not None:
+                const.obs_inci_angle_start = radians(float(constellation.find('ObsIncidenceAngleStart').text))
+            if constellation.find('ObsIncidenceAngleStop') is not None:
+                const.obs_inci_angle_stop = radians(float(constellation.find('ObsIncidenceAngleStop').text))
             if constellation.find('ObsSwathStart') is not None:
                 const.obs_swath_start = float(constellation.find('ObsSwathStart').text)
             if constellation.find('ObsSwathStop') is not None:
@@ -381,7 +381,7 @@ class AppConfig:
             self.orbit_propagator = sim.find('OrbitPropagator').text
 
             ls.logger.info(f'Loaded simulation, start MJD: {self.start_time}, stop MJD: {self.stop_time},' +
-                           f' number of time steps: {self.time_step}')
+                           f' size time steps in sec: {self.time_step}')
             for analysis_node in root.iter('Analysis'):  # Only one analysis can be performed at a time
                 if analysis_node.find('Type').text == 'cov_ground_track':
                     self.analysis = AnalysisCovGroundTrack()

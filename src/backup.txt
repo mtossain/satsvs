@@ -3,7 +3,7 @@ Some text to debug visually the obs_swat_push_broom
 if sm.cnt_epoch == 1:
     fig = plt.figure(figsize=(10, 10))
     ax = plt.axes(projection='3d')
-    ax.scatter3D(sat_pos[0] / 1e3, sat_pos[1] / 1e3, sat_pos[2] / 1e3, color='blue')
+    ax.scatter3D(satellite.pos_ecf[0] / 1e3, satellite.pos_ecf[1] / 1e3, satellite.pos_ecf[2] / 1e3, color='blue')
     # for u in sm.users:
     #     ax.scatter3D(u.posvel_ecf[0] / 1e3, u.posvel_ecf[1] / 1e3, u.posvel_ecf[2] / 1e3, color='r')
     u, v = np.mgrid[0:2 * np.pi:20j, 0:np.pi:10j]
@@ -15,10 +15,10 @@ if sm.cnt_epoch == 1:
     ax.scatter3D(self.p2[0] / 1e3, self.p2[1] / 1e3, self.p2[2] / 1e3, color='b')
     ax.scatter3D(self.p3[0] / 1e3, self.p3[1] / 1e3, self.p3[2] / 1e3, color='k')
     ax.scatter3D(self.p4[0] / 1e3, self.p4[1] / 1e3, self.p4[2] / 1e3, color='c')
-    ax.scatter3D(planes[0].n[0] * 4e3, planes[0].n[1] * 4e3, planes[0].n[2] * 4e3, color='green')
-    ax.scatter3D(planes[1].n[0] * 4e3, planes[1].n[1] * 4e3, planes[1].n[2] * 4e3, color='blue')
-    ax.scatter3D(planes[2].n[0] * 4e3, planes[2].n[1] * 4e3, planes[2].n[2] * 4e3, color='black')
-    ax.scatter3D(planes[3].n[0] * 4e3, planes[3].n[1] * 4e3, planes[3].n[2] * 4e3, color='cyan')
+    ax.scatter3D(self.planes[0].n[0] * 4e3, self.planes[0].n[1] * 4e3, self.planes[0].n[2] * 4e3, color='green')
+    ax.scatter3D(self.planes[1].n[0] * 4e3, self.planes[1].n[1] * 4e3, self.planes[1].n[2] * 4e3, color='blue')
+    ax.scatter3D(self.planes[2].n[0] * 4e3, self.planes[2].n[1] * 4e3, self.planes[2].n[2] * 4e3, color='black')
+    ax.scatter3D(self.planes[3].n[0] * 4e3, self.planes[3].n[1] * 4e3, self.planes[3].n[2] * 4e3, color='cyan')
     plt.show()
 
 # Old way for conical scanner

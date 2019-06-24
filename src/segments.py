@@ -35,8 +35,8 @@ class Constellation:
         self.uere_list = []  # Varies over elevation
 
         self.tle_file_name = None
-        self.obs_incl_angle_start = None
-        self.obs_incl_angle_stop = None
+        self.obs_inci_angle_start = None
+        self.obs_inci_angle_stop = None
         self.obs_swath_start = None
         self.obs_swath_stop = None
         self.frontal_area = None
@@ -76,8 +76,8 @@ class Satellite:
 
         self.metric = []  # For analysis purposes
 
-        self.obs_incl_angle_start = None  # If satellite contains instrument
-        self.obs_incl_angle_stop = None
+        self.obs_inci_angle_start = None  # If satellite contains instrument
+        self.obs_inci_angle_stop = None
         self.obs_swath_start = None  # Alternatively swath width instrument
         self.obs_swath_stop = None
 
