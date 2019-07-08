@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
-os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/lib/python3.6/site-packages/pyproj/data'
+os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/share/proj'
 from mpl_toolkits.basemap import Basemap
 from numpy.linalg import norm
 from math import sin, cos, asin, degrees, radians, log10

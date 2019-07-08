@@ -8,15 +8,29 @@ import numpy as np
 import config
 import logging_svs as ls
 import misc_fn
+from misc_fn import benchmark
 from astropy.time import Time
 
 
-def main():
+@benchmark
+def load_configuration():
+    sm = config.AppConfig('../input/Config.xml')
+    sm.load_satellites()
+    sm.load_stations()
+    sm.load_users()
+    sm.load_simulation()
+    sm.setup_links()
+    return sm  # Configuration is used as state machine
 
-    sm = load_configuration()  # Load config into sm status machine holds status of sat, station, user and links
+
+@benchmark
+def run_before_time_loop(sm):
     sm.analysis.before_loop(sm)  # Run analysis which is needed before time loop
     ls.logger.info('Finished reading configuration file')
 
+
+@benchmark
+def run_time_loop(sm):
     clear_load_orbit_file(sm)  # Clear or load previous orbit file
 
     for sm.cnt_epoch in range(sm.num_epoch):  # Loop over simulation time window
@@ -32,18 +46,10 @@ def main():
 
         sm.time_mjd += sm.time_step / 86400.0  # Update time
 
+@benchmark
+def run_after_time_loop(sm):
     ls.logger.info(f'Plotting analysis {sm.analysis.type}')
     sm.analysis.after_loop(sm)  # Run analysis after time loop
-
-
-def load_configuration():
-    sm = config.AppConfig('../input/Config.xml')
-    sm.load_satellites()
-    sm.load_stations()
-    sm.load_users()
-    sm.load_simulation()
-    sm.setup_links()
-    return sm  # Configuration is used as state machine
 
 
 def convert_times(sm):
@@ -143,7 +149,13 @@ def clear_load_orbit_file(sm):  # Clear or load previous orbit file
 
 
 if __name__ == '__main__':
-    main()
+
+    sm = load_configuration()  # Load config into sm status machine holds status of sat, station, user and links
+
+    run_before_time_loop(sm)  # Run the before and during time loop
+
+    run_time_loop(sm)  # Run the before and during time loop
+
+    run_after_time_loop(sm)  # Run the after time loop
 
 # TODO analysis SAT
-

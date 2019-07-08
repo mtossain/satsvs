@@ -70,8 +70,8 @@
 			<ConstellationID>2</ConstellationID>
 			<ConstellationName>NISAR</ConstellationName>
 		    <ReceiverConstellation>1111</ReceiverConstellation>
-			<ObsSwathStart>-715000.0</ObsSwathStart>
-			<ObsSwathStop>-485000.0</ObsSwathStop>
+			<ObsSwathStart>485000.0</ObsSwathStart>
+			<ObsSwathStop>715000.0</ObsSwathStop>
 			<Satellite>
 				<SatelliteID>1</SatelliteID>
 				<Plane>1</Plane>
@@ -123,8 +123,8 @@
             <LatMax>90</LatMax>
             <LonMin>-180</LonMin>
             <LonMax>180</LonMax>
-            <LatStep>1</LatStep>
-            <LonStep>1</LonStep>
+            <LatStep>.5</LatStep>
+            <LonStep>.5</LonStep>
             <Height>0.0</Height>
             <ReceiverConstellation>1111</ReceiverConstellation>
             <ElevationMask>0.0</ElevationMask>
@@ -150,10 +150,10 @@
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
 	    <StartDate>2010-05-08 00:00:00</StartDate>
-	    <StopDate>2010-05-20 00:00:00</StopDate>
+	    <StopDate>2010-05-09 01:00:00</StopDate>
 	    <TimeStep>120</TimeStep>
 
-		<IncludeStation2SpaceLinks>False</IncludeStation2SpaceLinks>
+		<IncludeStation2SpaceLinks>True</IncludeStation2SpaceLinks>
 		<IncludeUser2SpaceLinks>False</IncludeUser2SpaceLinks>
 		<IncludeSpace2SpaceLinks>False</IncludeSpace2SpaceLinks>
 
@@ -166,10 +166,27 @@
 <!--            <Revisit>True</Revisit>-->
 <!--	        <Statistic>Mean</Statistic>-->
 <!--        </Analysis>-->
+<!--<Analysis>-->
+<!--    <Type>com_gr2sp_budget</Type>-->
+<!--    <GroundStationID>1</GroundStationID>-->
+<!--    <TransmitterObject>Satellite</TransmitterObject>-->
+<!--    <CarrierFrequency>10e9</CarrierFrequency>-->
+<!--    <TransmitPowerW>10</TransmitPowerW>-->
+<!--    <TransmitLossesdB>2</TransmitLossesdB>-->
+<!--    <TransmitGaindB>20</TransmitGaindB>-->
+<!--    <ReceiveGaindB>20</ReceiveGaindB>-->
+<!--    <ReceiveLossesdB>2</ReceiveLossesdB>-->
+<!--    <ReceiveTempK>290</ReceiveTempK>-->
+<!--    <PExceedPerc>0.01</PExceedPerc>-->
+<!--    <IncludeGas>True</IncludeGas>-->
+<!--    <IncludeRain>True</IncludeRain>-->
+<!--    <IncludeScintillation>False</IncludeScintillation>-->
+<!--    <IncludeClouds>False</IncludeClouds>-->
+<!--</Analysis>-->
 
 			<Analysis>
 				<Type>obs_swath_push_broom</Type>
-	            <PolarView>60</PolarView>
+	            <PolarView>-60</PolarView>
 				<Revisit>True</Revisit>
 				<Statistic>Mean</Statistic>
 				<SaveOutput>NetCDF</SaveOutput>

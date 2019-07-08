@@ -60,7 +60,7 @@ class AppConfig:
         root = tree.getroot()
         for constellation in root.iter('Constellation'):
             const = Constellation()
-            # Mandato
+            # Mandatory
             const.constellation_id = int(constellation.find('ConstellationID').text)
             const.num_sat = int(constellation.find('NumOfSatellites').text)
             const.num_planes = int(constellation.find('NumOfPlanes').text)

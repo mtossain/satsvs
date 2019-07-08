@@ -1,5 +1,6 @@
 import math
 from math import sin, cos, atan2, atan, fabs, acos
+import time
 import numpy as np
 from astropy.coordinates import EarthLocation
 from math import tan, sqrt, asin, degrees, radians
@@ -9,21 +10,46 @@ from numba import jit, float64
 from scipy import interpolate
 # Modules from project
 from constants import R_EARTH, PI, GM_EARTH
+import logging_svs as ls
+
+from multiprocessing import Process, Value, Array
+
+def benchmark(func):
+    """
+    A decorator that prints the time a function takes to execute.
+    """
+    def wrapper(*args, **kwargs):
+        t = time.process_time()
+        res = func(*args, **kwargs)
+        t_sec = round((time.process_time()-t) % 60,1)
+        t_min = int((time.process_time()-t)/ 60)
+        ls.logger.info(f'Application function {func.__name__} execution time {t_min} [min] {t_sec} [sec]')
+        return res
+    return wrapper
 
 
-def plane_normal(a,b):  # assume here point c is [0,0,0]
+def plane_normal(a,b):
+    """
+    :param a: 3d vector to point on plane
+    :param b: 3d vector to point on plane
+    :return:  3d vector normal of the plane
+    :rtype: list
+    Returns the plane normal for a plane which has the origin in its plane
+    """
     c = [a[1]*b[2] - a[2]*b[1],
          a[2]*b[0] - a[0]*b[2],
          a[0]*b[1] - a[1]*b[0]]
     return c
 
-# Compute Modified Julian Date from YYYY and Day Of Year pair
-# Time functions from SP3 library B.Remondi.
-#
-# @param YYYY Year (year)
-# @param DOY Day of year (days)
-# @return Modified Julian Date
+
 def yyyy_doy2mjd(yyyy, doy):
+    """
+    :param yyyy: 4 digit year
+    :param doy: decimal day of year
+    :return: Modified Julian Date
+    :rtype: float
+    Converts year, doy to MJD, taken from from SP3 library B.Remondi.
+    """
 
     mjd_jan1_1901 = 15385
     days_per_second = 0.00001157407407407407
@@ -47,12 +73,14 @@ def yyyy_doy2mjd(yyyy, doy):
     return pf_mjd + p_mjd
 
 
-# Compute Greenwich Mean Sidereal Time from Modified Julian Date
-# Ref. Time functions from SP3 library B.Remondi.
-#
-# @param MJD_Requested Modified Julian Date (days/double)
-# @return Greenwich Mean Sidereal Time (radians/double) [0 to 2PI]
 def mjd2gmst(mjd_requested):
+    """
+    :param mjd_requested: MJD to be converted
+    :return: Greenwich Mean Sidereal Time (radians) [0 to 2PI]
+    :rtype: float
+    Compute Greenwich Mean Sidereal Time from Modified Julian Date.
+    Ref. Time functions from SP3 library B.Remondi.
+    """
 
     jd = mjd_requested + 2400000.5
 
@@ -74,16 +102,14 @@ def mjd2gmst(mjd_requested):
     return theta_n
 
 
-# Convert from latitude, longitude and height to ECF cartesian coordinates, taking
-# into account the Earth flattening
-#
-# Ref. Understanding GPS: Principles and Applications,
-# Elliott D. Kaplan, Editor, Artech House Publishers, Boston 1996.
-#
-# @param LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
-# @param XYZ ECEF XYZ coordinates in m
 @jit(nopython=True)
 def lla2xyz(lla):
+    """
+    :param lla: LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
+    :return: XYZ ECEF XYZ coordinates in m
+    Convert from latitude, longitude and height to ECF cartesian coordinates, taking into account the Earth flattening
+    Ref. Understanding GPS: Principles and Applications,E. Kaplan, Editor, Artech House Publishers, Boston 1996.
+    """
 
     xyz = np.zeros(3)
     
@@ -109,24 +135,31 @@ def lla2xyz(lla):
     return xyz
 
 
-# Same as lla2xyz but now in Astropy
-# Not used because it is too slow
 def lla2xyz_astropy(lla):
+    """
+    :param lla: LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
+    :return: XYZ ECEF XYZ coordinates in m
+    Same as lla2xyz but now in Astropy, not used because it is too slow
+    """
     xyz = EarthLocation.from_geodetic(degrees(lla[1]), degrees(lla[0]), lla[2], 'WGS84')
     return list(xyz.value)
 
 
-# Convert from ECF cartesian coordinates to latitude, longitude and height, taking
-# into account the Earth flattening
+#
 #
 # Ref. Converts from WGS-84 X, Y and Z rectangular co-ordinates to latitude,
 #      longitude and height. For more information: Simo H. Laurila,
 #      "Electronic Surveying and Navigation", John Wiley & Sons (1976).
-#
-# @param XYZ ECEF XYZ coordinates in m
-# @param LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
+
 @jit(nopython=True)
 def xyz2lla(xyz):
+    """
+    :param xyz: ECEF XYZ coordinates in m
+    :return: LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
+    Convert from ECF cartesian coordinates to latitude, longitude and height, taking into account the Earth flattening.
+    Ref. Converts from WGS-84 X, Y and Z rectangular co-ordinates to latitude,longitude and height.
+    For more information: Simo H. Laurila, "Electronic Surveying and Navigation", John Wiley & Sons (1976).
+    """
 
     x2 = xyz[0] * xyz[0]
     y2 = xyz[1] * xyz[1]
@@ -171,22 +204,22 @@ def xyz2lla(xyz):
     return [lat, lon, height]
 
 
-# Compute satellite position given Kepler set in ECI reference frame
-#
-# @param MJD_Requested Modified Julian date for wanted position
-# @param Kepler Class object with kepler elements in radians and meters
-# double Epoch_MJD
-# double Semi_Major_Axis
-# double Eccentricity
-# double Inclination
-# double RAAN
-# double Arg_Of_Perigee
-# double Mean_Anomaly
-# @param Out POS_VEL_XYZ in m and m/s
 @jit(nopython=True)
 def kep2xyz(mjd_requested,
             kepler_epoch_mjd, kepler_semi_major_axis, kepler_eccentricity, kepler_inclination,
             kepler_right_ascension, kepler_arg_perigee, kepler_mean_anomaly):
+    """
+    :param mjd_requested:
+    :param kepler_epoch_mjd:
+    :param kepler_semi_major_axis:
+    :param kepler_eccentricity:
+    :param kepler_inclination:
+    :param kepler_right_ascension:
+    :param kepler_arg_perigee:
+    :param kepler_mean_anomaly:
+    :return: pos,vel 3d vectors in m and m/s
+    Compute satellite position given Kepler set in ECI reference frame
+    """
 
     pos = np.zeros(3)
     vel = np.zeros(3)
@@ -253,15 +286,12 @@ def kep2xyz(mjd_requested,
     return pos, vel
 
 
-# Iterates to solution of eccentric_anomaly using numerical solution
-# Only necessary if eccentricity is unequal to 0
-# 
-# Ref. http:en.wikipedia.org/wiki/Newton's_method
-# 
-# @param MeanAnomaly mean anomaly (radians)
-# @param Eccentricity eccentricity (-)
-# @return  Eccentric anomaly (radians)
 def newton_raphson (mean_anomaly, eccentricity):
+    """
+    :param mean_anomaly: MeanAnomaly mean anomaly (radians)
+    :param eccentricity: Eccentricity eccentricity (-)
+    :return: Eccentric anomaly (radians)
+    """
     k = 0
     big_e = np.zeros(50)
 
@@ -275,13 +305,15 @@ def newton_raphson (mean_anomaly, eccentricity):
     return big_e[k + 1]
 
 
-# Rotate vector on z-axis
-#
-# @param Angle Rotation angle (radians/double)
-# @param Vector Position input vector (1:6) (meters/double)
-# @param Out Rotated position vector (1:6) (meters/double)
 @jit(nopython=True)
 def spin_vector(angle, pos_vec, vel_vec):
+    """
+    :param angle: Angle Rotation angle (radians/double)
+    :param pos_vec: Vector Position input vector (1:3) (meters/double)
+    :param vel_vec: Vector Velocity input vector (1:3) (meters/double)
+    :return: Rotated position and velocity vector (1:3) (meters/double)
+    Rotate position and velocity around z-axis
+    """
 
     pos = np.zeros(3)
     vel = np.zeros(3)
@@ -301,13 +333,13 @@ def spin_vector(angle, pos_vec, vel_vec):
     return pos, vel
 
 
-# Compute Azimuth and Elevation from User to Satellite assuming the Earth is a perfect sphere
-#
-# @param Xs Satellite position in ECEF (m/double)
-# @param Xu User position in ECEF (m/double)
-# @param AzEl Azimuth [0] and Elevation [1] (radians/double)
 def calc_az_el(xs, xu):
-
+    """
+    :param xs: Xs Satellite position in ECEF (m/double)
+    :param xu: Xu User position in ECEF (m/double)
+    :return: Az, El Azimuth and Elevation (radians/double)
+    Compute Azimuth and Elevation from User to Satellite assuming the Earth is a perfect sphere
+    """
     az_el = np.zeros(2)
     e3by3 = np.zeros((3,3))
     d = np.zeros(3)
@@ -354,19 +386,18 @@ def calc_az_el(xs, xu):
     return az_el[0], az_el[1]
 
 
-# Computes two intersection points for a line and a sphere
-# Returns false if the line does not intersect the sphere
-# Returns two equal intersection points if the line is tangent to the sphere
-# Returns two different intersection points if the line gos through the sphere
-#
-# @param X1 Point 1 on the line
-# @param X2 Point 2 on the line
-# @param SphereRadius Radius of the sphere
-# @param SphereCenterX Center point of the sphere
-# @param iX1 Intersection point one
-# @param iX2 Intersection point two
-# @return Returns false if the line does not intersect the sphere
 def line_sphere_intersect(x1, x2, sphere_radius, sphere_center):
+    """
+    :param x1: Point 1 on the line
+    :param x2: Point 2 on the line
+    :param sphere_radius: SphereRadius Radius of the sphere
+    :param sphere_center: Center point of the sphere
+    :return: Returns false if the line does not intersect the sphere, Intersection point one and two
+    Computes two intersection points for a line and a sphere
+    Returns false if the line does not intersect the sphere
+    Returns two equal intersection points if the line is tangent to the sphere
+    Returns two different intersection points if the line gos through the sphere
+    """
 
     intersect = True
 
@@ -405,17 +436,14 @@ def line_sphere_intersect(x1, x2, sphere_radius, sphere_center):
     return intersect, i_x1, i_x2
 
 
-# Compute satellite visibility contour for a certain ElevationMask of the users,
-# assuming the Earth is a perfect sphere
-#
-# REFERENCE
-# Space Mission Analysis and Design, 3rd edition (Space Technology Library)
-# W. Larson and J. Wertz
-#
-# @param LLA Sub Satellite Point Latitude, Longitude, Altitude rad/m
-# @param ElevationMask User to satellite elevation mask (rad)
-# @param Contour Array with Lat Lon points on the satellite visibility contour lat/lon in (rad)
 def sat_contour(lla, elevation_mask):
+    """
+    :param lla: Sub Satellite Point Latitude, Longitude, Altitude rad/m
+    :param elevation_mask: ElevationMask User to satellite elevation mask (rad)
+    :return: Contour np.array with Lat Lon points on the satellite visibility contour lat/lon in (rad)
+    Compute satellite visibility contour for a certain ElevationMask of the users,assuming the Earth is a perfect sphere
+    Ref.Space Mission Analysis and Design, 3rd edition (Space Technology Library), W. Larson and J. Wertz
+    """
 
     step_size = 0.3
 
@@ -461,12 +489,25 @@ def sat_contour(lla, elevation_mask):
 
     return contour
 
-@jit(nopython=True)  # paralellism did not work, only for loops...
-def dist_point_plane(point_q, plane_normal):  # not really distance but if point is more than 90 deg away from normal
+
+@jit(nopython=True)
+def dist_point_plane(point_q, plane_normal):
+    """
+    :param point_q: point q 3d vector
+    :param plane_normal: plane normal 3d vector
+    :return: dot product between point q and normal, measure of angle and length both vectors
+    """
     return np.dot(point_q, plane_normal)
 
-@jit(nopython=True)  # paralellism did not work, only for loops...
+
+@jit(nopython=True)
 def test_point_within_pyramid(point_q, planes_h):
+    """
+    :param point_q: point q
+    :param planes_h: 4 plane normals defining a pyramid
+    :return: True if point is within pyramid
+    Compute if point is within pyramid with top at origin
+    """
     for i in range(4):
         if dist_point_plane(point_q, planes_h[i,:]) > 0.0:  # on bad side of plane, faster implementation
             return False
@@ -474,12 +515,20 @@ def test_point_within_pyramid(point_q, planes_h):
 
 
 def make_unit(x):
-    """Normalize entire input to norm 1. Not what you want for 2D arrays!"""
+    """
+    :param x: vector
+    :return: normalized vector to length 1
+    Normalize a vector
+    """
     return x / norm(x)
 
 
 def x_parallel_v(x, v):
-    """Project x onto v. Result will be parallel to v."""
+    """
+    :param x: vector x
+    :param v: vector v
+    :return: projection of x onto v, result will be parallel to v
+    """
     # (x' * v / norm(v)) * v / norm(v)
     # = (x' * v) * v / norm(v)^2
     # = (x' * v) * v / (v' * v)
@@ -487,15 +536,19 @@ def x_parallel_v(x, v):
 
 
 def x_perpendicular_v(x, v):
-    """Component of x orthogonal to v. Result is perpendicular to v."""
+    """
+    :param x: vector x
+    :param v: vector v
+    :return: projection of x orthogonal to v, result will be perpendicular to v
+    """
     return x - x_parallel_v(x, v)
 
 
 def x_project_on_v(x, v):
-    """Project x onto v, returning parallel and perpendicular components
-    >> d = xProject(x, v)
-    >> np.allclose(d['par'] + d['perp'], x)
-    True
+    """
+    :param x: vector x
+    :param v: vector v
+    :return: dict with paralel and perpendicular components
     """
     par = x_parallel_v(x, v)
     perp = x - par
@@ -503,37 +556,65 @@ def x_project_on_v(x, v):
 
 
 def rot_vec_vec(a, b, theta):
-    """Rotate vector a about vector b by theta radians."""
-    # Thanks user MNKY at http: #math.stackexchange.com/a/1432182/81266
+    """
+    :param a: 3d vector a
+    :param b: 3d vector b
+    :param theta: rotation angle in radians
+    :return: rotated vector a
+    Rotate vector a about vector b by theta radians.
+    """
     proj = x_project_on_v(a, b)
     w = cross(b, proj['perp'])
     return proj['par'] + proj['perp'] * cos(theta) + norm(proj['perp']) * make_unit(w) * sin(theta)
 
 
 @jit(nopython=True)
-def det_swath_radius(alt, inc_angle, r_earth): # altitude in [m], incidence angle alfa in [radians]
+def det_swath_radius(alt, inc_angle, r_earth):
+    """
+    :param alt: altitude in [m]
+    :param inc_angle: incidence angle alfa in [radians]
+    :param r_earth: radius Earth in [m]
+    :return: compute swath radius for conical scanner in [m]
+    """
+    # ,
     oza = det_oza_fast(alt, r_earth, inc_angle)
-    return (oza - inc_angle)*r_earth # in [m]
+    return (oza - inc_angle)*r_earth
 
 
 @jit(nopython=True)
-def det_oza_fast(alt, r_earth, inc_angle):  # altitude and R_EARTH in [m], incidence angle  in [radians]
+def det_oza_fast(alt, r_earth, inc_angle):
+    """
+    :param alt: altitude in [m]
+    :param r_earth: radius Earth in [m]
+    :param inc_angle: incidence angle in [rad]
+    :return: observation zenith angle in [rad]
+    compute OZA from altitude, radius_earth and incidence angle
+    """
     oza = asin((r_earth + alt) / r_earth * sin(inc_angle))
     return oza
 
 
 @jit(nopython=True)
 def earth_angle_beta(swath_radius, r_earth):
-    # Returns the Earth beta angle in [radians], from swath radius in [m]
+    """
+    :param swath_radius: swath radius in [m]
+    :param r_earth: radius Earth in [m]
+    :return: Earth beta angle in [radians]
+    """
     beta = asin(swath_radius / r_earth)
     return beta
 
 
-@jit(nopython=True)  # paralellism did not work, only for loops...
+@jit(nopython=True)
 def angle_two_vectors(u, v, norm_u, norm_v):
-    # Returns angle in [radians]
-    # Pre computed the norm of the second vector
-    # c = np.dot(u, v) / norm_u / norm_v
+    """
+    :param u: 3d vector
+    :param v: 3d vector
+    :param norm_u: norm of u
+    :param norm_v: norm of v
+    :return: angle between u and v in [rad]
+    Assumes norms are pre-computed
+    """
     c = (u[0]*v[0]+u[1]*v[1]+u[2]*v[2])/norm_u/norm_v
     if c>1:
         c=1
@@ -544,21 +625,25 @@ def angle_two_vectors(u, v, norm_u, norm_v):
     return result
 
 
-# Compute numerically the solution to the incidence angle alfa from a swath width from nadir
-# swath width in [m]
-# radius Earth in [m]
-# altitude satellite in [m]
-# return incidence angle in [rad]
 @jit(nopython=True)
 def incl_from_swath(swath_w, r_earth, alt):
+    """
+    :param swath_w: swath width in [m]
+    :param r_earth: radius Earth in [m]
+    :param alt: altitude satellite in [m]
+    :return: incidence angle in [rad]
+    Compute numerically the solution to the incidence angle alfa from a swath width from nadir
+    """
     solution = atan(sin(swath_w/r_earth) / ((r_earth + alt)/r_earth - cos(swath_w/r_earth)))
     return solution
 
 
-# Compute Earth radius at latitude
-# input lat [rad]
-# output radius R [m]
 def earth_radius_lat(lat):
+    """
+    :param lat: [rad]
+    :return: radius R [m]
+    Compute Earth radius at latitude from elliptical shape
+    """
     r1 = 6378137  # radius at equator in [m]
     r2 = 6356752  # radius at pole in [m]
     radius = sqrt((r1*r1*r1*r1*pow(cos(lat),2) + r2*r2*r2*r2*pow(sin(lat),2)) /
@@ -566,17 +651,64 @@ def earth_radius_lat(lat):
     return radius
 
 
-@jit(nopython=True)
-def check_users_in_plane(user_metric, user_pos, planes, cnt_epoch):
-    n_users = len(user_metric)
-    for idx_user in range(n_users):
+
+def check_users_in_plane(user_pos, planes, shared_array):
+    """
+    :param user_pos: user position ECEF
+    :param planes: normals of the planes
+    :param shared_array: shared array
+    :return: user-metric
+    Does not work well since processes take too much overhead to run, therefore normal numba version preferred
+    """
+
+    num_processors = 8  # for mac pro
+    process_list = []
+    for i in range(num_processors):
+        process_list.append(Process(target=process_users, args=(shared_array, num_processors, i, user_pos, planes)))
+        process_list[i].start()
+
+    for i in range(num_processors):
+        process_list[i].join()
+
+    return np.frombuffer(shared_array, dtype="int32")
+
+
+def process_users(shared_array, num_processors, cnt_processor, user_pos, planes):
+    """
+    :param shared_array:
+    :param num_processors:
+    :param cnt_processor:
+    :param user_pos:
+    :param planes:
+    :return:
+    Divide the users among the processors, does not work well, since startup of processor takes too long
+    """
+    num_users = len(shared_array)
+    set_length = np.floor(num_users / num_processors)
+    for idx_user in range(cnt_processor*set_length,(cnt_processor+1)*set_length):
         if test_point_within_pyramid(user_pos[idx_user, :], planes):
-            user_metric[idx_user,cnt_epoch] = 1  # Within swath
-    return user_metric[:,cnt_epoch]
+            shared_array[idx_user] = 1  # Within swath
+
+
+# @jit(nopython=True)
+# def check_users_in_plane(user_metric, user_pos, planes, cnt_epoch):
+#     n_users = len(user_metric)
+#     for idx_user in range(n_users):
+#         if test_point_within_pyramid(user_pos[idx_user, :], planes):
+#             user_metric[idx_user,cnt_epoch] = 1  # Within swath
+#     return user_metric[:,cnt_epoch]
 
 
 @jit(nopython=True)
 def check_users_from_nadir(user_metric, user_pos, sat_pos, earth_angle_swath, cnt_epoch):
+    """
+    :param user_metric: 0 or 1 for covered user[num_users,num_epoch)
+    :param user_pos: user position in ECEF [m]
+    :param sat_pos: satellite position in ECEF [m]
+    :param earth_angle_swath: earth angle swath [rad]
+    :param cnt_epoch: current time epoch [-]
+    :return: checks if user is within the conical swath
+    """
     norm_sat = norm(sat_pos)
     n_users = len(user_metric)
     for idx_user in range(n_users):
@@ -589,19 +721,24 @@ def check_users_from_nadir(user_metric, user_pos, sat_pos, earth_angle_swath, cn
 
 # Convert string True/False to boolean
 def str2bool(v):
+    """
+    :param v: string
+    :return: bool
+    Convert string True/False to boolean
+    """
     return v.lower() in ("yes", "true", "t", "1")
 
 
-# Compute gas attenuation
-# Gas attenuation models are given in ITU-R P676-11.
-# The model provided is computationally intensive and requires a lot of tabulated data.
-# In order to implement this with a low computational burden in a short time, a simplified-statistical model has been derived.
-# The elevation dependences have been mapped for each frequency with an exponential fit.
-# The result is a coefficients table:
-# Input: frequency [Hz]
-# Input: elevation [rad]
-# Output: attenuation [dB]
 def comp_gas_attenuation(frequency, elevation):
+    """
+    :param frequency: frequency [Hz]
+    :param elevation: elevation [rad]
+    :return: Compute gas attenuation in [dB]
+    Compute gas attenuation, Gas attenuation models are given in ITU-R P676-11.
+    The model provided is computationally intensive and requires a lot of tabulated data.
+    In order to implement this with a low computational burden in a short time, a simplified-statistical model has been derived.
+    The elevation dependences have been mapped for each frequency with an exponential fit.
+    """
 
     frequency = frequency / 1e9  # assume freq GHz, elevation deg
     elevation = degrees(elevation)  # assume freq GHz, elevation deg
@@ -620,15 +757,18 @@ def comp_gas_attenuation(frequency, elevation):
     return gas_attenuation
 
 
-# Taken from Gérard Maral, Michel Bousquet. Satellite Communications Systems. John Wiley & Sons. 4th Edition, 2002.
-# Input:    Frequency   Hz
-# Input:    Elevation   rad
-# Input:    p_exceed    %
-# Input:    Latitude    rad
-# Input:    Height      m
-# Input:    Rainfall Rate   mm/hr
-# Output:   Rain attenuation    dB
 def comp_rain_attenuation(frequency, elevation, latitude, height, rain_p_exceed, rainfall_rate, rain_height):
+    """
+    :param frequency: frequency in [Hz]
+    :param elevation: [rad]
+    :param latitude: [rad]
+    :param height: [m]
+    :param rain_p_exceed: [%]
+    :param rainfall_rate: [mm/hr]
+    :param rain_height: [m]
+    :return: Rain attenuation [dB]
+    Taken from Gerard Maral, Michel Bousquet. Satellite Communications Systems. John Wiley & Sons. 4th Edition, 2002.
+    """
 
     frequency = frequency/1e9  # Convert to GHz
     height = height / 1000 # Convert to m
@@ -726,10 +866,12 @@ def comp_rain_attenuation(frequency, elevation, latitude, height, rain_p_exceed,
     return rain_attenuation
 
 
-# Input frequency Hz
-# Input elevation rad
-# Output brightness temp sky K
 def temp_brightness(frequency, elevation):
+    """
+    :param frequency: [Hz]
+    :param elevation:  [rad]
+    :return: brightness temp sky [K]
+    """
 
     frequency = frequency/1e9  # Convert to GHz
     elevation = degrees(elevation)  # Convert to degrees
@@ -752,11 +894,13 @@ def temp_brightness(frequency, elevation):
     return temperature
 
 
-# Input Modulation type BPSK/QPSK
-# Input BER in multiples of 10
-# Input datarate in bps
-# Output CN0 required in dB
 def comp_cn0_required(modulation, ber, datarate):
+    """
+    :param modulation: Modulation type BPSK/QPSK
+    :param ber: BER in multiples of 10
+    :param datarate: datarate in bps
+    :return: CN0 required in dB
+    """
 
     ber = np.log10(ber)
     # Valid for BPSK and QPSK
@@ -773,8 +917,13 @@ def comp_cn0_required(modulation, ber, datarate):
     else:
         return 100
 
+
 @jit(nopython=True)
 def inverse4by4(a):
+    """
+    :param a: 4 by 4 numpy array
+    :return: inverse of a
+    """
 
     out = np.zeros((4,4))
 
@@ -893,6 +1042,13 @@ def inverse4by4(a):
 
 @jit(nopython=True)
 def ecef2enu(a, user_lat, user_lon):
+    """
+    :param a: point a from which East North Up is
+    :param user_lat: [rad]
+    :param user_lon: [rad]
+    :return: returns coordinates in a local east-north-up (ENU) Cartesian system,
+    corresponding to coordinates X, Y, Z in an Earth-Centered Earth-Fixed (ECEF) spheroid-centric Cartesian system.
+    """
 
     r = np.zeros((3,4))
 

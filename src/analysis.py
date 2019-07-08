@@ -10,7 +10,6 @@ from numba import jit
 # Modules from project
 import logging_svs as ls
 
-
 class AnalysisBase:
 
     def __init__(self):

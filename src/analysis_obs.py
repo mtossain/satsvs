@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
-os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/lib/python3.6/site-packages/pyproj/data'
+os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/share/proj'
 from mpl_toolkits.basemap import Basemap
 from numpy.linalg import norm
 from math import sin, cos, asin, degrees, radians
@@ -14,6 +14,7 @@ from analysis import AnalysisBase, AnalysisObs
 import misc_fn
 import logging_svs as ls
 
+from multiprocessing import Process, Value, Array, RawArray
 
 class AnalysisObsSwathConical(AnalysisBase, AnalysisObs):
 
@@ -139,6 +140,7 @@ class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
         self.det_angles_from_swath_before_loop(sm)
         self.user_pos_ecf = np.zeros((len(sm.users),3))  # User position in ECF
         self.user_metric = np.zeros((len(sm.users), sm.num_epoch), dtype=np.uint8)  # Range
+        self.shared_array = RawArray('i', len(sm.users))
         for idx_user, user in enumerate(sm.users):
             self.user_pos_ecf[idx_user,:] = user.pos_ecf
 
@@ -192,8 +194,10 @@ class AnalysisObsSwathPushBroom(AnalysisBase, AnalysisObs):
             satellite.p3 = satellite.p1.copy()  # Copy for next run, without .copy() python just refers to same list
             satellite.p4 = satellite.p2.copy()
             if sm.cnt_epoch > 0:  # Now valid point 3 and 4
-                self.user_metric[:,sm.cnt_epoch] = misc_fn.check_users_in_plane(self.user_metric, self.user_pos_ecf,
-                                                                                self.planes, sm.cnt_epoch)
+                misc_fn.check_users_in_plane(
+                     self.user_pos_ecf, self.planes, self.shared_array)
+                # self.user_metric[:,sm.cnt_epoch] = misc_fn.check_users_in_plane(self.user_metric, self.user_pos_ecf,
+                #                                                                 self.planes, sm.cnt_epoch)
 
     def det_angles_from_swath_in_loop(self, satellite):
 
