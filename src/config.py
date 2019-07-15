@@ -413,6 +413,8 @@ class AppConfig:
                     self.analysis = AnalysisComSp2SpBudget()
                 if analysis_node.find('Type').text == 'com_doppler':
                     self.analysis = AnalysisComDoppler()
+                if analysis_node.find('Type').text == 'com_gr2sp_budget_interference':
+                    self.analysis = AnalysisComGr2SpBudgetInterference()
                 if analysis_node.find('Type').text == 'nav_dilution_of_precision':
                     self.analysis = AnalysisNavDOP()
                 if analysis_node.find('Type').text == 'nav_accuracy':

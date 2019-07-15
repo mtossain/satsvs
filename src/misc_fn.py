@@ -8,11 +8,13 @@ from numpy import dot, arccos, cross, sin, cos
 from numpy.linalg import norm
 from numba import jit, float64
 from scipy import interpolate
+from scipy.special import jv  # Bessel function of 1st kind
+
 # Modules from project
 from constants import R_EARTH, PI, GM_EARTH
 import logging_svs as ls
 
-from multiprocessing import Process, Value, Array
+from multiprocessing import Process
 
 def benchmark(func):
     """
@@ -1071,4 +1073,23 @@ def ecef2enu(a, user_lat, user_lon):
     q = np.dot(q,np.transpose(r))  # np.matmul not supported by numba
 
     return q
+
+
+def dish_pattern(frequency, diameter, max_gain, theta):
+    """
+    :param frequency: in Hz
+    :param diameter: in m
+    :param max_gain: in dB in boresight
+    :param theta off boresight angle: in radians
+    :return: gain in dB
+    """
+    lam = 3e8 / frequency
+    k = 2 * PI  # wavelength
+    r = diameter / lam / 2  # in units of lambda
+    # array factor (E-Field) for a circular antenna
+    pattern = lambda theta: (2. * jv(1, k * r * sin(theta)) / (k * r * sin(theta))) ** 2
+
+    return 10.0 * np.log10(pattern(theta)) + max_gain # radiated pattern in dB
+
+
 

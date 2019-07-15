@@ -385,13 +385,20 @@ class AnalysisCovSatelliteSkyAngles(AnalysisBase):
                 user.metric[sm.cnt_epoch, 1] = degrees(sm.usr2sp[idx_user][self.idx_found_satellite].elevation)
 
     def after_loop(self, sm):
-        fig = plt.figure(figsize=(10, 6))
-        plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
+        fig, ax1 = plt.subplots(figsize=(10, 6))
+        plt.grid()
+        plt.subplots_adjust(left=.1, right=.92, top=0.95, bottom=0.07)
+        ax1.set_ylabel('Azimuth [deg]')
+        ax1.yaxis.label.set_color('red')
+        ax1.tick_params(axis='y', colors='red')
+        ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+        ax2.set_ylabel('Elevation [deg]')
+        ax2.yaxis.label.set_color('blue')
+        ax2.tick_params(axis='y', colors='blue')
         for user in sm.users:
-            plt.plot(self.times_f_doy, user.metric[:, 0], 'r+', label='Azimuth')
-            plt.plot(self.times_f_doy, user.metric[:, 1], 'b+', label='Elevation')
+            ax1.plot(self.times_f_doy, user.metric[:, 0], 'r+', label='Azimuth')
+            ax2.plot(self.times_f_doy, user.metric[:, 1], 'b+', label='Elevation')
         plt.xlabel('DOY[-]');
-        plt.ylabel('Azimuth / Elevation [deg]')
         plt.legend(); plt.grid()
         plt.savefig('../output/'+self.type+'.png')
         plt.show()
