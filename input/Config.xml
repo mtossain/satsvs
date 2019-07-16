@@ -192,7 +192,9 @@
 	    <TransmitPowerW>50</TransmitPowerW>
 	    <TransmitLossesdB>5</TransmitLossesdB>
 	    <TransmitGaindB>32</TransmitGaindB>
+	    <TransmitAntennaDiameter>0.25</TransmitAntennaDiameter>
 	    <ReceiveGaindB>64</ReceiveGaindB>
+		<ReceiveAntennaDiameter>6</ReceiveAntennaDiameter>
 	    <ReceiveLossesdB>3</ReceiveLossesdB>
 	    <ReceiveTempK>290</ReceiveTempK>
 	    <PExceedPerc>0.5</PExceedPerc>

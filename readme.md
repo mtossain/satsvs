@@ -419,6 +419,9 @@ The following parameters are needed:
     <TransmitPowerW>10</TransmitPowerW>
     <TransmitLossesdB>2</TransmitLossesdB>
     <TransmitGaindB>20</TransmitGaindB>
+    <ReceiveGaindB>64</ReceiveGaindB>
+    <ReceiveLossesdB>3</ReceiveLossesdB>
+    <ReceiveTempK>290</ReceiveTempK>
     <PExceedPerc>0.01</PExceedPerc>
     <IncludeGas>True</IncludeGas>
     <IncludeRain>True</IncludeRain>
@@ -433,7 +436,14 @@ Parameters are:
 - TransmitPowerW: Transmit power of transmitter in W
 - TransmitLossesdB: All transmit losses in dB
 - TransmitGaindB: Transmit gain of antenna in dB
+- ReceiveGaindB: Receive gain of antenna in dB
+- ReceiveLossesdB: All receive losses in dB
+- ReceiveTempK: Receive Temperature in K
 - PExceedPerc: Probability to exceed attenuation values in %.
+- IncludeGas: Whether gas attenuation should be included True/False
+- IncludeRain: Whether rain attenuation should be included True/False
+- IncludeScintillation: Whether scintillation attenuation should be included True/False
+- IncludeClouds: Whether cloud attenuation should be included True/False
 
 Optional in the analysis part are:
 ```
@@ -448,6 +458,62 @@ Some parameters can be entered to get the required CN0:
 - DataRateBitPerSec: datarate required
 
 <img src="/docs/com_gr2sp_budget.png" alt="com_gr2sp_budget"/>
+
+### com_gr2sp_budget_interference
+Plots the link budget parameters for a certain ground station to all satellites as in com_gr2sp_budget,
+but now includes interference from a second satellite following closely the nominal link satellite. 
+
+The following parameters are needed:
+```
+<Analysis>
+    <Type>com_gr2sp_budget</Type>
+    <GroundStationID>1</GroundStationID>
+    <TransmitterObject>Satellite</TransmitterObject>
+    <CarrierFrequency>10e9</CarrierFrequency>
+    <BandWidth>675e6</BandWidth>
+    <TransmitPowerW>10</TransmitPowerW>
+    <TransmitLossesdB>2</TransmitLossesdB>
+    <TransmitGaindB>20</TransmitGaindB>
+    <TransmitAntennaDiameter>0.25</TransmitAntennaDiameter>
+    <ReceiveGaindB>64</ReceiveGaindB>
+    <ReceiveAntennaDiameter>6</ReceiveAntennaDiameter>
+    <ReceiveLossesdB>3</ReceiveLossesdB>
+    <ReceiveTempK>290</ReceiveTempK>
+    <PExceedPerc>0.5</PExceedPerc>
+    <IncludeGas>True</IncludeGas>
+    <IncludeRain>True</IncludeRain>
+    <IncludeScintillation>False</IncludeScintillation>
+    <IncludeClouds>False</IncludeClouds>
+</Analysis>
+```
+Parameters are:
+- GroundStationID: Station to be used, refer to the ground segment part.
+- TransmitterObject: Satellite or Ground Station, which one is transmitting
+- CarrierFrequency: Carrier frequency of signal in Hz
+- BandWidth: Signal bandwith in Hz
+- TransmitPowerW: Transmit power of transmitter in W
+- TransmitLossesdB: All transmit losses in dB
+- TransmitGaindB: Transmit gain of antenna in dB
+- TransmitAntennaDiameter: Antenna diameter in m (not used to compute Gain)
+- ReceiveGaindB: Receive gain of antenna in dB
+- ReceiveLossesdB: All receive losses in dB
+- ReceiveTempK: Receive Temperature in K
+- ReceiveAntennaDiameter: Antenna diameter in m (not used to compute Gain)
+- PExceedPerc: Probability to exceed attenuation values in %.
+
+Optional in the analysis part are:
+```
+    <ModulationType>BPSK</ModulationType>
+    <BitErrorRate>1e-5</BitErrorRate>
+    <DataRateBitPerSec>1e6</DataRateBitPerSec>
+```
+
+Some parameters can be entered to get the required CN0:
+- ModulationType: 'BPSK' or 'QPSK'
+- BitErrorRate: bit error rate required
+- DataRateBitPerSec: datarate required
+
+<img src="/docs/com_gr2sp_budget_interference.png" alt="com_gr2sp_budget_interfernce"/>
 
 
 ### com_sp2sp_budget

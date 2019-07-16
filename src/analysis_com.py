@@ -338,6 +338,8 @@ class AnalysisComGr2SpBudgetInterference(AnalysisBase):
             self.transmit_losses = float(node.find('TransmitLossesdB').text)
         if node.find('TransmitGaindB') is not None:
             self.transmit_gain = float(node.find('TransmitGaindB').text)
+        if node.find('TransmitAntennaDiameter') is not None:
+            self.transmit_ant_dia = float(node.find('TransmitAntennaDiameter').text)
 
         if node.find('PExceedPerc') is not None:
             self.p_exceed = float(node.find('PExceedPerc').text)
@@ -352,6 +354,8 @@ class AnalysisComGr2SpBudgetInterference(AnalysisBase):
 
         if node.find('ReceiveGaindB') is not None:
             self.receive_gain = float(node.find('ReceiveGaindB').text)
+        if node.find('ReceiveAntennaDiameter') is not None:
+            self.receive_ant_dia = float(node.find('ReceiveAntennaDiameter').text)
         if node.find('ReceiveLossesdB') is not None:
             self.receive_losses = float(node.find('ReceiveLossesdB').text)
         if node.find('ReceiveTempK') is not None:
@@ -414,20 +418,20 @@ class AnalysisComGr2SpBudgetInterference(AnalysisBase):
             C_fact = np.power(10, C/10) # all in factors since C0/(N0+I0)
             N0 = K_BOLTZMANN + 10*np.log10(temp_sys)
             N0_fact = np.power(10, N0/10)
-            tx_gain = misc_fn.dish_pattern(self.carrier_frequency,0.25,self.transmit_gain,off_boresight_angle)
-            rx_gain = misc_fn.dish_pattern(self.carrier_frequency,6,self.receive_gain,off_boresight_angle)
+            tx_gain = misc_fn.dish_pattern(self.carrier_frequency,
+                                           self.transmit_ant_dia,self.transmit_gain,off_boresight_angle)
+            rx_gain = misc_fn.dish_pattern(self.carrier_frequency,
+                                           self.receive_ant_dia,self.receive_gain,off_boresight_angle)
             I = 10 * log10(self.transmit_power) + tx_gain - self.transmit_losses + \
                 - fsl - a_g.value - a_r.value - a_c.value - a_s.value + \
                 + rx_gain - self.receive_losses
-            I0 = I - 10*np.log10(675e6)
+            I0 = I - 10*np.log10(self.bandwidth)
             I0_fact = np.power(10, I0/10)
             cni0 = 10*np.log10(C_fact / (N0_fact+I0_fact))
 
             self.metric[sm.cnt_epoch,:] = [self.times_f_doy[sm.cnt_epoch], degrees(elevation),
                                            cn0, cni0, a_g.value, a_r.value, a_c.value, a_s.value, a_t.value,
                                            degrees(off_boresight_angle), tx_gain, rx_gain]
-
-
 
     def after_loop(self, sm):
         self.metric = self.metric[~np.all(self.metric == 0, axis=1)]  # Clean up empty rows
