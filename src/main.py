@@ -158,4 +158,10 @@ if __name__ == '__main__':
 
     run_after_time_loop(sm)  # Run the after time loop
 
-# TODO analysis SAT
+# TODO analysis SAT Energy
+# TODO analysis SAT Data storage
+# TODO analysis SAT Thermal
+# TODO analysis SAT Aocs
+
+# TODO incorporate datashader or geoviews
+

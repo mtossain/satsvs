@@ -147,6 +147,7 @@ class User:
         self.type = ''  # Static, grid or spacecraft
         self.user_id = 0
         self.rx_constellation = ''
+        self.name = ''
         self.elevation_mask = []  # Could be varying over azimuth...
         self.el_mask_max = []  # Could be varying over azimuth...
 

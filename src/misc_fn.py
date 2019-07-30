@@ -653,52 +653,52 @@ def earth_radius_lat(lat):
     return radius
 
 
-
-def check_users_in_plane(user_pos, planes, shared_array):
-    """
-    :param user_pos: user position ECEF
-    :param planes: normals of the planes
-    :param shared_array: shared array
-    :return: user-metric
-    Does not work well since processes take too much overhead to run, therefore normal numba version preferred
-    """
-
-    num_processors = 8  # for mac pro
-    process_list = []
-    for i in range(num_processors):
-        process_list.append(Process(target=process_users, args=(shared_array, num_processors, i, user_pos, planes)))
-        process_list[i].start()
-
-    for i in range(num_processors):
-        process_list[i].join()
-
-    return np.frombuffer(shared_array, dtype="int32")
-
-
-def process_users(shared_array, num_processors, cnt_processor, user_pos, planes):
-    """
-    :param shared_array:
-    :param num_processors:
-    :param cnt_processor:
-    :param user_pos:
-    :param planes:
-    :return:
-    Divide the users among the processors, does not work well, since startup of processor takes too long
-    """
-    num_users = len(shared_array)
-    set_length = np.floor(num_users / num_processors)
-    for idx_user in range(cnt_processor*set_length,(cnt_processor+1)*set_length):
-        if test_point_within_pyramid(user_pos[idx_user, :], planes):
-            shared_array[idx_user] = 1  # Within swath
-
-
-# @jit(nopython=True)
-# def check_users_in_plane(user_metric, user_pos, planes, cnt_epoch):
-#     n_users = len(user_metric)
-#     for idx_user in range(n_users):
+#
+# def check_users_in_plane(user_pos, planes, shared_array):
+#     """
+#     :param user_pos: user position ECEF
+#     :param planes: normals of the planes
+#     :param shared_array: shared array
+#     :return: user-metric
+#     Does not work well since processes take too much overhead to run, therefore normal numba version preferred
+#     """
+#
+#     num_processors = 8  # for mac pro
+#     process_list = []
+#     for i in range(num_processors):
+#         process_list.append(Process(target=process_users, args=(shared_array, num_processors, i, user_pos, planes)))
+#         process_list[i].start()
+#
+#     for i in range(num_processors):
+#         process_list[i].join()
+#
+#     return np.frombuffer(shared_array, dtype="int32")
+#
+#
+# def process_users(shared_array, num_processors, cnt_processor, user_pos, planes):
+#     """
+#     :param shared_array:
+#     :param num_processors:
+#     :param cnt_processor:
+#     :param user_pos:
+#     :param planes:
+#     :return:
+#     Divide the users among the processors, does not work well, since startup of processor takes too long
+#     """
+#     num_users = len(shared_array)
+#     set_length = np.floor(num_users / num_processors)
+#     for idx_user in range(cnt_processor*set_length,(cnt_processor+1)*set_length):
 #         if test_point_within_pyramid(user_pos[idx_user, :], planes):
-#             user_metric[idx_user,cnt_epoch] = 1  # Within swath
-#     return user_metric[:,cnt_epoch]
+#             shared_array[idx_user] = 1  # Within swath
+
+
+@jit(nopython=True)
+def check_users_in_plane(user_metric, user_pos, planes, cnt_epoch):
+    n_users = len(user_metric)
+    for idx_user in range(n_users):
+        if test_point_within_pyramid(user_pos[idx_user, :], planes):
+            user_metric[idx_user,cnt_epoch] = 1  # Within swath
+    return user_metric[:,cnt_epoch]
 
 
 @jit(nopython=True)

@@ -2,45 +2,14 @@
 <!--Simulation Scenario-->
 <Scenario>
     <SpaceSegment>
-<!--	    <Constellation>-->
-<!--			<NumOfPlanes>1</NumOfPlanes>-->
-<!--			<NumOfSatellites>2</NumOfSatellites>-->
-<!--			<ConstellationID>1</ConstellationID>-->
-<!--			<ConstellationName>S1</ConstellationName>-->
-<!--		    <ReceiverConstellation>1111</ReceiverConstellation>-->
-<!--			<ObsSwathStart>325000.0</ObsSwathStart>-->
-<!--			<ObsSwathStop>725000.0</ObsSwathStop>-->
-<!--			<Satellite>-->
-<!--				<SatelliteID>1</SatelliteID>-->
-<!--				<Plane>1</Plane>-->
-<!--				<EpochMJD>54465.0</EpochMJD>-->
-<!--				<SemiMajorAxis>7081289</SemiMajorAxis>-->
-<!--				<Eccentricity>0.00</Eccentricity>-->
-<!--				<Inclination>98.157</Inclination>-->
-<!--				<RAAN>188.934</RAAN>-->
-<!--				<ArgOfPerigee>0.00</ArgOfPerigee>-->
-<!--				<MeanAnomaly>0</MeanAnomaly>-->
-<!--			</Satellite>-->
-<!--			<Satellite>-->
-<!--				<SatelliteID>2</SatelliteID>-->
-<!--				<Plane>1</Plane>-->
-<!--				<EpochMJD>54465.0</EpochMJD>-->
-<!--				<SemiMajorAxis>7081289</SemiMajorAxis>-->
-<!--				<Eccentricity>0.00</Eccentricity>-->
-<!--				<Inclination>98.157</Inclination>-->
-<!--				<RAAN>188.934</RAAN>-->
-<!--				<ArgOfPerigee>0.00</ArgOfPerigee>-->
-<!--				<MeanAnomaly>180</MeanAnomaly>-->
-<!--			</Satellite>-->
-<!--        </Constellation>-->
 	    <Constellation>
 			<NumOfPlanes>1</NumOfPlanes>
 			<NumOfSatellites>2</NumOfSatellites>
 			<ConstellationID>1</ConstellationID>
-			<ConstellationName>ROSEL</ConstellationName>
+			<ConstellationName>S1-NG</ConstellationName>
 		    <ReceiverConstellation>1111</ReceiverConstellation>
 			<ObsSwathStart>325000.0</ObsSwathStart>
-			<ObsSwathStop>585000.0</ObsSwathStop>
+			<ObsSwathStop>575000.0</ObsSwathStop>
 			<Satellite>
 				<SatelliteID>1</SatelliteID>
 				<Plane>1</Plane>
@@ -61,30 +30,9 @@
 				<Inclination>98.157</Inclination>
 				<RAAN>188.934</RAAN>
 				<ArgOfPerigee>0.00</ArgOfPerigee>
-				<MeanAnomaly>.2</MeanAnomaly>
+				<MeanAnomaly>180</MeanAnomaly>
 			</Satellite>
         </Constellation>
-<!--	    <Constellation>-->
-<!--			<NumOfPlanes>1</NumOfPlanes>-->
-<!--			<NumOfSatellites>2</NumOfSatellites>-->
-<!--			<ConstellationID>2</ConstellationID>-->
-<!--			<ConstellationName>NISAR</ConstellationName>-->
-<!--		    <ReceiverConstellation>1111</ReceiverConstellation>-->
-<!--			<ObsSwathStart>485000.0</ObsSwathStart>-->
-<!--			<ObsSwathStop>715000.0</ObsSwathStop>-->
-<!--			<Satellite>-->
-<!--				<SatelliteID>1</SatelliteID>-->
-<!--				<Plane>1</Plane>-->
-<!--				<EpochMJD>54465.0</EpochMJD>-->
-<!--				<SemiMajorAxis>7121289</SemiMajorAxis>-->
-<!--				<Eccentricity>0.00</Eccentricity>-->
-<!--				<Inclination>98.5</Inclination>-->
-<!--				<RAAN>188.934</RAAN>-->
-<!--				<ArgOfPerigee>0.00</ArgOfPerigee>-->
-<!--				<MeanAnomaly>0</MeanAnomaly>-->
-<!--			</Satellite>-->
-<!--        </Constellation>-->
-
 <!--    <Constellation>-->
 <!--        <ConstellationID>1</ConstellationID>-->
 <!--        <NumOfSatellites>1</NumOfSatellites>-->
@@ -101,17 +49,17 @@
 	</SpaceSegment>
 	<!--Defines the ground stations that should be simulated-->
 	<GroundSegment>
-      <NumStation>2</NumStation>
-      <NetworkName>Sentinel-1</NetworkName>
+      <NumStation>1</NumStation>
+      <NetworkName>RIMS</NetworkName>
       <GroundStation>
-        <Type>Sentinel-1</Type>
+        <Type>RIMS</Type>
         <ConstellationID>1</ConstellationID>
         <GroundStationID>1</GroundStationID>
-        <GroundStationName>Svalbard</GroundStationName>
-        <Latitude>77.8750</Latitude>
-        <Longitude>20.9752</Longitude>
+        <GroundStationName>ALB</GroundStationName>
+        <Latitude>57.10</Latitude>
+        <Longitude>9.90</Longitude>
         <Height>0</Height>
-        <ReceiverConstellation>1111</ReceiverConstellation>
+        <ReceiverConstellation>1</ReceiverConstellation>
         <ElevationMask>5</ElevationMask>
       </GroundStation>
 	</GroundSegment>
@@ -119,24 +67,94 @@
 	<UserSegment>
 <!--        <User>-->
 <!--            <Type>Grid</Type>-->
-<!--            <LatMin>-90</LatMin>-->
-<!--            <LatMax>90</LatMax>-->
+<!--            <LatMin>-60</LatMin>-->
+<!--            <LatMax>60</LatMax>-->
 <!--            <LonMin>-180</LonMin>-->
 <!--            <LonMax>180</LonMax>-->
-<!--            <LatStep>.5</LatStep>-->
-<!--            <LonStep>.5</LonStep>-->
+<!--            <LatStep>1</LatStep>-->
+<!--            <LonStep>1</LonStep>-->
 <!--            <Height>0.0</Height>-->
 <!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
-<!--            <ElevationMask>0.0</ElevationMask>-->
+<!--            <ElevationMask>5.0</ElevationMask>-->
 <!--        </User>-->
-        <User>
-            <Type>Static</Type>
-            <Latitude>77.8750</Latitude>
-            <Longitude>20.9752</Longitude>
+<!--		<User>-->
+<!--            <Type>Polygon</Type>-->
+<!--			<Name>Europe</Name>-->
+<!--			<LatStep>.5</LatStep>-->
+<!--			<LonStep>.5</LonStep>-->
+<!--            <PolygonList>(-24.11, 65.34),(-15.97, 52.45),(-14.89, 42.52),(-15.59, 37.36),(-20.89, 42.52),(-30.06, 43.62),(-36.40, 41.78),(-38.86, 35.15),(-27.21, 31.10),(-20.50, 23.74),(-7.47, 33.68),(6.98, 34.42),(19.68, 31.10),(30.26, 33.68),(39.77, 37.73),(44.35, 40.67),(38.70, 45.09),(37.63, 49.51),(27.04, 57.61),(33.37, 63.87),(39.71, 65.71),(36.88, 72.70),(31.58, 78.22),(13.60, 75.64),(1.28, 68.65),(-9.29, 62.02),(-14.59, 66.81)</PolygonList>-->
+<!--            <Height>0</Height>-->
+<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--            <ElevationMask>0</ElevationMask>-->
+<!--        </User>-->
+<!--		<User>-->
+<!--            <Type>Polygon</Type>-->
+<!--			<Name>Antarctic</Name>-->
+<!--			<LatStep>.5</LatStep>-->
+<!--			<LonStep>.5</LonStep>-->
+<!--            <PolygonList>(-180.0, -71.60),(-149.02, -67.55),(-124.68, -71.96),(-95.41, -73.80),(-71.44, -69.75),(-57.70, -66.81),(-55.93, -68.65),(-28.44, -62.76),(-21.03, -64.23),(10.35, -61.66),(27.98, -64.60),(50.55, -66.44),(72.76, -65.71),(79.81, -63.87),(129.54, -69.75),(157.75, -69.39),(179.61, -71.23),(180.0, -90.37),(-180.0, -90.37)</PolygonList>-->
+<!--            <Height>0</Height>-->
+<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--            <ElevationMask>0</ElevationMask>-->
+<!--        </User>-->
+<!--		<User>-->
+<!--            <Type>Polygon</Type>-->
+<!--			<Name>Arctic</Name>-->
+<!--			<LatStep>.5</LatStep>-->
+<!--			<LonStep>.5</LonStep>-->
+<!--            <PolygonList>(-180.0, 55.77),(-164.07, 56.50),(-165.50, 67.91),(-128.48, 69.39),(-122.83, 65.71),(-106.61, 64.60),(-95.34, 69.02),(-95.66, 56.50),(-82.61, 49.88),(-74.51, 56.87),(-64.64, 57.24),(-56.52, 54.66),(-22.32, 56.13),(-17.39, 59.08),(-5.41, 60.92),(5.50, 70.86),(30.88, 75.28),(41.12, 69.75),(39.01, 64.23),(62.27, 69.02),(66.16, 64.60),(72.15, 64.60),(79.19, 71.60),(97.52, 77.48),(107.39, 75.64),(110.57, 71.96),(159.23, 71.23),(168.05, 68.65),(178.98, 68.65),(180.0, 90.00),(-180.0, 89.63)</PolygonList>-->
+<!--			<Height>0</Height>-->
+<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--            <ElevationMask>0</ElevationMask>-->
+<!--        </User>-->
+		<User>
+            <Type>Polygon</Type>
+			<Name>Americas</Name>
+			<LatStep>.5</LatStep>
+			<LonStep>.5</LonStep>
+            <PolygonList>(-165.51, 70.12),(-166.54, 60.18),(-159.13, 57.61),(-174.28, 51.72),(-154.55, 56.13),(-143.27, 59.45),(-140.08, 52.09),(-130.90, 45.46),(-128.77, 36.99),(-121.34, 24.48),(-106.16, 11.96),(-89.57, 5.34),(-79.34, 2.76),(-80.38, -4.23),(-79.66, -14.17),(-72.59, -23.74),(-72.92, -36.63),(-76.41, -55.40),(-74.63, -62.76),(-68.28, -64.60),(-59.47, -61.29),(-68.64, -59.82),(-64.41, -57.24),(-60.21, -45.46),(-52.11, -39.94),(-42.95, -32.94),(-35.92, -24.48),(-32.07, -6.81),(-49.00, 0),(-52.19, 4.23),(-60.30, 4.97),(-57.15, 16.01),(-72.33, 23.37),(-75.51, 29.26),(-62.12, 33.68),(-61.78, 39.94),(-51.21, 41.04),(-44.51, 44.36),(-39.25, 56.13),(-61.46, 56.13),(-76.64, 62.39),(-81.91, 52.82),(-96.37, 57.98),(-87.57, 66.44),(-93.93, 69.75),(-118.61, 69.39),(-129.54, 70.86),(-147.88, 70.86)</PolygonList>
             <Height>0</Height>
             <ReceiverConstellation>1111</ReceiverConstellation>
             <ElevationMask>0</ElevationMask>
         </User>
+		<User>
+            <Type>Polygon</Type>
+			<Name>EurAsia</Name>
+			<LatStep>.5</LatStep>
+			<LonStep>.5</LonStep>
+            <PolygonList>(-36.75, 42.15),(-37.44, 35.15),(-23.68, 28.53),(-21.88, 9.39),(-17.28, 0.92),(-0.35, -4.23),(6.71, -4.60),(8.48, -11.23),(12.72, -15.28),(10.97, -23.01),(19.13, -46.56),(31.81, -41.04),(38.14, -33.31),(46.60, -31.47),(55.06, -27.79),(49.04, -17.48),(40.58, -17.12),(39.51, -10.12),(50.43, -3.50),(54.63, 9.39),(55.68, 14.54),(63.07, 22.27),(72.25, 15.64),(76.51, 3.50),(80.39, 1.66),(85.65, 16.01),(93.41, 11.96),(93.08, 1.29),(103.69, -11.96),(121.32, -15.64),(128.38, -16.01),(125.21, -15.80),(116.41, -20.06),(113.24, -30.37),(115.73, -41.78),(132.30, -38.47),(143.24, -46.20),(146.08, -51.72),(154.51, -37.73),(152.37, -27.06),(146.02, -21.53),(155.51, -9.02),(153.39, -6.81),(131.17, -4.23),(121.26, 17.12),(110.72, -2.76),(104.72, 0.55),(105.77, 5.71),(109.28, 9.75),(107.86, 16.38),(119.13, 21.53),(128.65, 25.95),(139.56, 33.68),(142.37, 41.41),(144.47, 50.25),(144.11, 53.56),(136.35, 54.29),(143.04, 58.34),(155.38, 58.71),(155.04, 49.88),(165.25, 58.71),(179.35, 62.39),(180.04, 70.12),(161.35, 69.39),(140.54, 72.70),(109.16, 72.33),(108.80, 76.01),(87.30, 75.28),(79.19, 71.23),(72.50, 66.44),(63.69, 64.97),(59.45, 69.02),(43.59, 65.71),(39.01, 64.60),(38.64, 74.17),(28.05, 81.53),(11.48, 81.17),(12.90, 75.64),(1.63, 69.39),(-6.82, 62.76),(-15.63, 58.34),(-16.68, 52.82),(-12.07, 41.78),(-14.18, 37.36),(-22.30, 41.78)</PolygonList>
+            <Height>0</Height>
+            <ReceiverConstellation>1111</ReceiverConstellation>
+            <ElevationMask>0</ElevationMask>
+        </User>
+<!--		<User>-->
+<!--            <Type>Polygon</Type>-->
+<!--			<Name>Oceans</Name>-->
+<!--			<LatStep>.5</LatStep>-->
+<!--			<LonStep>.5</LonStep>-->
+<!--            <PolygonList>(-178.52, 56.13),(-141.15, 57.61),(-133.02, 46.20),(-124.17, 27.79),(-107.92, 11.23),(-80.05, 3.50),(-81.08, -8.65),(-74.00, -21.90),(-71.52, -28.90),(-76.05, -56.87),(-68.63, -62.39),(-65.48, -53.19),(-54.92, -42.52),(-36.97, -27.42),(-34.18, -9.39),(-51.13, 3.13),(-57.50, 13.80),(-75.86, 25.58),(-74.47, 34.79),(-60.01, 34.79),(-56.85, 41.78),(-47.69, 43.99),(-40.66, 55.77),(-17.04, 58.34),(-14.53, 38.83),(-21.24, 42.15),(-36.40, 42.52),(-38.15, 35.89),(-26.86, 30.74),(-21.52, 6.44),(-9.87, -3.50),(6.00, -4.23),(11.66, -14.91),(16.30, -39.94),(18.08, -47.67),(30.05, -41.78),(34.62, -34.42),(46.60, -31.47),(62.82, -28.90),(61.74, -19.33),(40.57, -13.44),(39.15, -8.28),(51.83, -2.02),(59.19, 21.53),(72.96, 14.54),(77.56, 4.23),(87.06, 16.38),(92.01, 10.49),(96.62, -4.60),(119.56, -15.64),(129.43, -14.91),(121.34, -23.01),(112.18, -30.00),(115.38, -41.78),(130.89, -39.20),(143.60, -45.83),(148.19, -51.35),(156.27, -33.68),(146.72, -22.27),(154.81, -11.96),(131.88, -3.87),(120.20, 18.59),(121.93, 32.94),(141.30, 47.30),(139.52, 55.03),(162.78, 57.98),(179.00, 62.02),(180.0, -71.60),(141.88, -69.39),(102.03, -66.44),(78.40, -64.23),(29.39, -66.07),(12.11, -60.55),(-27.73, -63.13),(-87.30, -72.33),(-116.57, -73.07),(-149.72, -67.18),(-180.0, -71.23)</PolygonList>-->
+<!--            <Height>0</Height>-->
+<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--            <ElevationMask>0</ElevationMask>-->
+<!--        </User>-->
+<!--		<User>-->
+<!--            <Type>Polygon</Type>-->
+<!--			<LatStep>.5</LatStep>-->
+<!--			<LonStep>.5</LonStep>-->
+<!--            <PolygonList>(-50,-50),(-50,30),(50,40),(50,-50)</PolygonList>-->
+<!--            <Height>0</Height>-->
+<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--            <ElevationMask>0</ElevationMask>-->
+<!--        </User>-->
+
+<!--        <User>-->
+<!--            <Type>Static</Type>-->
+<!--            <Latitude>50</Latitude>-->
+<!--            <Longitude>10</Longitude>-->
+<!--            <Height>0</Height>-->
+<!--            <ReceiverConstellation>111</ReceiverConstellation>-->
+<!--            <ElevationMask>5</ElevationMask>-->
+<!--        </User>-->
 <!--        <User>-->
 <!--            <Type>Spacecraft</Type>-->
 <!--            <TLEFileName>input/example_tle_files/Iridium_20100505_one_satellite.txt</TLEFileName>-->
@@ -149,12 +167,12 @@
 
 	<!--Defines the simulation parameters-->
 	<SimulationManager>
-	    <StartDate>2010-05-08 11:50:00</StartDate>
-	    <StopDate>2010-05-08 12:20:00</StopDate>
-	    <TimeStep>1</TimeStep>
+	    <StartDate>2010-05-08 00:00:00</StartDate>
+	    <StopDate>2010-05-20 00:00:00</StopDate>
+	    <TimeStep>120</TimeStep>
 
-		<IncludeStation2SpaceLinks>True</IncludeStation2SpaceLinks>
-		<IncludeUser2SpaceLinks>True</IncludeUser2SpaceLinks>
+		<IncludeStation2SpaceLinks>False</IncludeStation2SpaceLinks>
+		<IncludeUser2SpaceLinks>False</IncludeUser2SpaceLinks>
 		<IncludeSpace2SpaceLinks>False</IncludeSpace2SpaceLinks>
 
         <OrbitsFromPreviousRun>False</OrbitsFromPreviousRun>
@@ -166,57 +184,19 @@
 <!--            <Revisit>True</Revisit>-->
 <!--	        <Statistic>Mean</Statistic>-->
 <!--        </Analysis>-->
-<!--		<Analysis>-->
-<!--		    <Type>com_gr2sp_budget</Type>-->
-<!--		    <GroundStationID>1</GroundStationID>-->
-<!--		    <TransmitterObject>Satellite</TransmitterObject>-->
-<!--		    <CarrierFrequency>26.25e9</CarrierFrequency>-->
-<!--		    <TransmitPowerW>50</TransmitPowerW>-->
-<!--		    <TransmitLossesdB>5</TransmitLossesdB>-->
-<!--		    <TransmitGaindB>32</TransmitGaindB>-->
-<!--		    <ReceiveGaindB>64</ReceiveGaindB>-->
-<!--		    <ReceiveLossesdB>3</ReceiveLossesdB>-->
-<!--		    <ReceiveTempK>290</ReceiveTempK>-->
-<!--		    <PExceedPerc>0.5</PExceedPerc>-->
-<!--		    <IncludeGas>True</IncludeGas>-->
-<!--		    <IncludeRain>True</IncludeRain>-->
-<!--		    <IncludeScintillation>True</IncludeScintillation>-->
-<!--		    <IncludeClouds>True</IncludeClouds>-->
-<!--		</Analysis>-->
-	<Analysis>
-	    <Type>com_gr2sp_budget_interference</Type>
-	    <GroundStationID>1</GroundStationID>
-	    <TransmitterObject>Satellite</TransmitterObject>
-	    <CarrierFrequency>26.25e9</CarrierFrequency>
-		<BandWidth>675e6</BandWidth>
-	    <TransmitPowerW>50</TransmitPowerW>
-	    <TransmitLossesdB>5</TransmitLossesdB>
-	    <TransmitGaindB>32</TransmitGaindB>
-	    <TransmitAntennaDiameter>0.25</TransmitAntennaDiameter>
-	    <ReceiveGaindB>64</ReceiveGaindB>
-		<ReceiveAntennaDiameter>6</ReceiveAntennaDiameter>
-	    <ReceiveLossesdB>3</ReceiveLossesdB>
-	    <ReceiveTempK>290</ReceiveTempK>
-	    <PExceedPerc>0.5</PExceedPerc>
-	    <IncludeGas>True</IncludeGas>
-	    <IncludeRain>True</IncludeRain>
-	    <IncludeScintillation>True</IncludeScintillation>
-	    <IncludeClouds>True</IncludeClouds>
-	</Analysis>
 
-<!--			<Analysis>-->
-<!--				<Type>obs_swath_push_broom</Type>-->
-<!--	            <PolarView>-60</PolarView>-->
-<!--				<Revisit>True</Revisit>-->
-<!--				<Statistic>Mean</Statistic>-->
-<!--				<SaveOutput>NetCDF</SaveOutput>-->
-<!--			</Analysis>-->
+			<Analysis>
+				<Type>obs_swath_push_broom</Type>
+<!--	            <OrthoViewLatitude>90</OrthoViewLatitude>-->
+				<Revisit>True</Revisit>
+				<Statistic>Mean</Statistic>
+			</Analysis>
 
 
 <!--		<Analysis>-->
 <!--			<Type>cov_ground_track</Type>-->
 <!--			<ConstellationID>1</ConstellationID>-->
-<!--			<SatelliteID>1</SatelliteID>-->
+<!--&lt;!&ndash;			<SatelliteID>29499</SatelliteID>&ndash;&gt;-->
 <!--		</Analysis>-->
 
 <!--        <Analysis>-->
@@ -242,8 +222,8 @@
 
 <!--          <Analysis>-->
 <!--            <Type>cov_satellite_sky_angles</Type>-->
-<!--            <ConstellationID>1</ConstellationID>-->
-<!--            <SatelliteID>1</SatelliteID>-->
+<!--            <ConstellationID>3</ConstellationID>-->
+<!--            <SatelliteID>24307</SatelliteID>-->
 <!--          </Analysis>-->
 
 <!--		<Analysis>-->

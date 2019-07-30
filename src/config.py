@@ -2,6 +2,15 @@ import xml.etree.ElementTree as ET
 from math import ceil, radians
 from astropy.time import Time
 import sgp4
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
+import os
+os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/share/proj'
+from mpl_toolkits.basemap import Basemap
+from shapely.geometry import Point, Polygon
+import numpy as np
+from geopandas import GeoSeries, GeoDataFrame
 # Project modules
 from constants import *
 from analysis_cov import *
@@ -11,6 +20,7 @@ from analysis_nav import *
 from segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
 import logging_svs as ls
 import misc_fn
+import ast
 
 class AppConfig:
     
@@ -282,6 +292,55 @@ class AppConfig:
                             user.el_mask_max = len(mask_values) * [radians(90.0)]
                         user.det_posvel_ecf()  # Do it once to initialise
                         self.users.append(user)
+
+            if user_element.find('Type').text == 'Polygon':
+                name = user_element.find('Name').text
+                lat_step = float(user_element.find('LatStep').text)
+                lon_step = float(user_element.find('LonStep').text)
+                height = float(user_element.find('Height').text)
+                rx_constellation = user_element.find('ReceiverConstellation').text
+                mask_values = user_element.find('ElevationMask').text.split(',')
+                mask_max_values = []
+                if user_element.find('ElevationMaskMaximum') is not None:
+                    mask_max_values = user_element.find('ElevationMaskMaximum').text.split(',')
+                if user_element.find('PolygonList') is not None:
+                    points = list(ast.literal_eval(user_element.find('PolygonList').text))
+                    poly = Polygon(points)
+                else:
+                    poly = GeoDataFrame.from_file(user_element.find('PolygonFile').text)
+                    poly = poly['geometry'].iloc[0]
+                    #poly = poly[poly.ADMIN == 'Denmark']['geometry'].iloc[0]
+                # Setup a rough grid
+                xmin, xmax, ymin, ymax = poly.bounds[0], poly.bounds[2], poly.bounds[1], poly.bounds[3]
+                ls.logger.info(f'User polygon {name} bounds: lon: {round(xmin,1)},{round(xmax,1)} [deg] lat: {round(ymin,1)},{round(ymax,1)} [deg]')
+                ls.logger.info(f'User polygon {name} area: {round(poly.area,1)} [deg^2] percentage: {round(poly.area/360/180*100,1)} [%] Earth surface')
+                xx, yy = np.meshgrid(np.arange(xmin, xmax, lon_step), np.arange(ymin, ymax, lat_step))
+                xc = xx.flatten(); yc = yy.flatten()
+                # Check the ones within the polygon
+                pts = GeoSeries([Point(x, y) for x, y in zip(xc, yc)])
+                in_map = np.array([pts.within(poly)]).sum(axis=0)
+                pts = GeoSeries([val for pos, val in enumerate(pts) if in_map[pos]])
+
+                # Now make the full list of users
+                for i, pt in enumerate(pts):
+                    user = User()
+                    user.type = "Polygon"
+                    user.name = name
+                    user.user_id = i
+                    user.UserName = "Polygon"
+                    user.lla[0] = radians(pt.y)
+                    user.lla[1] = radians(pt.x)
+                    user.lla[2] = height
+                    user.num_lat = len(pts)
+                    user.num_lon = len(pts)
+                    user.rx_constellation = rx_constellation
+                    user.elevation_mask = [radians(float(n)) for n in mask_values]
+                    if user_element.find('ElevationMaskMaximum') is not None:
+                        user.el_mask_max = [radians(float(n)) for n in mask_max_values]
+                    else:
+                        user.el_mask_max = len(mask_values) * [radians(90.0)]
+                    user.det_posvel_ecf()  # Do it once to initialise
+                    self.users.append(user)
 
             if user_element.find('Type').text == 'Spacecraft':
                 user = User()

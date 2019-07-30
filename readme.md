@@ -120,31 +120,59 @@ Ground stations belong to a constellation <ConstellationID> and can be told to r
 values seperated by commas, dividing the azimuth circle in equal parts.
 
 ### User segment
-The following xml is used to setup the user segment:
+The following xml is used to setup the user segment, here a quadrangle grid:
 ```
 <UserSegment>
-    <Type>Grid</Type>
-    <LatMin>-90</LatMin>
-    <LatMax>90</LatMax>
-    <LonMin>-180</LonMin>
-    <LonMax>180</LonMax>
-    <LatStep>10</LatStep>
-    <LonStep>10</LonStep>
-    <Height>0</Height>
-    <ReceiverConstellation>111</ReceiverConstellation>
-    <ElevationMask>5</ElevationMask>
+    <User>
+        <Type>Grid</Type>
+        <LatMin>-90</LatMin>
+        <LatMax>90</LatMax>
+        <LonMin>-180</LonMin>
+        <LonMax>180</LonMax>
+        <LatStep>10</LatStep>
+        <LonStep>10</LonStep>
+        <Height>0</Height>
+        <ReceiverConstellation>111</ReceiverConstellation>
+        <ElevationMask>5</ElevationMask>
+    </User>
 </UserSegment>
 ```
-The user segment can be setup as a grid or single locations:
+or as single static location:
 ```
-<UserSegment>
+<User>
     <Type>Static</Type>
     <Latitude>50</Latitude>
     <Longitude>5</Longitude>
     <Height>0</Height>
     <ReceiverConstellation>111</ReceiverConstellation>
     <ElevationMask>5</ElevationMask>
-</UserSegment>
+</User>
+```
+or as a polygon surface with manual points as tuples:
+```
+<User>
+    <Type>Polygon</Type>
+    <Name>Europe</Name>
+    <LatStep>.5</LatStep>
+    <LonStep>.5</LonStep>
+    <PolygonList>(-24.11, 65.34),(-15.97, 52.45),(-14.89, 42.52),(-15.59, 37.36),(-20.89, 42.52),(-30.06, 43.62),(-36.40, 41.78),(-38.86, 35.15),(-27.21, 31.10),(-20.50, 23.74),(-7.47, 33.68),(6.98, 34.42),(19.68, 31.10),(30.26, 33.68),(39.77, 37.73),(44.35, 40.67),(38.70, 45.09),(37.63, 49.51),(27.04, 57.61),(33.37, 63.87),(39.71, 65.71),(36.88, 72.70),(31.58, 78.22),(13.60, 75.64),(1.28, 68.65),(-9.29, 62.02),(-14.59, 66.81)</PolygonList>
+    <Height>0</Height>
+    <ReceiverConstellation>1111</ReceiverConstellation>
+    <ElevationMask>0</ElevationMask>
+</User>
+```
+or as a polygon surface defined in a shapefile:
+```
+<User>
+    <Type>Polygon</Type>
+    <Name>Europe</Name>
+    <LatStep>.5</LatStep>
+    <LonStep>.5</LonStep>
+    <PolygonFile>../input/polygon.shp</PolygonFile>
+    <Height>0</Height>
+    <ReceiverConstellation>1111</ReceiverConstellation>
+    <ElevationMask>0</ElevationMask>
+</User>
 ```
 or as a spacecraft user through a TLE file:
 ```
@@ -513,7 +541,7 @@ Some parameters can be entered to get the required CN0:
 - BitErrorRate: bit error rate required
 - DataRateBitPerSec: datarate required
 
-<img src="/docs/com_gr2sp_budget_interference.png" alt="com_gr2sp_budget_interfernce"/>
+<img src="/docs/com_gr2sp_budget_interference.png" alt="com_gr2sp_budget_interference"/>
 
 
 ### com_sp2sp_budget

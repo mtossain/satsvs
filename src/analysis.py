@@ -2,11 +2,10 @@ import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
 import os
-os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/lib/python3.6/site-packages/pyproj/data'
+os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/share/proj'
 from mpl_toolkits.basemap import Basemap
 from math import sin, cos, asin, degrees, radians
 import numpy as np
-from numba import jit
 # Modules from project
 import logging_svs as ls
 
@@ -65,6 +64,7 @@ class AnalysisObs:   # Common methods needed for some OBS analysis
         plt.subplots_adjust(left=.1, right=.9, top=0.92, bottom=0.1)
         plt.savefig('../output/'+self.type+'.png')
         plt.show()
+        dum = 1
 
     def plot_swath_revisit(self, sm, user_metric, statistic, polar_view):
         plot_points = np.zeros((len(sm.users), 3))
