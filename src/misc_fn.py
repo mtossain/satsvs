@@ -2,7 +2,9 @@ import math
 from math import sin, cos, atan2, atan, fabs, acos
 import time
 import numpy as np
-from astropy.coordinates import EarthLocation
+from astropy.coordinates import EarthLocation, AltAz, get_sun
+from astropy import time
+from astropy import coordinates, units as u
 from math import tan, sqrt, asin, degrees, radians
 from numpy import dot, arccos, cross, sin, cos
 from numpy.linalg import norm
@@ -701,6 +703,33 @@ def check_users_in_plane(user_metric, user_pos, planes, cnt_epoch):
     return user_metric[:,cnt_epoch]
 
 
+def det_sza_fast(user_metric, user_pos_lla, epoch, cnt_epoch): # In fact very slow, TBD
+
+    n_users = len(user_metric)
+    for idx_user in range(n_users):
+        location = EarthLocation(lat=user_pos_lla[idx_user,0]*u.rad,
+                                 lon=user_pos_lla[idx_user,1]*u.rad,
+                                 height=user_pos_lla[idx_user,2]*u.m)
+        altazframe = AltAz(obstime=epoch, location=location)
+        sun_altaz = get_sun(epoch).transform_to(altazframe)
+        if (user_metric[idx_user,cnt_epoch] > 0):  # Within swath
+            user_metric[idx_user, cnt_epoch] = 90 - sun_altaz.alt.value
+    return user_metric[:,cnt_epoch]
+
+
+def det_sza(user_pos_lla, epoch):
+
+    location = EarthLocation(lat=radians(user_pos_lla[0])*u.rad,
+                             lon=radians(user_pos_lla[1])*u.rad,
+                             height=0*u.m)
+    altazframe = AltAz(obstime=epoch, location=location)
+    sun_altaz = get_sun(epoch).transform_to(altazframe)
+    if (sun_altaz.alt.value > 0):  # Above horizon
+        return 90 - sun_altaz.alt.value
+    else:
+        return 0
+
+
 @jit(nopython=True)
 def check_users_from_nadir(user_metric, user_pos, sat_pos, earth_angle_swath, cnt_epoch):
     """
@@ -1092,4 +1121,73 @@ def dish_pattern(frequency, diameter, max_gain, theta):
     return 10.0 * np.log10(pattern(theta)) + max_gain # radiated pattern in dB
 
 
+def dish_pattern_manual(points, angle_off_boresight):
+    """
+    :param points: list with points as function of elevation ranging from 0 - 180 deg off boresight in [dB]
+    :param angle_off_boresight: angle off boresight in [radians]
+    :return: gain at angle given in [dB]
+    """
 
+    tck = interpolate.splrep(points[:, 0], points[:, 1], s=0)  # cubic interpolation
+    xnew = np.abs(degrees(angle_off_boresight))
+
+    return interpolate.splev(xnew, tck, der=0)
+
+
+@u.quantity_input(ltan=u.hourangle)
+def raan_from_ltan(epoch, ltan=12.0):
+    """RAAN angle from LTAN for SSO around the earth
+    Parameters
+    ----------
+    epoch : ~astropy.time.Time
+         Value of time to calculate the RAAN for
+    ltan: ~astropy.units.Quantity
+         Decimal hour between 0 and 24
+    Returns
+    -------
+    RAAN: ~astropy.units.Quantity
+        Right ascension of the ascending node angle in GCRS
+    Note
+    ----
+    Calculations of the sun mean longitude and equation of time
+    follow "Fundamentals of Astrodynamics and Applications"
+    Fourth edition by Vallado, David A.
+    """
+    constants_J2000 = time.Time("J2000", scale="tt")
+    T_UT1 = ((epoch.ut1 - constants_J2000).value / 36525.0) * u.deg
+    T_TDB = ((epoch.tdb - constants_J2000).value / 36525.0) * u.deg
+
+    # Apparent sun position
+    sun_position = coordinates.get_sun(epoch)
+
+    # Calculate the sun apparent local time
+    salt = sun_position.ra + 12 * u.hourangle
+
+    # Use the equation of time to calculate the mean sun local time (fictional sun without anomalies)
+
+    # sun mean anomaly
+    M_sun = 357.5291092 * u.deg + 35999.05034 * T_TDB
+
+    # sun mean longitude
+    l_sun = 280.460 * u.deg + 36000.771 * T_UT1
+    l_ecliptic_part2 = 1.914666471 * u.deg * np.sin(
+        M_sun
+    ) + 0.019994643 * u.deg * np.sin(2 * M_sun)
+    l_ecliptic = l_sun + l_ecliptic_part2
+
+    eq_time = (
+        -l_ecliptic_part2
+        + 2.466 * u.deg * np.sin(2 * l_ecliptic)
+        - 0.0053 * u.deg * np.sin(4 * l_ecliptic)
+    )
+
+    # Calculate sun mean local time
+
+    smlt = salt + eq_time
+
+    # Desired angle between sun and ascending node
+    alpha = (coordinates.Angle(ltan).wrap_at(24 * u.hourangle)).to(u.rad)
+
+    # Use the mean sun local time calculate needed RAAN for given LTAN
+    raan = smlt + alpha
+    return raan

@@ -21,6 +21,7 @@ K_BOLTZMANN = -228.6  # dBJ/K
 
 R_SUN = 6.9599e8  # Radius Sun [m] Seidelmann 1992
 R_EARTH = 6378136.3  # Radius Earth [m] EGM2008 & EGM96
+
 R_MOON = 1738.200e3
 
 OMEGA_EARTH = 7.29211514670698e-5  # [rad/s]Aoki 1982, NIMA 1997  Earth rotation

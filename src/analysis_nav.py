@@ -2,10 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from math import degrees, radians
-import matplotlib
-matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
-os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/share/proj'
 from mpl_toolkits.basemap import Basemap
 # Import project modules
 from src import misc_fn

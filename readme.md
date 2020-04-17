@@ -27,6 +27,7 @@ parameters and analysis are defined. Analysis can be added as wished, the baseli
 ### Earth observation
 - __obs_swath_conical__: Swath coverage for satellite(s) with conical scanners
 - __obs_swath_pushbroom__: Swath coverage for satellite(s)
+- __obs_sza_subsat__: Solar Zenith Angle (SZA) for all satellite(s) sub satellite point
 
 ### Communication
 - __com_gr2sp_budget__: For station-satellite received power, losses and C/N0
@@ -82,6 +83,23 @@ The following xml is used to setup the space segment:
         </Constellation>
     </SpaceSegment>
 
+```
+The satellite can also be defined as an Sun Synchronous Satellite (SSO) with:
+- LTAN Local Time Ascending Node in hours
+- Altitude in m
+The inclination is computed based on the SSO assumption. Put the Epoch at midday, ArgOfPerigee at 0 and MeanAnomaly at 0,
+so that the satellite passes the equator at ltan requested.
+```
+<Satellite>
+    <SatelliteID>1</SatelliteID>
+    <Plane>1</Plane>
+    <EpochMJD>58945.15</EpochMJD>
+    <Altitude>694000</Altitude>
+    <Eccentricity>0.0001402</Eccentricity>
+    <LTAN>22.25</LTAN>
+    <ArgOfPerigee>0.0</ArgOfPerigee>
+    <MeanAnomaly>0.0</MeanAnomaly>
+</Satellite>
 ```
 Orbit parameters are either Keplerian or can be defined as a list of satellites in a TLE file (in input directory):
 ```
@@ -356,7 +374,7 @@ In the constellation part of the space segment are defined the instrument charac
 ```
 as above in meters, at the edge, or in degrees incidence angle:
 ```
-<ObsInclinationAngleStop>52.0</ObsInclinationAngleStop>
+<ObsIncidenceAngleStop>52.0</ObsIncidenceAngleStop>
 ```
 The incidence angle is defined as the angle between the line-of-sight and the nadir vector from the satellite. 
 This is not to be confused with the user observation zenith angle.
@@ -417,6 +435,33 @@ what kind of statistic is displayed per user location.
 
 <img src="/docs/obs_swath_push_broom.png" alt="cov_satellite_push_broom"/>
 <img src="/docs/obs_swath_push_broom_revisit.png" alt="cov_satellite_push_broom_revisit"/>
+
+
+### obs_sza_subsat
+Plots the Solar Zenith Angle SZA for the subsatellite point. 
+All the satellites defined in the config will be used.
+
+The following parameters are needed:
+```
+<Analysis>
+    <Type>obs_sza_subsat</Type>
+</Analysis>
+```
+<img src="/docs/obs_sza_subsat.png" alt="obs_sza_subsat"/>
+
+Optional in the analysis part are:
+```
+<PolarView>90</PolarView>
+<RangeLatitude>-80,80,10</RangeLatitude>
+<SaveOutput>Numpy</SaveOutput>
+```
+- PolarView angle: This parameter can be given to see one part of the globe in an stereographic view, eg.  for the polar region.
+  When negative the area on the South Pole will be visible.
+- RangeLatitude: Min_Lat, Max_Lat and Lat_Step in degrees, will enable plots vs. latitude.
+- SaveOutput: Will write to file the SZA vs latitude averaged over the simulation time.
+
+<img src="/docs/obs_sza_subsat_lat.png" alt="obs_sza_subsat_lat"/>
+<img src="/docs/obs_sza_subsat_lat_year.png" alt="obs_sza_subsat_lat_year"/>
 
 
 - __com_sp2sp_budget__: for satellite-satellite received power and C/N0
@@ -521,7 +566,8 @@ Parameters are:
 - BandWidth: Signal bandwith in Hz
 - TransmitPowerW: Transmit power of transmitter in W
 - TransmitLossesdB: All transmit losses in dB
-- TransmitGaindB: Transmit gain of antenna in dB
+- TransmitGaindB: Transmit gain of antenna in dB (theoretical pattern assumed), or,
+  TransmitGainManualdB: list of tuples in string from 0-180 off boresight gain values
 - TransmitAntennaDiameter: Antenna diameter in m (not used to compute Gain)
 - ReceiveGaindB: Receive gain of antenna in dB
 - ReceiveLossesdB: All receive losses in dB

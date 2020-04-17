@@ -2,11 +2,9 @@ import os
 import numpy as np
 import pandas as pd
 from math import degrees, radians
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib import pyplot as plt
-os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/share/proj'
+import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
+
 # Import project modules
 from src import misc_fn
 from src.constants import PI
@@ -58,6 +56,7 @@ class AnalysisCovGroundTrack(AnalysisBase):
         self.constellation_id = 0  # Mandatory
         self.satellite_id = 0  # Optional
 
+
     def read_config(self, node):
         if node.find('ConstellationID') is not None:
             self.constellation_id = int(node.find('ConstellationID').text)
@@ -85,7 +84,7 @@ class AnalysisCovGroundTrack(AnalysisBase):
 
     def after_loop(self, sm):
 
-        fig = plt.figure(figsize=(10, 5))
+        plt.figure(figsize=(10, 5))
         m = Basemap(projection='cyl', lon_0=0)
         m.drawparallels(np.arange(-90., 99., 30.), labels=[True, False, False, True])
         m.drawmeridians(np.arange(-180., 180., 60.), labels=[True, False, False, True])

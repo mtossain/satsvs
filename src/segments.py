@@ -1,6 +1,6 @@
 # Standard python packages
 import numpy as np
-from math import floor, degrees
+from math import floor, degrees, radians
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
 from sgp4.earth_gravity import wgs84
@@ -8,7 +8,8 @@ from sgp4.io import twoline2rv
 # Modules from the project
 from src.constants import PI, R_EARTH, OMEGA_EARTH
 from src import misc_fn
-
+from astropy import time
+from astropy import coordinates, units as u
 
 class KeplerSet:
 
@@ -53,6 +54,7 @@ class Satellite:
         self.plane = 0  # Plane the satellite is in
         self.name = ''  # Name of the satellite
         self.rx_constellation = ''  # Which constellations can this satellite receive (for SP2SP)
+        self.ltan = -1 # If satellite defined as SSO
 
         self.elevation_mask = []  # Could be varying over azimuth...
         self.el_mask_max = []  # Could be varying over azimuth...
@@ -87,6 +89,13 @@ class Satellite:
         self.p4 = np.zeros(3)  # four corners of the swath
 
     def det_posvel_eci_keplerian(self, mjd_requested):
+
+        if self.ltan != -1 : # For SSO orbits the RAAN depends on the time
+            epoch = Time(mjd_requested, format='mjd')
+            epoch.delta_ut1_utc = 0.0  # avoid getting IERS outside range error
+            raan = misc_fn.raan_from_ltan(epoch, ltan=self.ltan * u.hourangle)
+            self.kepler.right_ascension = radians(raan.value % 360.0)
+
         self.pos_eci, self.vel_eci = misc_fn.kep2xyz(mjd_requested, self.kepler.epoch_mjd,
                                                      self.kepler.semi_major_axis, self.kepler.eccentricity,
                                                      self.kepler.inclination, self.kepler.right_ascension,
@@ -156,7 +165,7 @@ class User:
         self.pos_ecf = np.zeros(3)
         self.vel_ecf = np.zeros(3)
         self.norm_ecf = 0  # For speeding up processes
-        self.lla = np.zeros(3)
+        self.lla = np.zeros(3) # LLA Latitude rad/[-PI/2,PI/2] positive N, Longitude rad/[-PI,PI] positive E, height above ellipsoid
         self.num_lat = 0
         self.num_lon = 0
 
@@ -176,6 +185,13 @@ class User:
 
     def det_posvel_tle(self, gmst_requested, mjd_requested):  # For spacecraft user
         # Compute ECF and ECI coordinates from MJD and TLE set
+
+        if self.ltan != -1 : # For SSO orbits the RAAN depends on the time
+            epoch = Time(mjd_requested, format='mjd')
+            epoch.delta_ut1_utc = 0.0  # avoid getting IERS outside range error
+            raan = misc_fn.raan_from_ltan(epoch, ltan=self.ltan * u.hourangle)
+            self.kepler.right_ascension = radians(raan.value % 360.0)
+
         self.pos_eci, self.vel_eci = misc_fn.kep2xyz(mjd_requested, self.kepler.epoch_mjd,
                                                      self.kepler.semi_major_axis, self.kepler.eccentricity,
                                                      self.kepler.inclination, self.kepler.right_ascension,

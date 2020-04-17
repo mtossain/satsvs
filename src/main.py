@@ -4,15 +4,15 @@ if os.path.exists('../output/main.log'):
     os.remove('../output/main.log')
 import datetime
 import numpy as np
+from astropy.time import Time
+
 # Import project modules
 import config
 import logging_svs as ls
 import misc_fn
 from misc_fn import benchmark
-from astropy.time import Time
 
 
-@benchmark
 def load_configuration():
     sm = config.AppConfig('../input/Config.xml')
     sm.load_satellites()
@@ -23,13 +23,11 @@ def load_configuration():
     return sm  # Configuration is used as state machine
 
 
-@benchmark
 def run_before_time_loop(sm):
     sm.analysis.before_loop(sm)  # Run analysis which is needed before time loop
     ls.logger.info('Finished reading configuration file')
 
 
-@benchmark
 def run_time_loop(sm):
     clear_load_orbit_file(sm)  # Clear or load previous orbit file
 
@@ -46,7 +44,7 @@ def run_time_loop(sm):
 
         sm.time_mjd += sm.time_step / 86400.0  # Update time
 
-@benchmark
+
 def run_after_time_loop(sm):
     ls.logger.info(f'Plotting analysis {sm.analysis.type}')
     sm.analysis.after_loop(sm)  # Run analysis after time loop
@@ -162,6 +160,6 @@ if __name__ == '__main__':
 # TODO analysis SAT Data storage
 # TODO analysis SAT Thermal
 # TODO analysis SAT Aocs
-
+# TODO analysis SZA_pushbroom faster...
 # TODO incorporate datashader or geoviews
 

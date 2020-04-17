@@ -2,15 +2,15 @@ import xml.etree.ElementTree as ET
 from math import ceil, radians
 from astropy.time import Time
 import sgp4
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib import pyplot as plt
 import os
 os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/share/proj'
+import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
+from geopandas import GeoSeries, GeoDataFrame
 from shapely.geometry import Point, Polygon
 import numpy as np
-from geopandas import GeoSeries, GeoDataFrame
+import ast
+
 # Project modules
 from constants import *
 from analysis_cov import *
@@ -20,7 +20,7 @@ from analysis_nav import *
 from segments import Constellation, Satellite, Station, User, Ground2SpaceLink, User2SpaceLink, Space2SpaceLink
 import logging_svs as ls
 import misc_fn
-import ast
+import copy
 
 class AppConfig:
     
@@ -128,10 +128,17 @@ class AppConfig:
                 sat.el_mask_max = const.el_mask_max
                 sat.uere_list = const.uere_list
                 sat.kepler.epoch_mjd = float(satellite.find('EpochMJD').text)
-                sat.kepler.semi_major_axis = float(satellite.find('SemiMajorAxis').text)
+                if satellite.find('Altitude') is not None:
+                    sat.kepler.semi_major_axis = float(satellite.find('Altitude').text)+R_EARTH
+                else:
+                    sat.kepler.semi_major_axis = float(satellite.find('SemiMajorAxis').text)
                 sat.kepler.eccentricity = float(satellite.find('Eccentricity').text)
-                sat.kepler.inclination = radians(float(satellite.find('Inclination').text))
-                sat.kepler.right_ascension = radians(float(satellite.find('RAAN').text))
+                if satellite.find('LTAN') is not None:
+                    sat.kepler.inclination =  math.acos(-pow(sat.kepler.semi_major_axis/12352000,7/2))
+                    sat.ltan = float(satellite.find('LTAN').text)
+                else:
+                    sat.kepler.inclination = radians(float(satellite.find('Inclination').text))
+                    sat.kepler.right_ascension = radians(float(satellite.find('RAAN').text))
                 sat.kepler.arg_perigee = radians(float(satellite.find('ArgOfPerigee').text))
                 sat.kepler.mean_anomaly = radians(float(satellite.find('MeanAnomaly').text))
                 if const.frontal_area is not None:
@@ -271,27 +278,27 @@ class AppConfig:
                     mask_max_values = user_element.find('ElevationMaskMaximum').text.split(',')
 
                 # Now make the full list of users
+                user = User()
+                user.type = "Grid"
+                user.UserName = "Grid"
+                user.num_lat = num_lat
+                user.num_lon = num_lon
+                user.rx_constellation = rx_constellation
+                user.elevation_mask = [radians(float(n)) for n in mask_values]
+                user.lla[2] = height
+                if user_element.find('ElevationMaskMaximum') is not None:
+                    user.el_mask_max = [radians(float(n)) for n in mask_max_values]
+                else:
+                    user.el_mask_max = len(mask_values) * [radians(90.0)]
                 for i in range(num_lat):
                     latitude = lat_min + lat_step * i
                     for j in range(num_lon):
                         longitude = lon_min + lon_step * j
-                        user = User()
-                        user.type = "Grid"
-                        user.user_id = len(self.users)
-                        user.UserName = "Grid"
                         user.lla[0] = radians(latitude)
                         user.lla[1] = radians(longitude)
-                        user.lla[2] = height
-                        user.num_lat = num_lat
-                        user.num_lon = num_lon
-                        user.rx_constellation = rx_constellation
-                        user.elevation_mask = [radians(float(n)) for n in mask_values]
-                        if user_element.find('ElevationMaskMaximum') is not None:
-                            user.el_mask_max = [radians(float(n)) for n in mask_max_values]
-                        else:
-                            user.el_mask_max = len(mask_values) * [radians(90.0)]
                         user.det_posvel_ecf()  # Do it once to initialise
-                        self.users.append(user)
+                        user.user_id = len(self.users)
+                        self.users.append(copy.deepcopy(user))
 
             if user_element.find('Type').text == 'Polygon':
                 name = user_element.find('Name').text
@@ -466,6 +473,10 @@ class AppConfig:
                     self.analysis = AnalysisObsSwathConical()
                 if analysis_node.find('Type').text == 'obs_swath_push_broom':
                     self.analysis = AnalysisObsSwathPushBroom()
+                if analysis_node.find('Type').text == 'obs_sza_push_broom':
+                    self.analysis = AnalysisObsSzaPushBroom()
+                if analysis_node.find('Type').text == 'obs_sza_subsat':
+                    self.analysis = AnalysisObsSzaSubSat()
                 if analysis_node.find('Type').text == 'com_gr2sp_budget':
                     self.analysis = AnalysisComGr2SpBudget()
                 if analysis_node.find('Type').text == 'com_sp2sp_budget':

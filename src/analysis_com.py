@@ -1,14 +1,13 @@
 import os
 import numpy as np
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib import pyplot as plt
-os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/share/proj'
+import matplotlib.pyplot as plt
+# os.environ['PROJ_LIB'] = '/Users/micheltossaint/Documents/anaconda3/share/proj'
 from mpl_toolkits.basemap import Basemap
 from numpy.linalg import norm
 from math import sin, cos, asin, degrees, radians, log10
 import itur
 import astropy.units as u
+import ast
 # Project modules
 from constants import K_BOLTZMANN, C_LIGHT
 from analysis import AnalysisBase
@@ -90,7 +89,7 @@ class AnalysisComGr2SpBudget(AnalysisBase):
                 self.idx_found_station = idx_station
                 break
         self.eirp = 10*log10(self.transmit_power) + self.transmit_gain - self.transmit_losses
-        self.metric = np.zeros((sm.num_epoch, 9))
+        self.metric = np.zeros((sm.num_epoch, 10))
         if self.modulation_type is not None:
             self.cn0_required = misc_fn.comp_cn0_required(self.modulation_type, self.ber, self.data_rate)
 
@@ -126,11 +125,12 @@ class AnalysisComGr2SpBudget(AnalysisBase):
                   +self.receive_gain - self.receive_losses - \
                   K_BOLTZMANN - 10*np.log10(temp_sys)
             self.metric[sm.cnt_epoch,:] = [self.times_f_doy[sm.cnt_epoch], degrees(elevation),
-                                           cn0, a_g.value, a_r.value, a_c.value, a_s.value, fsl, self.cn0_required]
+                                           cn0, a_g.value, a_r.value, a_c.value, a_s.value, a_t.value,
+                                           fsl, self.cn0_required]
 
     def after_loop(self, sm):
         self.metric = self.metric[~np.all(self.metric == 0, axis=1)]  # Clean up empty rows
-        fig = plt.figure(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(10, 6))
         plt.subplots_adjust(left=.1, right=.95, top=0.95, bottom=0.07)
         time_list = self.metric[:, 0]
         plt.plot(time_list, self.metric[:, 1], 'k.', label='Elevation')
@@ -143,12 +143,14 @@ class AnalysisComGr2SpBudget(AnalysisBase):
             plt.plot(time_list, self.metric[:, 5], 'r+', label='Cloud Attenuation')
         if self.include_scintillation:
             plt.plot(time_list, self.metric[:, 6], 'y+', label='Scintillation Attenuation')
-        plt.plot(time_list, self.metric[:, 7]-100, 'c+', label='Free space loss - 100dB')
+        plt.plot(time_list, self.metric[:, 7], 'r.', label='Total Atmospheric Attenuation')
+        plt.plot(time_list, self.metric[:, 8]-100, 'c+', label='Free space loss - 100dB')
         if self.modulation_type is not None:
-            plt.plot(time_list, self.metric[:, 8], 'b+', label='CN0 Required')
-        plt.xlabel('DOY[-]'); plt.ylabel('Elevation [deg], Power values [dB]')
+            plt.plot(time_list, self.metric[:, 9], 'b+', label='CN0 Required')
+        plt.xlabel('Day Of Year DOY [-]'); plt.ylabel('Elevation [deg], Power values [dB]')
         plt.legend(); plt.grid()
         plt.savefig('../output/'+self.type+'.png')
+        ax.ticklabel_format(useOffset=False, style='plain')
         plt.show()
 
 
@@ -304,6 +306,7 @@ class AnalysisComGr2SpBudgetInterference(AnalysisBase):
         self.transmit_power = None
         self.transmit_losses = None
         self.transmit_gain = None
+        self.transmit_gain_manual = None
         self.p_exceed = None
         self.include_rain = None
         self.include_gas = None
@@ -338,6 +341,8 @@ class AnalysisComGr2SpBudgetInterference(AnalysisBase):
             self.transmit_losses = float(node.find('TransmitLossesdB').text)
         if node.find('TransmitGaindB') is not None:
             self.transmit_gain = float(node.find('TransmitGaindB').text)
+        if node.find('TransmitGainManualdB') is not None:
+            self.transmit_gain_manual = np.array(list(ast.literal_eval(node.find('TransmitGainManualdB').text)))
         if node.find('TransmitAntennaDiameter') is not None:
             self.transmit_ant_dia = float(node.find('TransmitAntennaDiameter').text)
 
@@ -384,6 +389,9 @@ class AnalysisComGr2SpBudgetInterference(AnalysisBase):
             elevation = sm.gr2sp[idx_station][0].elevation
             distance = sm.gr2sp[idx_station][0].distance
 
+            if self.transmit_gain_manual is not None:
+                self.transmit_gain = misc_fn.dish_pattern_manual(self.transmit_gain_manual,0)
+
             # Nominal satellite C/N0
             self.eirp = 10 * log10(self.transmit_power) + self.transmit_gain - self.transmit_losses
             fsl = 20 * log10(distance / 1000) + 20 * log10(self.carrier_frequency / 1e9) + 92.45
@@ -418,7 +426,10 @@ class AnalysisComGr2SpBudgetInterference(AnalysisBase):
             C_fact = np.power(10, C/10) # all in factors since C0/(N0+I0)
             N0 = K_BOLTZMANN + 10*np.log10(temp_sys)
             N0_fact = np.power(10, N0/10)
-            tx_gain = misc_fn.dish_pattern(self.carrier_frequency,
+            if self.transmit_gain_manual is not None:
+                tx_gain = misc_fn.dish_pattern_manual(self.transmit_gain_manual,off_boresight_angle)
+            else:
+                tx_gain = misc_fn.dish_pattern(self.carrier_frequency,
                                            self.transmit_ant_dia,self.transmit_gain,off_boresight_angle)
             rx_gain = misc_fn.dish_pattern(self.carrier_frequency,
                                            self.receive_ant_dia,self.receive_gain,off_boresight_angle)
@@ -448,7 +459,7 @@ class AnalysisComGr2SpBudgetInterference(AnalysisBase):
         plt.plot(time_list, np.ones(len(time_list))*self.transmit_gain, label='Tx Gain Nom')
         plt.plot(time_list, np.ones(len(time_list)) *self.receive_gain, label='Rx Gain Nom')
         plt.gca().ticklabel_format(axis='both', style='plain', useOffset=False)
-        plt.xlabel('DOY[-]'); plt.ylabel('Angles [deg], Power values [dB]')
+        plt.xlabel('Day Of Year DOY [-]'); plt.ylabel('Angles [deg], Power values [dB]')
         plt.legend(); plt.grid()
         plt.savefig('../output/'+self.type+'.png')
         plt.show()
@@ -458,6 +469,6 @@ class AnalysisComGr2SpBudgetInterference(AnalysisBase):
         plt.plot(time_list, self.metric[:, 2]-self.metric[:, 3], label='CN0 drop [dB]')
         plt.gca().ticklabel_format(axis='x', style='plain', useOffset=False)
         plt.gca().ticklabel_format(axis='y', style='sci', useOffset=False)
-        plt.xlabel('DOY[-]'); plt.ylabel('Power values [dB]')
+        plt.xlabel('Day Of Year DOY [-]'); plt.ylabel('Power values [dB]')
         plt.legend(); plt.grid()
         plt.show()

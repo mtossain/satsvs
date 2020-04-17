@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Simulation Scenario-->
+<Scenario>
+    <SpaceSegment>
+<!--	    <Constellation>-->
+<!--			<NumOfPlanes>1</NumOfPlanes>-->
+<!--			<NumOfSatellites>2</NumOfSatellites>-->
+<!--			<ConstellationID>1</ConstellationID>-->
+<!--			<ConstellationName>S1</ConstellationName>-->
+<!--		    <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--			<ObsSwathStart>325000.0</ObsSwathStart>-->
+<!--			<ObsSwathStop>725000.0</ObsSwathStop>-->
+<!--			<Satellite>-->
+<!--				<SatelliteID>1</SatelliteID>-->
+<!--				<Plane>1</Plane>-->
+<!--				<EpochMJD>54465.0</EpochMJD>-->
+<!--				<SemiMajorAxis>7081289</SemiMajorAxis>-->
+<!--				<Eccentricity>0.00</Eccentricity>-->
+<!--				<Inclination>98.157</Inclination>-->
+<!--				<RAAN>188.934</RAAN>-->
+<!--				<ArgOfPerigee>0.00</ArgOfPerigee>-->
+<!--				<MeanAnomaly>0</MeanAnomaly>-->
+<!--			</Satellite>-->
+<!--			<Satellite>-->
+<!--				<SatelliteID>2</SatelliteID>-->
+<!--				<Plane>1</Plane>-->
+<!--				<EpochMJD>54465.0</EpochMJD>-->
+<!--				<SemiMajorAxis>7081289</SemiMajorAxis>-->
+<!--				<Eccentricity>0.00</Eccentricity>-->
+<!--				<Inclination>98.157</Inclination>-->
+<!--				<RAAN>188.934</RAAN>-->
+<!--				<ArgOfPerigee>0.00</ArgOfPerigee>-->
+<!--				<MeanAnomaly>180</MeanAnomaly>-->
+<!--			</Satellite>-->
+<!--        </Constellation>-->
+	    <Constellation>
+			<NumOfPlanes>1</NumOfPlanes>
+			<NumOfSatellites>1</NumOfSatellites>
+			<ConstellationID>1</ConstellationID>
+			<ConstellationName>ROSEL</ConstellationName>
+		    <ReceiverConstellation>1111</ReceiverConstellation>
+			<ObsSwathStart>325000.0</ObsSwathStart>
+			<ObsSwathStop>585000.0</ObsSwathStop>
+			<Satellite>
+				<SatelliteID>1</SatelliteID>
+				<Plane>1</Plane>
+				<EpochMJD>54465.0</EpochMJD>
+				<SemiMajorAxis>7081289</SemiMajorAxis>
+				<Eccentricity>0.00</Eccentricity>
+				<Inclination>98.157</Inclination>
+				<RAAN>188.934</RAAN>
+				<ArgOfPerigee>0.00</ArgOfPerigee>
+				<MeanAnomaly>0</MeanAnomaly>
+			</Satellite>
+			<Satellite>
+				<SatelliteID>2</SatelliteID>
+				<Plane>1</Plane>
+				<EpochMJD>54465.0</EpochMJD>
+				<SemiMajorAxis>7081289</SemiMajorAxis>
+				<Eccentricity>0.00</Eccentricity>
+				<Inclination>98.157</Inclination>
+				<RAAN>188.934</RAAN>
+				<ArgOfPerigee>0.00</ArgOfPerigee>
+				<MeanAnomaly>1</MeanAnomaly>
+			</Satellite>
+        </Constellation>
+<!--	    <Constellation>-->
+<!--			<NumOfPlanes>1</NumOfPlanes>-->
+<!--			<NumOfSatellites>2</NumOfSatellites>-->
+<!--			<ConstellationID>2</ConstellationID>-->
+<!--			<ConstellationName>NISAR</ConstellationName>-->
+<!--		    <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--			<ObsSwathStart>485000.0</ObsSwathStart>-->
+<!--			<ObsSwathStop>715000.0</ObsSwathStop>-->
+<!--			<Satellite>-->
+<!--				<SatelliteID>1</SatelliteID>-->
+<!--				<Plane>1</Plane>-->
+<!--				<EpochMJD>54465.0</EpochMJD>-->
+<!--				<SemiMajorAxis>7121289</SemiMajorAxis>-->
+<!--				<Eccentricity>0.00</Eccentricity>-->
+<!--				<Inclination>98.5</Inclination>-->
+<!--				<RAAN>188.934</RAAN>-->
+<!--				<ArgOfPerigee>0.00</ArgOfPerigee>-->
+<!--				<MeanAnomaly>0</MeanAnomaly>-->
+<!--			</Satellite>-->
+<!--        </Constellation>-->
+
+<!--    <Constellation>-->
+<!--        <ConstellationID>1</ConstellationID>-->
+<!--        <NumOfSatellites>1</NumOfSatellites>-->
+<!--        <NumOfPlanes>1</NumOfPlanes>-->
+<!--        <ConstellationName>METOPA</ConstellationName>-->
+<!--        <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--        <TLEFileName>../input/example_tle_files/metop_a.txt</TLEFileName>-->
+<!--		<ObsSwathStart>250000.0</ObsSwathStart>-->
+<!--		<ObsSwathStop>650000.0</ObsSwathStop>-->
+<!--		<ObsInclinationAngleStart>20.0</ObsInclinationAngleStart>-->
+<!--		<ObsInclinationAngleStop>45.0</ObsInclinationAngleStop>-->
+<!--    </Constellation>-->
+
+	</SpaceSegment>
+	<!--Defines the ground stations that should be simulated-->
+	<GroundSegment>
+      <NumStation>1</NumStation>
+      <NetworkName>Sentinel-1</NetworkName>
+      <GroundStation>
+        <Type>Sentinel-1</Type>
+        <ConstellationID>1</ConstellationID>
+        <GroundStationID>1</GroundStationID>
+        <GroundStationName>Svalbard</GroundStationName>
+        <Latitude>77.8750</Latitude>
+        <Longitude>20.9752</Longitude>
+        <Height>0</Height>
+        <ReceiverConstellation>1111</ReceiverConstellation>
+        <ElevationMask>5</ElevationMask>
+      </GroundStation>
+	</GroundSegment>
+  <!--Defines the users that should be simulated-->
+	<UserSegment>
+<!--        <User>-->
+<!--            <Type>Grid</Type>-->
+<!--            <LatMin>-90</LatMin>-->
+<!--            <LatMax>90</LatMax>-->
+<!--            <LonMin>-180</LonMin>-->
+<!--            <LonMax>180</LonMax>-->
+<!--            <LatStep>.5</LatStep>-->
+<!--            <LonStep>.5</LonStep>-->
+<!--            <Height>0.0</Height>-->
+<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--            <ElevationMask>0.0</ElevationMask>-->
+<!--        </User>-->
+
+        <User>
+            <Type>Static</Type>
+            <Latitude>77.8750</Latitude>
+            <Longitude>20.9752</Longitude>
+            <Height>0</Height>
+            <ReceiverConstellation>1111</ReceiverConstellation>
+            <ElevationMask>0</ElevationMask>
+        </User>
+
+<!--		<User>-->
+<!--            <Type>Polygon</Type>-->
+<!--			<LatStep>2</LatStep>-->
+<!--			<LonStep>2</LonStep>-->
+<!--            <PolygonList>(-50,-50),(-50,30),(50,40),(50,-50)</PolygonList>-->
+<!--            <Height>0</Height>-->
+<!--            <ReceiverConstellation>1111</ReceiverConstellation>-->
+<!--            <ElevationMask>0</ElevationMask>-->
+<!--        </User>-->
+
+
+<!--        <User>-->
+<!--            <Type>Spacecraft</Type>-->
+<!--            <TLEFileName>input/example_tle_files/Iridium_20100505_one_satellite.txt</TLEFileName>-->
+<!--            <ElevationMask>5.0</ElevationMask>-->
+<!--            <ReceiverConstellation>111</ReceiverConstellation>-->
+<!--        </User>-->
+
+
+    </UserSegment>
+
+	<!--Defines the simulation parameters-->
+	<SimulationManager>
+	    <StartDate>2010-05-08 11:50:00</StartDate>
+	    <StopDate>2010-05-08 12:20:00</StopDate>
+	    <TimeStep>1</TimeStep>
+
+		<IncludeStation2SpaceLinks>True</IncludeStation2SpaceLinks>
+		<IncludeUser2SpaceLinks>False</IncludeUser2SpaceLinks>
+		<IncludeSpace2SpaceLinks>False</IncludeSpace2SpaceLinks>
+
+        <OrbitsFromPreviousRun>False</OrbitsFromPreviousRun>
+        <OrbitPropagator>Keplerian</OrbitPropagator>
+
+<!--        <Analysis>-->
+<!--            <Type>obs_swath_conical</Type>-->
+<!--&lt;!&ndash;            <OrthoViewLatitude>90</OrthoViewLatitude>&ndash;&gt;-->
+<!--            <Revisit>True</Revisit>-->
+<!--	        <Statistic>Mean</Statistic>-->
+<!--        </Analysis>-->
+
+<!--		<Analysis>-->
+<!--		    <Type>com_gr2sp_budget</Type>-->
+<!--		    <GroundStationID>1</GroundStationID>-->
+<!--		    <TransmitterObject>Satellite</TransmitterObject>-->
+<!--		    <CarrierFrequency>26.25e9</CarrierFrequency>-->
+<!--		    <TransmitPowerW>50</TransmitPowerW>-->
+<!--		    <TransmitLossesdB>5</TransmitLossesdB>-->
+<!--		    <TransmitGaindB>32</TransmitGaindB>-->
+<!--		    <ReceiveGaindB>64</ReceiveGaindB>-->
+<!--		    <ReceiveLossesdB>3</ReceiveLossesdB>-->
+<!--		    <ReceiveTempK>290</ReceiveTempK>-->
+<!--		    <PExceedPerc>0.5</PExceedPerc>-->
+<!--		    <IncludeGas>True</IncludeGas>-->
+<!--		    <IncludeRain>True</IncludeRain>-->
+<!--		    <IncludeScintillation>True</IncludeScintillation>-->
+<!--		    <IncludeClouds>True</IncludeClouds>-->
+<!--		</Analysis>-->
+
+	<Analysis>
+	    <Type>com_gr2sp_budget_interference</Type>
+	    <GroundStationID>1</GroundStationID>
+	    <TransmitterObject>Satellite</TransmitterObject>
+	    <CarrierFrequency>26.25e9</CarrierFrequency>
+		<BandWidth>675e6</BandWidth>
+	    <TransmitPowerW>50</TransmitPowerW>
+	    <TransmitLossesdB>5</TransmitLossesdB>
+	    <TransmitGainManualdB>(0.00, 33.18),(0.72, 32.68),(1.39, 31.05),(2.06, 28.12),(2.53, 24.76),(2.99, 21.05),(3.32, 16.65),(3.62, 10.25),(3.77, 5.84),(3.83, 3.51),(3.87, 3.08),(3.92, 3.51),(4.02, 6.28),(4.16, 9.83),(4.42, 13.7),(4.68, 15.9),(5.00, 17.29),(5.52, 17.90),(6.08, 17.05),(6.74, 14.82),(7.28, 13.01),(7.84, 11.47),(9.01, 8.05 ),(10.44, 4.25),(12.70, 0.22),(13.31, 4.92),(15.56, 3.24),(17.82, 4.91),(21.09, -1.69),(23.14, 1.89),(25.19, -1.14),(26.83, -0.58),(28.26, -1.70),(29.49, 0.99),(31.33, -1.03),(33.17, 1.99),(36.04, 0.20),(38.29, -0.81),(42.39, 1.99),(45.05, -0.14),(48.94, 1.20),(53.24, -0.93),(56.52, -0.48),(59.39, -2.84),(68.81, 2.87),(81.71, -3.86),(88.26, -7.78),(92.15, -7.45),(95.02, -11.14),(103.21, -13.27),(106.48, -11.26),(110.17, -12.83),(113.45, -12.94),(117.75, -15.07),(127.17, -15.86),(142.32, -14.30),(148.87, -18.11),(160.34, -16.33),(169.97, -21.26),(179.59, -25.97)</TransmitGainManualdB>
+	    <TransmitAntennaDiameter>0.25</TransmitAntennaDiameter>
+<!--	    <ReceiveGaindB>64</ReceiveGaindB>-->
+		<ReceiveAntennaDiameter>6.8</ReceiveAntennaDiameter>
+		<ReceiveGainManualdB>(0.00, 64.24),(0.05, 61.86),(0.08, 57.21),(0.09, 51.03),(0.11, 46.66),(0.13, 50.18),(0.15, 52.27),(0.16, 52.74),(0.17, 52.27),(0.19, 49.32),(0.21, 45.33),(0.23, 42.29),(0.25, 44.85),(0.27, 46.56),(0.29, 46.28),(0.31, 43.62),(0.33, 40.20),(0.34, 36.59),(0.35, 35.54),(0.37, 38.87),(0.39, 40.01),(0.41, 39.15),(0.43, 37.25),(0.45, 36.68),(0.47, 37.92),(0.49, 38.68),(0.54, 34.69),(0.56, 31.74),(0.56, 31.17),(0.60, 32.12),(0.63, 28.13),(0.65, 21.48),(0.67, 27.46),(0.68, 30.69),(0.70, 31.64),(0.72, 30.60),(0.75, 25.37),(0.76, 19.77),(0.77, 15.87),(0.78, 21.86),(0.80, 25.18),(0.81, 26.04),(0.83, 25.09),(0.85, 18.15),(0.87, 11.12),(0.88, 3.23 ),(0.90, 15.49),(0.92, 19.29),(0.95, 20.62),(0.98, 25.09),(1.01, 27.08),(1.07, 24.80),(1.11, 24.52),(1.15, 20.62),(1.17, 14.35),(1.18, 7.41 ),(1.20, 20.81),(1.22, 25.28),(1.24, 26.13),(1.28, 24.90),(1.33, 17.01),(1.36, 23.38),(1.37, 24.33),(1.40, 23.09),(1.45, 12.92),(1.53, 21.57),(1.59, 17.49),(1.60, 5.61 ),(1.64, 17.11),(1.67, 21.95),(1.71, 17.20),(1.73, 11.59),(1.75, 18.15),(1.79, 21.48),(1.85, 15.11),(1.87, 3.80 ),(1.89, 13.68),(1.92, 17.11),(1.98, 11.21),(2.00, 6.56 )</ReceiveGainManualdB>
+	    <ReceiveLossesdB>3</ReceiveLossesdB>
+	    <ReceiveTempK>290</ReceiveTempK>
+	    <PExceedPerc>0.5</PExceedPerc>
+	    <IncludeGas>True</IncludeGas>
+	    <IncludeRain>True</IncludeRain>
+	    <IncludeScintillation>True</IncludeScintillation>
+	    <IncludeClouds>True</IncludeClouds>
+	</Analysis>
+
+<!--			<Analysis>-->
+<!--				<Type>obs_swath_push_broom</Type>-->
+<!--&lt;!&ndash;	            <PolarView>60</PolarView>&ndash;&gt;-->
+<!--				<Revisit>False</Revisit>-->
+<!--				<Statistic>Mean</Statistic>-->
+<!--&lt;!&ndash;				<SaveOutput>NetCDF</SaveOutput>&ndash;&gt;-->
+<!--			</Analysis>-->
+
+
+<!--		<Analysis>-->
+<!--			<Type>cov_ground_track</Type>-->
+<!--			<ConstellationID>1</ConstellationID>-->
+<!--			<SatelliteID>1</SatelliteID>-->
+<!--		</Analysis>-->
+
+<!--        <Analysis>-->
+<!--			<Type>cov_satellite_visible</Type>-->
+<!--        </Analysis>-->
+
+<!--        <Analysis>-->
+<!--          <Type>cov_satellite_visible_grid</Type>-->
+<!--          <Statistic>Min</Statistic>-->
+<!--        </Analysis>-->
+
+<!--    <Analysis>-->
+<!--      <Type>cov_satellite_visible_id</Type>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--    </Analysis>-->
+
+<!--    <Analysis>-->
+<!--      <Type>cov_satellite_contour</Type>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--&lt;!&ndash;      <SatelliteID>24307</SatelliteID>&ndash;&gt;-->
+<!--      <ElevationMask>10</ElevationMask>-->
+<!--    </Analysis>-->
+
+<!--          <Analysis>-->
+<!--            <Type>cov_satellite_sky_angles</Type>-->
+<!--            <ConstellationID>1</ConstellationID>-->
+<!--            <SatelliteID>1</SatelliteID>-->
+<!--          </Analysis>-->
+
+<!--		<Analysis>-->
+<!--			<Type>cov_depth_of_coverage</Type>-->
+<!--		</Analysis>-->
+
+<!--		<Analysis>-->
+<!--			<Type>cov_pass_time</Type>-->
+<!--			<ConstellationID>1</ConstellationID>-->
+<!--			<Statistic>Max</Statistic>-->
+<!--		</Analysis>-->
+
+<!--    <Analysis>-->
+<!--      <Type>cov_satellite_highest</Type>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--      <Statistic>Mean</Statistic>-->
+<!--    </Analysis>-->
+
+<!--    <Analysis>-->
+<!--      <Type>cov_satellite_pvt</Type>-->
+<!--      <ConstellationID>1</ConstellationID>-->
+<!--      <SatelliteID>1</SatelliteID>-->
+<!--    </Analysis>-->
+
+	</SimulationManager>
+</Scenario>
