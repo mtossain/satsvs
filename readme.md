@@ -461,7 +461,7 @@ Optional in the analysis part are:
 - SaveOutput: Will write to file the SZA vs latitude averaged over the simulation time.
 
 <img src="/docs/obs_sza_subsat_lat.png" alt="obs_sza_subsat_lat"/>
-<img src="/docs/obs_sza_subsat_lat_year.png" alt="obs_sza_subsat_lat_year"/>
+<img src="/docs/obs_sza_subsat_lat_year.png" alt="obs_sza_subsat_lat_year"/>    
 
 
 - __com_sp2sp_budget__: for satellite-satellite received power and C/N0
