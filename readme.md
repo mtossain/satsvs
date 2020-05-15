@@ -1,6 +1,6 @@
 # Satellite Service Volume Simulator
 ## Open Source satellite, ground station and user tool
-### M. Tossaint - 2019 - v1
+### M. Tossaint - 2020 - v2
 
 <img src="/docs/schema.png" alt="schema"/>
 
@@ -422,13 +422,13 @@ Start is left most point, Stop is right most point, looking in direction of velo
 
 Optional in the analysis part are:
 ```
-<PolarView>90</PolarView>
+<PolarView>60</PolarView>
 <Revisit>True</Revisit>
 <Statistic>Mean</Statistic>
 <SaveOutput>NetCDF</SaveOutput>
 ```
 - PolarView angle: This parameter can be given to see one part of the globe in an stereographic view, eg.  for the polar region.
-  When negative the area on the South Pole will be visible.
+  The value describes the minimum bounding latitude visible. When negative the area on the South Pole will be visible.
 - Revisit flag: This flag will enable revisit computation after the swath coverage. The statistic will determine
 what kind of statistic is displayed per user location.
 - SaveOutput: NetCDF or Numpy This flag will enable saving user swath coverage for every timestep.
@@ -463,8 +463,6 @@ Optional in the analysis part are:
 <img src="/docs/obs_sza_subsat_lat.png" alt="obs_sza_subsat_lat"/>
 <img src="/docs/obs_sza_subsat_lat_year.png" alt="obs_sza_subsat_lat_year"/>    
 
-
-- __com_sp2sp_budget__: for satellite-satellite received power and C/N0
 
 ### com_gr2sp_budget
 Plots the link budget parameters for a certain ground station to all satellites. 

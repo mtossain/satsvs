@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 from math import sin, cos, asin, degrees, radians
 import numpy as np
+
 # Modules from project
 import logging_svs as ls
 
