@@ -8,7 +8,7 @@ from astropy import coordinates, units as u
 from math import tan, sqrt, asin, degrees, radians
 from numpy import dot, arccos, cross, sin, cos
 from numpy.linalg import norm
-from numba import jit, float64
+from numba import jit, float64 # todo test new modes in numba: njit, fastmath, cache, paralel...
 from scipy import interpolate
 from scipy.special import jv  # Bessel function of 1st kind
 
