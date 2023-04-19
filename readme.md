@@ -4,6 +4,15 @@
 
 <img src="/docs/schema.png" alt="schema"/>
 
+## Installation & first run
+Download from github, and install the following libraries:
+- Numpy, pandas and numba
+- Astropy and sgp4
+- Basemap and xarray
+- Geopandas and shapely
+- Itur
+To run, edit the config.xml file and run: python main.py
+
 ## Introduction
 Framework takes care of geometry computations, satellite propagation, ground station and user rotation in ECI/ECF.
 It will also automatically compute links between stations and satellites, users and satellites, and between satellites.
